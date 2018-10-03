@@ -1,0 +1,232 @@
+<!--
+  ~ © Copyright 2013 EntIT Software LLC
+  ~  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
+  ~  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
+  ~  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
+  ~  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
+  ~  marks are the property of their respective owners.
+  ~ __________________________________________________________________
+  ~ MIT License
+  ~
+  ~ © Copyright 2012-2018 Micro Focus or one of its affiliates.
+  ~
+  ~ The only warranties for products and services of Micro Focus and its affiliates
+  ~ and licensors (“Micro Focus”) are set forth in the express warranty statements
+  ~ accompanying such products and services. Nothing herein should be construed as
+  ~ constituting an additional warranty. Micro Focus shall not be liable for technical
+  ~ or editorial errors or omissions contained herein.
+  ~ The information contained herein is subject to change without notice.
+  ~ ___________________________________________________________________
+  ~
+  -->
+
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:c="/lib/credentials" >
+    <f:block>
+        <style>
+        .disabledLine {
+            position:relative;
+        }
+        .disabledLine:before {
+        width:100%;
+        height:100%;
+        background-color:#fff;
+        opacity:0.9;
+        content:'';
+        position:absolute;
+
+        }
+
+        .myClass{
+            border: 5px solid red;
+        }
+
+
+        /* Tooltip container */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+        }
+
+        /* Tooltip text */
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 350px;
+            background-color: #555;
+            color: #fff;
+            padding: 5px;
+            border-radius: 6px;
+
+            /* Position the tooltip text */
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+
+            /* Fade in tooltip */
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        /* Tooltip arrow */
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #555 transparent transparent transparent;
+        }
+
+        /* Show the tooltip text when you mouse over the tooltip container */
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        </style>
+
+            <script>
+
+
+        function assignhostPath(){
+            setTimeout(function(){
+                var href = window.location.href;
+                var splitter = href.split("/job");
+                var baseurl = splitter[0];
+                var p = document.getElementById('serverAndPort');
+                if(p){
+                    p.value = baseurl;
+                }
+            },50)
+
+        }
+
+
+
+		function isAddRunToTrendReportEnabled(sender) {
+			var x = sender.selectedIndex;
+			var y = sender.options;
+			var addRunToTrendReport = document.getElementById('trendReportTable');
+			//alert(y[x].value);
+			if (y[x].value === 'COLLATE_AND_ANALYZE'){
+				addRunToTrendReport.classList.remove("disabledLine");
+			}
+			else{
+				addRunToTrendReport.classList.add("disabledLine");
+			}
+
+		}
+
+		function onPostRunActionLoad(){
+			var postRunAction = document.getElementById('postRunAction');
+			if(postRunAction != null){
+			    isAddRunToTrendReportEnabled(postRunAction);
+			}
+
+		}
+
+		function verifyURLAvailable(){
+
+            var pcServer = document.getElementsByName("pcgit.pcServerName")[0].value;
+            var scheme = "http";
+            if(document.getElementsByName("pcgit.httpsProtocol")[0].checked){
+                scheme = "https"
+            }
+            if(pcServer){
+                var popup = window.open(scheme + "://" + pcServer + "/loadtest/");
+                popup.opener = null;
+            }else{
+                alert("Performance Center Server name is missing.");
+            }
+            return false;
+		}
+
+
+
+		</script>
+	</f:block>
+
+	<tr>
+		<td />
+		<td colspan="2">
+			<div class="help" style="display:block;">
+				${%DontForgetThePublisher}
+            </div>
+            <div class="help" style="display:block;">
+                ${%ParametrizationMessage}
+            </div>
+		</td>
+		<td />
+	</tr>
+
+
+    <f:entry title="Description" field="description">
+		<f:textbox name="pcgit.description" value="${instance.pcGitSyncModel.description}" />
+	</f:entry>
+
+	<f:entry title="PC Server" field="pcServerName">
+        <f:textbox name="pcgit.pcServerName" value="${instance.pcGitSyncModel.pcServerName}" />
+    </f:entry>
+
+    <f:entry title="&#160;">
+        <f:checkbox title="Use HTTPS Protocol" field="httpsProtocol" name="pcgit.httpsProtocol" checked="${instance.pcGitSyncModel.httpsProtocol}" />
+    </f:entry>
+
+    <f:entry title="Credentials" field="credentialsId">
+        <c:select expressionAllowed="true" />
+    </f:entry>
+
+    <f:entry title="Domain" field="almDomain">
+        <f:textbox name="pcgit.almDomain" value="${instance.pcGitSyncModel.almDomain}" />
+    </f:entry>
+
+    <f:entry title="Project" field="almProject">
+        <f:textbox name="pcgit.almProject" value="${instance.pcGitSyncModel.almProject}" />
+    </f:entry>
+
+    <f:invisibleEntry title="" field="serverAndPort">
+        <f:textbox id="serverAndPort" name="pcgit.serverAndPort" value="" onchange="assignhostPath()" />
+    </f:invisibleEntry>
+
+    <script>assignhostPath();</script>
+
+    <f:entry title="Local Proxy" field="proxyOutURL">
+        <f:textbox name="pcgit.proxyOutURL" value="${instance.pcGitSyncModel.proxyOutURL}" />
+    </f:entry>
+
+    <f:entry title="Proxy Credentials" field="credentialsProxyId">
+        <c:select expressionAllowed="true" />
+    </f:entry>
+
+
+    <f:entry title="Test Plan folder" field="subjectTestPlan">
+        <f:textbox name="pcgit.subjectTestPlan" value="${instance.pcGitSyncModel.subjectTestPlan}"  />
+    </f:entry>
+
+    <f:entry title="Upload script mode" field="uploadScriptMode">
+        <select id="uploadScriptMode" name="pcGit.uploadScriptMode" >
+            <j:forEach var="action" items="${descriptor.uploadScriptModes}">
+                <f:option selected="${action == instance.pcGitSyncModel.uploadScriptMode}"
+                    value="${action}">
+                    ${action.value}
+                        </f:option>
+            </j:forEach>
+        </select>
+    </f:entry>
+
+    <f:entry title="Delete script" field="removeScriptFromPC">
+        <select id="removeScriptFromPC" name="pcGit.removeScriptFromPC" >
+            <j:forEach var="action" items="${descriptor.deleteScripts}">
+                <f:option selected="${action == instance.pcGitSyncModel.removeScriptFromPC}"
+                    value="${action}">
+                    ${action.value}
+                        </f:option>
+            </j:forEach>
+        </select>
+    </f:entry>
+
+</j:jelly>
