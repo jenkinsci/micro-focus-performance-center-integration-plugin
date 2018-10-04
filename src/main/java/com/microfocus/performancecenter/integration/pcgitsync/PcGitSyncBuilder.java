@@ -401,14 +401,14 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                 return FormValidation.ok();
             }
 
-            url = Util.fixEmptyAndTrim(url);
-            if (url == null)
+            String urlFixesEmptiedAndTrimmed = Util.fixEmptyAndTrim(url);
+            if (urlFixesEmptiedAndTrimmed == null)
             // not set, can't check
             {
                 return FormValidation.ok();
             }
 
-            if (url.indexOf('$') >= 0)
+            if (urlFixesEmptiedAndTrimmed.indexOf('$') >= 0)
             // set by variable, can't check
             {
                 return FormValidation.ok();
@@ -441,20 +441,20 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                 int limit,
                 boolean limitIncluded) {
             FormValidation ret = FormValidation.ok();
-            value = value.trim();
+            String valueTrimmed = value.trim();
             String messagePrefix = field + " must be ";
-            if (StringUtils.isBlank(value)) {
+            if (StringUtils.isBlank(valueTrimmed)) {
                 ret = FormValidation.error(messagePrefix + "set");
             } else {
                 try {
                     //regular expression: parameter (with brackets or not)
-                    if (value.matches("^\\$\\{[\\w-. ]*}$|^\\$[\\w-.]*$"))
+                    if (valueTrimmed.matches("^\\$\\{[\\w-. ]*}$|^\\$[\\w-.]*$"))
                         return ret;
                         //regular expression: number
-                    else if (value.matches("[0-9]*$|")) {
-                        if (limitIncluded && Integer.parseInt(value) <= limit)
+                    else if (valueTrimmed.matches("[0-9]*$|")) {
+                        if (limitIncluded && Integer.parseInt(valueTrimmed) <= limit)
                             ret = FormValidation.error(messagePrefix + "higher than " + limit);
-                        else if (Integer.parseInt(value) < limit)
+                        else if (Integer.parseInt(valueTrimmed) < limit)
                             ret = FormValidation.error(messagePrefix + "at least " + limit);
                     }
                     else

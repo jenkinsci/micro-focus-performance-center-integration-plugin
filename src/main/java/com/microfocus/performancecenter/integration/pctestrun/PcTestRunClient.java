@@ -36,7 +36,6 @@ import java.beans.IntrospectionException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.nio.file.*;
 import java.util.*;
 
@@ -56,7 +55,6 @@ public class PcTestRunClient {
     private PcTestRunModel model;
     private PcRestProxy restProxy;
     private boolean loggedIn;
-    //private PrintStream logger;
     public UsernamePasswordCredentials usernamePCPasswordCredentials;
     public UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy;
     TaskListener listener;
@@ -297,7 +295,7 @@ public class PcTestRunClient {
     }
 
     public PcRunResponse waitForRunCompletion(int runId, int interval) throws InterruptedException, ClientProtocolException, PcException, IOException {
-        RunState state = RunState.UNDEFINED;
+        RunState state;
         switch (model.getPostRunAction()) {
             case DO_NOTHING:
                 state = RunState.BEFORE_COLLATING_RESULTS;
@@ -308,6 +306,8 @@ public class PcTestRunClient {
             case COLLATE_AND_ANALYZE:
                 state = RunState.FINISHED;
                 break;
+            default:
+                state = RunState.UNDEFINED;
         }
         return waitForRunState(runId, state, interval);
     }

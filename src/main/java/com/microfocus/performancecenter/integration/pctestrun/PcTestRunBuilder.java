@@ -507,7 +507,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
                 name = name.replace(prefix, "").toLowerCase();
                 for (Method modelMethod : modelMethods) {
                     String modelMethodName = modelMethod.getName();
-                    if (modelMethodName.toLowerCase().equals("get" + name) && modelMethod.getParameterTypes().length==0) {
+                    if (modelMethodName.equalsIgnoreCase("get" + name) && modelMethod.getParameterTypes().length==0) {
                         try {
                             Object obj = FormValidation.ok();
                             if (!("testinstanceid".equals(name) && "AUTO".equals(getPcTestRunModel().getAutoTestInstanceID()))
@@ -622,7 +622,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
         for (PluginWrapper pw :
                 allPlugin) {
 
-            if (pw.getDisplayName().toLowerCase().equals(pluginDisplayName.toLowerCase())) {
+            if (pw.getDisplayName().equalsIgnoreCase(pluginDisplayName)) {
                 return pw.isActive();
             }
         }

@@ -35,12 +35,11 @@ import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.*;
 import javax.annotation.Nullable;
-import javax.inject.Inject;
+
 import jenkins.security.Roles;
 import lombok.Getter;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.jenkinsci.remoting.RoleChecker;
 
 import com.microfocus.performancecenter.integration.common.helpers.utils.AffectedFolder;
@@ -69,10 +68,6 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     private final UsernamePasswordCredentials usernamePCPasswordCredentials;
     private final UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy;
 
-
-//    @Setter(onMethod = @__(
-//            @Inject))
-//    private transient WorkspaceScripts wss;
 
     @Override
     public void checkRoles(RoleChecker rc) throws SecurityException {
@@ -200,10 +195,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
         boolean loggedIn = false;
         try {
-            log(listener, "         ***************************", false);
-            log(listener, "         Login to Performance Center", false);
-            log(listener, "         ***************************", false);
-            log(listener, "", false);
+            initMessage("         ***************************", "         Login to Performance Center");
 
             if (pcGitSyncModel == null) {
                 log(listener, String.format("pcGitSyncModel is null"), true);
@@ -254,7 +246,6 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         boolean logoutSucceeded = false;
         try {
             logoutSucceeded = restProxy.logout();
-            loggedIn = !logoutSucceeded;
             log(listener, String.format("Logout: %s", logoutSucceeded ? "succeeded" : "failed"), true);
         } catch (PcException e) {
             log(listener,String.format("logout error PcException: %s. \n%s", e.getMessage(), e.getStackTrace()), true);
@@ -276,12 +267,8 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             return Result.SUCCESS;
         }
 
-        log(listener, "         ****************", false);
-        log(listener, "         Deleting scripts", false);
-        log(listener, "         ****************", false);
-        log(listener, "", false);
+        initMessage("         ****************", "         Deleting scripts");
 
-        //List<GetScriptResponse> scripts;
         PcScripts scripts;
         try {
             scripts = Objects.requireNonNull(restProxy.getScripts());
@@ -292,87 +279,12 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     ex.toString()
             );
             logStackTrace(listener, ex);
-            return Result.FAILURE;
+            return Result.SUCCESS;
         }
 
         //for every script to delete
         scriptsForDelete.forEach(localScript -> {
-            String targetSubject = allowFolderCreation ? localScript.getSubjectPath(subjectTestPlan) : subjectTestPlan;
-            Path localScriptRelativePath = localScript.getRelativePath();
-            String localScriptName = localScriptRelativePath.getName(localScriptRelativePath.getNameCount() - 1).toString();
-            try {
-
-                log(
-                        listener,
-                        "Deleting script '%s\\%s' from Performance Center...",
-                        true,
-                        targetSubject,
-                        localScriptName
-                );
-
-                PcScript pcScriptToDelete = getScript(targetSubject , localScriptName, restProxy);
-                if (pcScriptToDelete instanceof  PcScript && pcScriptToDelete.getName().toLowerCase().equals(localScriptName.toLowerCase())) {
-                    try {
-
-                        restProxy.deleteScript(pcScriptToDelete.getID());
-                        log(
-                                listener,
-                                "++++ Script deleted successfully.",
-                                false
-                        );
-                    } catch (IOException ex) {
-                        log(
-                                listener,
-                                "**** Could not delete script. Error: %s",
-                                false,
-                                ex.getMessage()
-                        );
-                        logStackTrace(listener, ex);
-                        throw new RuntimeException(ex);
-                    } catch (PcException ex) {
-                        log(
-                                listener,
-                                "**** Could not delete script. Error: %s.",
-                                false,
-                                ex.getMessage()
-                        );
-                        logStackTrace(listener, ex);
-                        throw new RuntimeException(ex);
-                    }
-                } else {
-                    log(
-                            listener,
-                            "---- This script was not found in Performance Center, therefore it cannot be deleted.",
-                            false
-                    );
-                }
-            } catch (PcException ex) {
-                log(
-                        listener,
-                        "**** Could not verify if the script exists. Error PcException: %s.",
-                        false,
-                        ex.toString()
-                );
-                logStackTrace(listener, /*config,*/ ex);
-                throw new RuntimeException(ex);
-            } catch (IOException ex) {
-                log(
-                        listener,
-                        "**** Could not verify if script exists. Error IOException: %s.",
-                        false,
-                        ex.toString()
-                );
-                logStackTrace(listener, ex);
-                throw new RuntimeException(ex);
-            } finally {
-                log(
-                        listener,
-                        "",
-                        false
-                );
-            }
-
-
+            scriptToDelete(restProxy, allowFolderCreation, subjectTestPlan, localScript);
         });
 
 
@@ -381,13 +293,101 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         return Result.SUCCESS;
     }
 
+    private void scriptToDelete(PcRestProxy restProxy, boolean allowFolderCreation, String subjectTestPlan, AffectedFolder localScript) {
+        String targetSubject = allowFolderCreation ? localScript.getSubjectPath(subjectTestPlan) : subjectTestPlan;
+        Path localScriptRelativePath = localScript.getRelativePath();
+        String localScriptName = localScriptRelativePath.getName(localScriptRelativePath.getNameCount() - 1).toString();
+        try {
+
+            log(
+                    listener,
+                    "Deleting script '%s\\%s' from Performance Center...",
+                    true,
+                    targetSubject,
+                    localScriptName
+            );
+
+            PcScript pcScriptToDelete = getScript(targetSubject , localScriptName, restProxy);
+            if (pcScriptToDelete instanceof  PcScript && pcScriptToDelete.getName().toLowerCase().equals(localScriptName.toLowerCase())) {
+                deleteScript(restProxy, pcScriptToDelete);
+            } else {
+                log(
+                        listener,
+                        "---- This script was not found in Performance Center, therefore it cannot be deleted.",
+                        false
+                );
+            }
+        } catch (PcException ex) {
+            log(
+                    listener,
+                    "**** Could not verify if the script exists. Error PcException: %s.",
+                    false,
+                    ex.toString()
+            );
+            logStackTrace(listener, /*config,*/ ex);
+            throw new RuntimeException(ex);
+        } catch (IOException ex) {
+            log(
+                    listener,
+                    "**** Could not verify if script exists. Error IOException: %s.",
+                    false,
+                    ex.toString()
+            );
+            logStackTrace(listener, ex);
+            throw new RuntimeException(ex);
+        } finally {
+            log(
+                    listener,
+                    "",
+                    false
+            );
+        }
+    }
+
+    private void deleteScript(PcRestProxy restProxy, PcScript pcScriptToDelete) {
+        try {
+
+            restProxy.deleteScript(pcScriptToDelete.getID());
+            log(
+                    listener,
+                    "++++ Script deleted successfully.",
+                    false
+            );
+        } catch (IOException ex) {
+            log(
+                    listener,
+                    "**** Could not delete script. Error: %s",
+                    false,
+                    ex.getMessage()
+            );
+            logStackTrace(listener, ex);
+            throw new RuntimeException(ex);
+        } catch (PcException ex) {
+            log(
+                    listener,
+                    "**** Could not delete script. Error: %s.",
+                    false,
+                    ex.getMessage()
+            );
+            logStackTrace(listener, ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private void initMessage(String s, String s2) {
+        log(listener, s, false);
+        log(listener, s2, false);
+        log(listener, s, false);
+        log(listener, "", false);
+    }
+
     public PcScript getScript(String testFolderPath, String scriptName, PcRestProxy restProxy) throws IOException,PcException{
         List<PcScript> pcScriptList = restProxy.getScripts().getPcScriptList();
         if (pcScriptList == null)
             return null;
         for (PcScript pcScript:pcScriptList
                 ) {
-            if(pcScript.getTestFolderPath().toLowerCase().equals(testFolderPath.toLowerCase()) && pcScript.getName().toLowerCase().equals(scriptName.toLowerCase())) {
+            if(pcScript.getTestFolderPath().equalsIgnoreCase(testFolderPath.toLowerCase()) && pcScript.getName().equalsIgnoreCase(scriptName.toLowerCase())) {
                 return pcScript;
             }
         }
@@ -404,86 +404,92 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             return result;
         }
 
-        log(listener, "         *****************", false);
-        log(listener, "         Uploading scripts", false);
-        log(listener, "         *****************", false);
-        log(listener, "", false);
-
-        log(listener, "(Each script folder will be automatically compressed in the workspace and then uploaded to the Performance Center project)", false);
-        log(listener, "", false);
+        uploadScriptsInitialMessage();
         ICompressor compressor = new Compressor();
 
         //for every script to add
         for(AffectedFolder script : scriptsForUpload){
-            try {
-                String scriptFullPath = script.getFullPath().toString();
-                String archive = scriptFullPath + ".zip";
-                compressor.compressDirectoryToFile(scriptFullPath, archive, true, "JENKINS PLUGIN");
-                String scriptRelativePath = script.getRelativePath().toString();
-
-                String targetSubject = allowFolderCreation ? script.getSubjectPath(subjectTestPlan) : subjectTestPlan;
-
-                try {
-                    int scriptId =restProxy.uploadScript(targetSubject, true, uploadAllFiles, true, archive);
-                    if (scriptId != 0) {
-                        log(
-                                listener,
-                                "Uploading script '%s' from Git to Performance Center...",
-                                true,
-                                scriptRelativePath
-                        );
-                        PcScript pcScript = restProxy.getScript(scriptId);
-                        log(
-                                listener,
-                                "+++++ Script uploaded Successfully: '%s\\%s' (id: %d, protocol: %s, mode: %s.)",
-                                false,
-                                pcScript.getTestFolderPath(),
-                                pcScript.getName(),
-                                pcScript.getID(),
-                                pcScript.getProtocol(),
-                                pcScript.getWorkingMode()
-                        );
-                    } else {
-                        result = Result.FAILURE;
-                        log(
-                                listener,
-                                "----- Failed to upload the script.",
-                                false
-                        );
-                    }
-
-                } catch (PcException ex) {
-                    result = Result.FAILURE;
-                    log(
-                            listener,
-                            "***** Failed to upload the script. Error PcException: %s.",
-                            false,
-                            ex.getMessage()
-                    );
-                    logStackTrace(listener, ex);
-                }
-            } catch (IOException ex) {
-                result = Result.FAILURE;
-                log(
-                        listener,
-                        "***** Failed to upload the script. Error IOException: %s.",
-                        false,
-                        ex.getMessage()
-                );
-                logStackTrace(listener, ex);
-                throw new RuntimeException(ex);
-            }  finally {
-                log(
-                        listener,
-                        "",
-                        false
-                );
-            }
+            result = uploadScript(restProxy, allowFolderCreation, result, subjectTestPlan, uploadAllFiles, compressor, script);
         }
 
         log(listener, "Finished uploading all scripts.", true);
         log(listener, "", false);
         return result;
+    }
+
+    private Result uploadScript(PcRestProxy restProxy, boolean allowFolderCreation, Result result, String subjectTestPlan, boolean uploadAllFiles, ICompressor compressor, AffectedFolder script) {
+        try {
+            String scriptFullPath = script.getFullPath().toString();
+            String archive = scriptFullPath + ".zip";
+            compressor.compressDirectoryToFile(scriptFullPath, archive, true, "JENKINS PLUGIN");
+            String scriptRelativePath = script.getRelativePath().toString();
+
+            String targetSubject = allowFolderCreation ? script.getSubjectPath(subjectTestPlan) : subjectTestPlan;
+
+            try {
+                int scriptId =restProxy.uploadScript(targetSubject, true, uploadAllFiles, true, archive);
+                if (scriptId != 0) {
+                    log(
+                            listener,
+                            "Uploading script '%s' from Git to Performance Center...",
+                            true,
+                            scriptRelativePath
+                    );
+                    PcScript pcScript = restProxy.getScript(scriptId);
+                    log(
+                            listener,
+                            "+++++ Script uploaded Successfully: '%s\\%s' (id: %d, protocol: %s, mode: %s.)",
+                            false,
+                            pcScript.getTestFolderPath(),
+                            pcScript.getName(),
+                            pcScript.getID(),
+                            pcScript.getProtocol(),
+                            pcScript.getWorkingMode()
+                    );
+                } else {
+                    result = Result.FAILURE;
+                    log(
+                            listener,
+                            "----- Failed to upload the script.",
+                            false
+                    );
+                }
+
+            } catch (PcException ex) {
+                result = Result.FAILURE;
+                log(
+                        listener,
+                        "***** Failed to upload the script. Error PcException: %s.",
+                        false,
+                        ex.getMessage()
+                );
+                logStackTrace(listener, ex);
+            }
+        } catch (IOException ex) {
+            result = Result.FAILURE;
+            log(
+                    listener,
+                    "***** Failed to upload the script. Error IOException: %s.",
+                    false,
+                    ex.getMessage()
+            );
+            logStackTrace(listener, ex);
+            throw new RuntimeException(ex);
+        }  finally {
+            log(
+                    listener,
+                    "",
+                    false
+            );
+        }
+        return result;
+    }
+
+    private void uploadScriptsInitialMessage() {
+        initMessage("         *****************", "         Uploading scripts");
+
+        log(listener, "(Each script folder will be automatically compressed in the workspace and then uploaded to the Performance Center project)", false);
+        log(listener, "", false);
     }
 
     private void logSetOfChangedFiles(String header, Set<ModifiedFile> modifiedFiles) {
@@ -514,35 +520,41 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         String subjectTestPlan = this.pcGitSyncModel.getSubjectTestPlan(true);
         String credentialsId = this.pcGitSyncModel.getCredentialsId(true);
 
+        return verifyInputs(listener, pcServerAndPort, domain, project, subjectTestPlan, credentialsId);
+    }
+
+    private boolean verifyInputs(TaskListener listener, String pcServerAndPort, String domain, String project, String subjectTestPlan, String credentialsId) {
+        String message = "";
         if (pcServerAndPort == null || pcServerAndPort.isEmpty()) {
-            listener.error("Performance Center Server not specified.");
-            return false;
+            message = "Performance Center Server not specified. ";
         }
 
         if (domain == null || domain.isEmpty()) {
-            listener.error("No domain specified.");
+            message += "No domain specified. ";
             return false;
         }
 
         if (project == null || project.isEmpty()) {
-            listener.error("No project specified.");
-            return false;
+            message += "No project specified. ";
         }
 
         if (subjectTestPlan == null || subjectTestPlan.isEmpty()) {
-            listener.error("The path to the folder in the Test Plan is not specified");
-            return false;
+            message += "The path to the folder in the Test Plan is not specified. ";
         }
 
         if (!subjectTestPlan.startsWith("Subject")) {
-            listener.error("The path to the folder '% s' should start with 'Subject\\'", subjectTestPlan);
-            return false;
+            message += String.format("The path to the folder '% s' should start with 'Subject\\'. ", subjectTestPlan);
         }
 
         if (credentialsId == null || pcServerAndPort.isEmpty()) {
-            listener.error("No credentials specified");
+            message += "No credentials specified. ";
+        }
+
+        if(!message.isEmpty()) {
+            listener.error(message);
             return false;
         }
+
         return true;
     }
 

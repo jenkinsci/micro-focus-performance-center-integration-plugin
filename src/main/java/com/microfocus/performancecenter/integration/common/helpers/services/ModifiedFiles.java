@@ -67,7 +67,7 @@ public class ModifiedFiles {
         return getAllChangedFiles(Paths.get(remoteWorkspacePath), changeLogList);
     }
 
-    SortedSet<ModifiedFile> getAllChangedFiles(Path workspace, List<ChangeLogSet> changelog) {
+    private SortedSet<ModifiedFile> getAllChangedFiles(Path workspace, List<ChangeLogSet> changelog) {
         SortedSet<ModifiedFile> result = new TreeSet<>();
 
         changelog.forEach((change) -> {

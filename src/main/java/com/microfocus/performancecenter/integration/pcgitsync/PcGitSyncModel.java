@@ -195,14 +195,12 @@ public class PcGitSyncModel implements Serializable {
 
 
     private static String useParameterIfNeeded (String buildParameters,String attribute){
-        if (buildParameters!=null && attribute!=null) {
-            if(attribute.startsWith("$")) {
-                String attributeParameter = attribute.replace("$", "").replace("{", "").replace("}", "");
-                String[] buildParametersArray = buildParameters.replace("{", "").replace("}", "").split(",");
-                for (String buildParameter : buildParametersArray) {
-                    if (buildParameter.trim().startsWith(attributeParameter + "=")) {
-                        return buildParameter.trim().replace(attributeParameter + "=", "");
-                    }
+        if (buildParameters!=null && attribute!=null && attribute.startsWith("$")) {
+            String attributeParameter = attribute.replace("$", "").replace("{", "").replace("}", "");
+            String[] buildParametersArray = buildParameters.replace("{", "").replace("}", "").split(",");
+            for (String buildParameter : buildParametersArray) {
+                if (buildParameter.trim().startsWith(attributeParameter + "=")) {
+                    return buildParameter.trim().replace(attributeParameter + "=", "");
                 }
             }
         }
