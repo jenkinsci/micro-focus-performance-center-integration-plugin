@@ -438,7 +438,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     PcScript pcScript = restProxy.getScript(scriptId);
                     log(
                             listener,
-                            "+++++ Script uploaded Successfully: '%s\\%s' (id: %d, protocol: %s, mode: %s.)",
+                            "+++++ Script uploaded Successfully: '%s\\%s' (id: %d, protocol: %s, mode: %s).",
                             false,
                             pcScript.getTestFolderPath(),
                             pcScript.getName(),

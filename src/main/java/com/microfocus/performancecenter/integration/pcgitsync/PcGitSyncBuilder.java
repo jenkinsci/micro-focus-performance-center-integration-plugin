@@ -348,7 +348,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         @Override
         public String getDisplayName() {
 
-            return "Sync Performance scripts from GitHub to Performance Center";
+            return Messages.DisplayName();
         }
 
         public FormValidation doCheckPcServerName(@QueryParameter String value) {

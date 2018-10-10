@@ -68,17 +68,17 @@ public class PcTestRunClient {
             String proxyOutUser = (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getUsername();
             String proxyOutPassword= (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
             if(model.getProxyOutURL(true) != null && !model.getProxyOutURL(true).isEmpty()) {
-                log(listener, "Using proxy: %s", true,  model.getProxyOutURL(true));
+                log(listener, "%s: %s", true,  Messages.UsingProxy(),  model.getProxyOutURL(true));
                 if(!proxyOutUser.isEmpty()) {
                     if (model.getCredentialsProxyId().startsWith("$"))
-                        log(listener, "Using proxy credentials of %s as specified in build parameters.", true,  proxyOutUser);
+                        log(listener, "%s  %s.", true,  Messages.UsingProxyCredentialsBuildParameters(),proxyOutUser);
                     else
-                        log(listener, "Using proxy credentials of %s as specified in configuration.", true,  proxyOutUser);
+                        log(listener, "%s  %s.", true,  Messages.UsingProxyCredentialsConfiguration(), proxyOutUser);
                 }
             }
-            restProxy = new PcRestProxy(model.isHTTPSProtocol(),model.getPcServerName(true), model.getAlmDomain(true), model.getAlmProject(true), model.getProxyOutURL(true),proxyOutUser,proxyOutPassword);
+            restProxy = new PcRestProxy(model.isHTTPSProtocol(), model.getPcServerName(true), model.getAlmDomain(true), model.getAlmProject(true), model.getProxyOutURL(true),proxyOutUser,proxyOutPassword);
         }catch (PcException e){
-            log(listener, "Error: %s", true, e.getMessage());
+            log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
         }
 
     }
@@ -96,21 +96,21 @@ public class PcTestRunClient {
             usernamePCPasswordCredentials = PcTestRunBuilder.getCredentialsId(credentialsId);
             if(usernamePCPasswordCredentials != null) {
                 if(model.getCredentialsId().startsWith("$"))
-                    log(listener, "Using Performance Center credentials supplied in build parameters", true);
+                    log(listener, "%s", true, Messages.UsingPCCredentialsBuildParameters());
                 else
-                    log(listener, "Using Performance Center credentials supplied in configuration", true);
-                log(listener, "Trying to login\n[PCServer='%s://%s', User='%s']", true, model.isHTTPSProtocol(), model.getPcServerName(true), usernamePCPasswordCredentials.getUsername());
+                    log(listener, "%s", true, Messages.UsingPCCredentialsConfiguration());
+                log(listener, "%s\n[PCServer='%s://%s', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), model.getPcServerName(true), usernamePCPasswordCredentials.getUsername());
                 loggedIn = restProxy.authenticate(usernamePCPasswordCredentials.getUsername(), usernamePCPasswordCredentials.getPassword().getPlainText());
             }
             else {
-                log(listener, "Trying to login\n[PCServer='%s://%s', User='%s']", true, model.isHTTPSProtocol(), model.getPcServerName(true), PcTestRunBuilder.usernamePCPasswordCredentials.getUsername());
+                log(listener, "%s\n[PCServer='%s://%s', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), model.getPcServerName(true), PcTestRunBuilder.usernamePCPasswordCredentials.getUsername());
                 loggedIn = restProxy.authenticate(PcTestRunBuilder.usernamePCPasswordCredentials.getUsername(), PcTestRunBuilder.usernamePCPasswordCredentials.getPassword().getPlainText());
             }
         } catch (PcException|IOException e) {
-            log(listener, "Error: %s", true, e.getMessage());
+            log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
             logStackTrace(listener, e);
         }
-        log(listener, "Login %s", true, loggedIn ? "succeeded" : "failed");
+        log(listener, "%s", true, loggedIn ? Messages.LoginSucceeded() : Messages.LoginFailed());
         return loggedIn;
     }
 
@@ -128,7 +128,26 @@ public class PcTestRunClient {
         int testInstance = getCorrectTestInstanceID(testID);
         setCorrectTrendReportID();
 
-        log(listener, "Executing Load Test: \n====================\nTest ID: %s \nTest Instance ID: %s \nTimeslot Duration: %s \nPost Run Action: %s \nUse VUDS: %s\n====================\n", true, Integer.parseInt(model.getTestId(true)), testInstance, model.getTimeslotDuration() ,model.getPostRunAction().getValue(),model.isVudsMode());
+        log(listener, "\n%s \n" +
+                        "====================\n" +
+                        "%s: %s \n" +
+                        "%s: %s \n" +
+                        "%s: %s \n" +
+                        "%s: %s \n" +
+                        "%s: %s \n" +
+                        "%s: %s \n" +
+                        "%s: %s \n" +
+                        "====================\n",
+                true,
+                Messages.ExecutingLoadTest(),
+                Messages.Domain(), model.getAlmDomain(true),
+                Messages.Project(), model.getAlmProject(true),
+                Messages.TestID(), Integer.parseInt(model.getTestId(true)),
+                Messages.TestInstanceID(), testInstance,
+                Messages.TimeslotDuration(), model.getTimeslotDuration(),
+                Messages.PostRunAction(), model.getPostRunAction().getValue(),
+                Messages.UseVUDS(), model.isVudsMode());
+
         PcRunResponse response = null;
         try {
             response = restProxy.startRun(testID,
@@ -136,16 +155,16 @@ public class PcTestRunClient {
                     model.getTimeslotDuration(),
                     model.getPostRunAction().getValue(),
                     model.isVudsMode());
-            log(listener, "Run started (TestID: %s, RunID: %s, TimeslotID: %s)", true, response.getTestID(), response.getID(), response.getTimeslotID());
+            log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s)", true, Messages.RunStarted(), response.getTestID(), response.getID(), response.getTimeslotID());
 
             return response.getID();
         }
         catch (NumberFormatException|ClientProtocolException|PcException ex) {
-            log(listener, "StartRun failed. Error: %s", true, ex.getMessage());
+            log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
             logStackTrace(listener, ex);
         }
         catch (IOException ex) {
-            log(listener, "StartRun failed. Error: %s", true, ex.getMessage());
+            log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
             logStackTrace(listener, ex);
         }
         if (!("RETRY".equals(model.getRetry()))) {
@@ -163,7 +182,13 @@ public class PcTestRunClient {
                 retryCount++;
                 try {
                     if(retryCount <= retryOccurrences) {
-                        log(listener, "Failed to start run. Attempting to start again in %s minute(s). %s attemp(s) remaining.", true, retryDelay, retryOccurrences - retryCount + 1);
+                        log(listener, "%s. %s (%s %s). %s: %s.", true,
+                                Messages.StartRunRetryFailed(),
+                                Messages.AttemptingStartAgainSoon(),
+                                retryDelay,
+                                Messages.Minutes(),
+                                Messages.AttemptsRemaining(),
+                                retryOccurrences - retryCount + 1);
                         Thread.sleep(retryDelay * 60 * 1000);
                     }
                 }
@@ -180,10 +205,16 @@ public class PcTestRunClient {
                             model.isVudsMode());
                 }
                 catch (NumberFormatException|ClientProtocolException|PcException ex) {
-                    log(listener, "StartRun retry failed. Error: %s", true, ex.getMessage());
+                    log(listener, "%s. %s: %s", true,
+                            Messages.StartRunRetryFailed(),
+                            Messages.Error(),
+                            ex.getMessage());
                     logStackTrace(listener, ex);
                 } catch (IOException ex) {
-                    log(listener, "StartRun retry failed. Error: %s", true, ex.getMessage());
+                    log(listener, "%s. %s: %s", true,
+                            Messages.StartRunRetryFailed(),
+                            Messages.Error(),
+                            ex.getMessage());
                     logStackTrace(listener, ex);
                 }
                 int ret = 0;
@@ -192,12 +223,19 @@ public class PcTestRunClient {
                         ret = response.getID();
                     }
                     catch (Exception ex) {
-                        log(listener, "getID failed. Error: %s", true, ex.getMessage());
+                        log(listener, "%s. %s: %s", true,
+                                Messages.RetrievingIDFailed(),
+                                Messages.Error(),
+                                ex.getMessage());
                         logStackTrace(listener, ex);
                     }
                 }
                 if (ret != 0) {
-                    log(listener, "Run started (TestID: %s, RunID: %s, TimeslotID: %s)", true, response.getTestID(), response.getID(), response.getTimeslotID());
+                    log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s))", true,
+                            Messages.RunStarted(),
+                            response.getTestID(),
+                            response.getID(),
+                            response.getTimeslotID());
                     return ret;
                 }
             }
@@ -211,33 +249,54 @@ public class PcTestRunClient {
             try {
 
 
-                log(listener, "Searching for available test instance", true);
-                PcTestInstances pcTestInstances = restProxy.getTestInstancesByTestId(testID);
+                log(listener, Messages.SearchingTestInstance(), true);
+                PcTestInstances pcTestInstances = null;
+                try {
+                    pcTestInstances = restProxy.getTestInstancesByTestId(testID);
+                } catch (PcException ex) {
+                    log(listener, "%s - getTestInstancesByTestId %s. Error: %s", true,
+                            Messages.Failure(),
+                            Messages.Error(),
+                            ex.getMessage());
+                }
+
                 int testInstanceID;
                 if (pcTestInstances != null && pcTestInstances.getTestInstancesList() != null){
                     PcTestInstance pcTestInstance = pcTestInstances.getTestInstancesList().get(pcTestInstances.getTestInstancesList().size()-1);
                     testInstanceID = pcTestInstance.getInstanceId();
-                    log(listener, "Found test instance ID: %s", true, testInstanceID);
+                    log(listener, "%s: %s", true,
+                            Messages.FoundTestInstanceID(),
+                            testInstanceID);
                 }else{
-                    log(listener, "Could not find existing test instanceID. Creating a new test instance.", true);
-                    log(listener, "Searching for available TestSet", true);
+                    log(listener, Messages.NotFoundTestInstanceID(), true);
+                    log(listener, Messages.SearchingAvailableTestSet(), true);
                     // Get a random TestSet
                     PcTestSets pcTestSets = restProxy.GetAllTestSets();
                     if (pcTestSets !=null && pcTestSets.getPcTestSetsList() !=null){
                         PcTestSet pcTestSet = pcTestSets.getPcTestSetsList().get(pcTestSets.getPcTestSetsList().size()-1);
                         int testSetID = pcTestSet.getTestSetID();
-                        log(listener, "Creating Test Instance with testID: %s and TestSetID: %s", true, testID,testSetID);
+                        log(listener, "%s (testID: %s, TestSetID: %s", true,
+                                Messages.CreatingNewTestInstance(),
+                                testID,
+                                testSetID);
                         testInstanceID = restProxy.createTestInstance(testID,testSetID);
-                        log(listener, "Test Instance with ID : %s has been created successfully.", true,testInstanceID);
-                    }else{
-                        String msg = "There is no TestSet available in the project. Please create a testset from Performance Center UI.";
-                        log(listener, "Error: %s", true, msg);
+                        log(listener, "%s: %s", true,
+                                Messages.TestInstanceCreatedSuccessfully(),
+                                testInstanceID);
+                    } else {
+                        String msg = Messages.NoTestSetAvailable();
+                        log(listener, "%s: %s", true,
+                                Messages.Error(),
+                                msg);
                         throw new PcException(msg);
                     }
                 }
                 return testInstanceID;
             } catch (Exception e){
-                log(listener, "getCorrectTestInstanceID failed, reason: %s", true, e.getMessage());
+                log(listener, "getCorrectTestInstanceID %s. %s: %s", true,
+                        Messages.Failure(),
+                        Messages.Error(),
+                        e.getMessage());
                 logStackTrace(listener, e);
                 return Integer.parseInt(null);
             }
@@ -247,9 +306,9 @@ public class PcTestRunClient {
 
     private void setCorrectTrendReportID() throws IOException, PcException {
         // If the user selected "Use trend report associated with the test" we want the report ID to be the one from the test
-        String msg = "No trend report ID is associated with the test.\n" +
-                "Please turn Automatic Trending on for the test through Performance Center UI.\n" +
-                "Alternatively you can check 'Add run to trend report with ID' on Jenkins job configuration.";
+        String msg = Messages.NoTrendReportAssociated() + "\n" +
+                Messages.PleaseTurnAutomaticTrendOn() + "\n" +
+                Messages.PleaseTurnAutomaticTrendOnAlternative();
         if (("ASSOCIATED").equals(model.getAddRunToTrendReport()) && model.getPostRunAction() != PostRunAction.DO_NOTHING) {
             PcTest pcTest = restProxy.getTestData(Integer.parseInt(model.getTestId(true)));
             //if the trend report ID is parametrized
@@ -325,9 +384,13 @@ public class PcTestRunClient {
             try {
 
                 if (threeStrikes < 3) {
-                    log(listener, "Cannot get response from PC about the state of RunID: %s %s time(s) consecutively", true, runId, (3 - threeStrikes));
+                    log(listener, "Cannot get response from PC about the state of RunID: %s %s time(s) consecutively", true,
+                            runId,
+                            (3 - threeStrikes));
                     if(threeStrikes==0) {
-                        log(listener, "stopping monitoring on RunID: %s", true, runId);
+                        log(listener, "%s: %s", true,
+                                Messages.StoppingMonitoringOnRun(),
+                                runId);
                         break;
                     }
                     Thread.sleep(2000);
@@ -337,7 +400,9 @@ public class PcTestRunClient {
                 RunState currentState = RunState.get(response.getRunState());
                 if (lastState.ordinal() < currentState.ordinal()) {
                     lastState = currentState;
-                    log(listener, "RunID: %s - State = %s", true, runId, currentState.value());
+                    log(listener, "RunID: %s - State = %s", true,
+                            runId,
+                            currentState.value());
                 }
 
                 // In case we are in state before collate or before analyze, we will wait 1 minute for the state to change otherwise we exit
@@ -346,7 +411,10 @@ public class PcTestRunClient {
                     counter++;
                     Thread.sleep(1000);
                     if (counter > 60) {
-                        log(listener, "RunID: %s  - Stopped from Performance Center side with state = %s", true, runId, currentState.value());
+                        log(listener, "Run ID: %s  - %s = %s", true,
+                                runId,
+                                Messages.StoppedFromPC(),
+                                currentState.value());
                         break;
                     }
                 } else {
@@ -371,7 +439,7 @@ public class PcTestRunClient {
                     File dir = new File(reportDirectory);
                     dir.mkdirs();
                     String reportArchiveFullPath = dir.getCanonicalPath() + IOUtils.DIR_SEPARATOR + PcTestRunBuilder.pcReportArchiveName;
-                    log(listener, "Publishing analysis report", true);
+                    log(listener, Messages.PublishingAnalysisReport(), true);
                     restProxy.GetRunResultData(runId, result.getID(), reportArchiveFullPath);
                     FilePath fp = new FilePath(new File(reportArchiveFullPath));
                     fp.unzip(fp.getParent());
@@ -382,7 +450,7 @@ public class PcTestRunClient {
                 }
             }
         }
-        log(listener, "Failed to get run report", true);
+        log(listener, Messages.FailedToGetRunReport(), true);
         return null;
     }
 
@@ -395,23 +463,30 @@ public class PcTestRunClient {
             logoutSucceeded = restProxy.logout();
             loggedIn = !logoutSucceeded;
         } catch (PcException|IOException e) {
-            log(listener, "Error: %s", true, e.getMessage());
+            log(listener, "%s: %s", true,
+                    Messages.Error(),
+                    e.getMessage());
             logStackTrace(listener, e);
         }
-        log(listener, "Logout %s", true, logoutSucceeded ? "succeeded" : "failed");
+        log(listener, "%s", true,
+                logoutSucceeded ? Messages.LogoutSucceeded() : Messages.LogoutFailed());
         return logoutSucceeded;
     }
 
     public boolean stopRun(int runId) {
         boolean stopRunSucceeded = false;
         try {
-            log(listener, "Stopping run", true);
+            log(listener, "%s", true,
+                    Messages.StoppingRun());
             stopRunSucceeded = restProxy.stopRun(runId, "stop");
         } catch (PcException|IOException e) {
-            log(listener, "Error: %s", true, e.getMessage());
+            log(listener, "%s: %s", true,
+                    Messages.Error(),
+                    e.getMessage());
             logStackTrace(listener, e);
         }
-        log(listener, "Stop run %s", true, stopRunSucceeded ? "succeeded" : "failed");
+        log(listener, "%s", true,
+                stopRunSucceeded ? Messages.StopRunSucceeded() : Messages.StopRunFailed());
         return stopRunSucceeded;
     }
 
@@ -419,7 +494,9 @@ public class PcTestRunClient {
         try {
             return restProxy.getRunEventLog(runId);
         } catch (PcException|IOException e) {
-            log(listener, "Error: %s", true, e.getMessage());
+            log(listener, "%s: %s", true,
+                    Messages.Error(),
+                    e.getMessage());
             logStackTrace(listener, e);
         }
         return null;
@@ -429,17 +506,25 @@ public class PcTestRunClient {
     {
 
         TrendReportRequest trRequest = new TrendReportRequest(model.getAlmProject(true), runId, null);
-        log(listener, "Adding run: %s to trend report: %s", true, runId, trendReportId);
+        log(listener, "Adding run: %s to trend report: %s", true,
+                runId,
+                trendReportId);
         try {
             restProxy.updateTrendReport(trendReportId, trRequest);
-            log(listener, "Publishing run: %s on trend report: %s", true, runId, trendReportId);
-        }
-        catch (PcException e) {
-            log(listener, "Failed to add run to trend report: %s", true, e.getMessage());
+            log(listener, "%s: %s %s: %s", true,
+                    Messages.PublishingRun(),
+                    runId,
+                    Messages.OnTrendReport(),
+                    trendReportId);
+        } catch (PcException e) {
+            log(listener, "%s: %s", true,
+                    Messages.FailedToAddRunToTrendReport(),
+                    e.getMessage());
             logStackTrace(listener, e);
-        }
-        catch (IOException e) {
-            log(listener, "Failed to add run to trend report: Problem connecting to PC Server.", true);
+        } catch (IOException e) {
+            log(listener, "%s: %s.", true,
+                    Messages.FailedToAddRunToTrendReport(),
+                    Messages.ProblemConnectingToPCServer());
             logStackTrace(listener, e);
         }
     }
@@ -448,7 +533,9 @@ public class PcTestRunClient {
 
         ArrayList<PcTrendedRun> trendReportMetaDataResultsList;
         boolean publishEnded = false;
-        int counter = 0;
+        int counterPublishStarted = 0;
+        int counterPublishNotStarted = 0;
+        boolean resultNotFound = true;
 
         do {
             trendReportMetaDataResultsList = restProxy.getTrendReportMetaData(trendReportId);
@@ -456,31 +543,48 @@ public class PcTestRunClient {
             if (trendReportMetaDataResultsList.isEmpty())  break;
 
             for (PcTrendedRun result : trendReportMetaDataResultsList) {
-
-                if (result.getRunID() != runId) continue;
+                resultNotFound = result.getRunID() != runId;
+                if (resultNotFound) continue;
 
                 if (result.getState().equals(PcTestRunBuilder.TRENDED) || result.getState().equals(PcTestRunBuilder.ERROR)){
                     publishEnded = true;
-                    log(listener, "Run: %s publishing status: %s.", true, runId, result.getState());
+                    log(listener, "Run: %s %s: %s", true,
+                            runId,
+                            Messages.PublishingStatus(),
+                            result.getState());
                     break;
-                }else{
+                } else {
                     Thread.sleep(5000);
-                    counter++;
-                    if(counter >= 120){
-                        String msg = "Error: Publishing didn't ended after 10 minutes, aborting...";
+                    counterPublishStarted++;
+                    if(counterPublishStarted >= 120){
+                        String msg = String.format("%s: %s",
+                                Messages.Error(),
+                                Messages.PublishingEndTimeout());
                         throw new PcException(msg);
                     }
                 }
             }
-
-        }while (!publishEnded && counter < 120);
+            if (!publishEnded && resultNotFound) {
+                Thread.sleep(5000);
+                counterPublishNotStarted++;
+                if(counterPublishNotStarted >= 120){
+                    String msg = String.format("%s: %s",
+                            Messages.Error(),
+                            Messages.PublishingStartTimeout());
+                    throw new PcException(msg);
+                }
+            }
+        } while (!publishEnded && counterPublishStarted < 120 && counterPublishNotStarted < 120);
     }
 
     public boolean downloadTrendReportAsPdf(String trendReportId, String directory) throws PcException {
 
 
         try {
-            log(listener, "Downloading trend report: %s in PDF format", true, trendReportId);
+            log(listener, "%s: %s %s", true,
+                    Messages.DownloadingTrendReport(),
+                    trendReportId,
+                    Messages.InPDFFormat());
             InputStream in = restProxy.getTrendingPDF(trendReportId);
             File dir = new File(directory);
             if(!dir.exists()){
@@ -489,10 +593,15 @@ public class PcTestRunClient {
             String filePath = directory + IOUtils.DIR_SEPARATOR + "trendReport" + trendReportId + ".pdf";
             Path destination = Paths.get(filePath);
             Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
-            log(listener, "Trend report: %s was successfully downloaded", true, trendReportId);
+            log(listener, "%s: %s %s", true,
+                    Messages.TrendReport(),
+                    trendReportId,
+                    Messages.SuccessfullyDownloaded());
         }
         catch (Exception e) {
-            log(listener, "Failed to download trend report: %s", true, e.getMessage());
+            log(listener, "%s: %s", true,
+                    Messages.FailedToDownloadTrendReport(),
+                    e.getMessage());
             logStackTrace(listener, e);
             throw new PcException(e.getMessage());
         }
@@ -505,7 +614,7 @@ public class PcTestRunClient {
 
         if (filePath == null){return;}
         //     return String.format( HyperlinkNote.encodeTo(filePath, "View trend report " + trendReportId));
-        log(listener, "%s", false, HyperlinkNote.encodeTo(filePath, "View trend report " + trendReportId));
+        log(listener, "%s", false, HyperlinkNote.encodeTo(filePath, Messages.ViewTrendReport() + " " + trendReportId));
 
     }
 
