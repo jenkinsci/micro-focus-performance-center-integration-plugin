@@ -55,8 +55,6 @@ public class PcTestRunClient {
     private PcTestRunModel model;
     private PcRestProxy restProxy;
     private boolean loggedIn;
-    public UsernamePasswordCredentials usernamePCPasswordCredentials;
-    public UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy;
     TaskListener listener;
 
     public PcTestRunClient(PcTestRunModel pcTestRunModel, TaskListener listener) {
@@ -64,7 +62,7 @@ public class PcTestRunClient {
             this.listener = listener;
             model = pcTestRunModel;
             String credentialsProxyId = model.getCredentialsProxyId(true);
-            usernamePCPasswordCredentialsForProxy = PcTestRunBuilder.getCredentialsId(credentialsProxyId);
+            UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy = PcTestRunBuilder.getCredentialsId(credentialsProxyId);
             String proxyOutUser = (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getUsername();
             String proxyOutPassword= (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
             if(model.getProxyOutURL(true) != null && !model.getProxyOutURL(true).isEmpty()) {
@@ -93,7 +91,7 @@ public class PcTestRunClient {
         try {
             this.listener = listener;
             String credentialsId = model.getCredentialsId(true);
-            usernamePCPasswordCredentials = PcTestRunBuilder.getCredentialsId(credentialsId);
+            UsernamePasswordCredentials usernamePCPasswordCredentials = PcTestRunBuilder.getCredentialsId(credentialsId);
             if(usernamePCPasswordCredentials != null) {
                 if(model.getCredentialsId().startsWith("$"))
                     log(listener, "%s", true, Messages.UsingPCCredentialsBuildParameters());
