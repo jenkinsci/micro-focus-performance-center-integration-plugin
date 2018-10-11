@@ -25,6 +25,7 @@ package com.microfocus.performancecenter.integration.common.helpers.utils;
 import hudson.model.TaskListener;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 
 import java.io.PrintStream;
 
@@ -45,15 +46,21 @@ public class LogHelper {
         listener.getLogger().println(String.format(formatted, args));
     }
 
-    public static void logStackTrace(TaskListener listener, Throwable t) {
+
+    public static void logStackTrace(TaskListener listener, ConfigureSystemSection configureSystemSection, Throwable t) {
+        logStackTrace(listener, configureSystemSection.getDebug(), t);
+    }
+
+    public static void logStackTrace(TaskListener listener, boolean debug, Throwable t) {
         if (listener.equals(TaskListener.NULL)) {
             return;
         }
 
-        PrintStream ps = listener.getLogger();
-        ps.print("  Stack Trace: ");
-        t.printStackTrace(ps);
-
+        if(debug) {
+            PrintStream ps = listener.getLogger();
+            ps.print("  Stack Trace: ");
+            t.printStackTrace(ps);
+        }
     }
 
     public static void printDescription(TaskListener listener, String description) {

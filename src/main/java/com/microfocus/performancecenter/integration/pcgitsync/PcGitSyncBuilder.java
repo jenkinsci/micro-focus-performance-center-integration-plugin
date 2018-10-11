@@ -38,6 +38,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
+import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 
 import hudson.*;
 import hudson.model.*;
@@ -296,9 +297,11 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
         EnvVars env = build.getEnvironment(listener);
         String expandedSubject = env.expand(subjectTestPlan);
+        ConfigureSystemSection configureSystemSection = ConfigureSystemSection.get();
 
         PcGitSyncClient pcGitSyncClient = new PcGitSyncClient(
                 listener,
+                configureSystemSection,
                 modifiedFiles,
                 pcGitSyncModel,
                 usernamePCPasswordCredentials,
@@ -312,7 +315,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         } catch (Exception ex) {
             result = Result.FAILURE;
             log(listener, "Error: '%s'", addDate, ex.getMessage());
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
         }
 
         build.setResult(result);

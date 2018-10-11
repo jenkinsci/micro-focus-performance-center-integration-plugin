@@ -25,6 +25,7 @@ package com.microfocus.performancecenter.integration.pcgitsync;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.RemoveScriptFromPC;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
+import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.TaskListener;
@@ -54,12 +55,12 @@ import static com.microfocus.performancecenter.integration.common.helpers.utils.
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
 import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
 
-
 @Getter
 @RequiredArgsConstructor
 public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializable {
 
     private final TaskListener listener;
+    private final ConfigureSystemSection configureSystemSection;
 
     @Nullable
     private final Set<ModifiedFile> modifiedFiles;
@@ -84,11 +85,10 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         
         boolean deleteScripts = (this.pcGitSyncModel.getRemoveScriptFromPC() == RemoveScriptFromPC.YES) ? true: false;
 
-
         Result result = Result.SUCCESS;
         PcRestProxy restProxy = defineRestProxy();
         if(restProxy == null)
-            return result;
+            return Result.FAILURE;
 
         boolean loggedIn = false;
 
@@ -98,8 +98,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
 
             if (!validateParameters(listener)) {
-                result = result.combine(Result.FAILURE);
-                return result;
+                return Result.FAILURE;
             }
 
             Set<AffectedFolder> scriptsForDelete = null;
@@ -149,8 +148,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             loggedIn = login(restProxy);
             if (!loggedIn) {
                 log(listener, "Login failed.", true);
-                result = result.combine(Result.FAILURE);
-                return result;
+                return Result.FAILURE;
             }
             allowFolderCreation = isAllowFolderCreation(restProxy);
 
@@ -159,14 +157,13 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
 
         } catch (PcException ex) {
-            log(listener, "No Changed files since the last successful build. Error PcException: %s.", true, ex.getMessage());
-            logStackTrace(listener, ex);
+            log(listener, "Error PcException: %s.", true, ex.getMessage());
+            logStackTrace(listener, configureSystemSection, ex);
             result = result.combine(Result.FAILURE);
         } catch (Exception ex) {
-            log(listener, "General exception. Error Exception: %s. stack trace:%s ", true, ex.getMessage(), ex.getStackTrace().toString());
-            logStackTrace(listener, ex);
+            log(listener, "General exception: %s.", true, ex.getMessage());
+            logStackTrace(listener, configureSystemSection, ex);
             result = result.combine(Result.FAILURE);
-
         } finally {
             logout(loggedIn, restProxy);
         }
@@ -182,8 +179,8 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         try {
             restProxy = new PcRestProxy(pcGitSyncModel.getHTTPSProtocol(), pcGitSyncModel.getPcServerName(true), pcGitSyncModel.getAlmDomain(true), pcGitSyncModel.getAlmProject(true), pcGitSyncModel.getProxyOutURL(true), proxyOutUser, proxyOutPassword);
         }catch (PcException e){
-            log(listener,  String.format("setRestProxy failed. Error: %s", e.getMessage()), true);
-            logStackTrace(listener, e);
+            log(listener,  String.format("Connection to PC server failed. Error: %s", e.getMessage()), true);
+            logStackTrace(listener, configureSystemSection, e);
         }
         return restProxy;
     }
@@ -213,10 +210,10 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             loggedIn = restProxy.authenticate(pcUser, pcPassword);
         } catch (PcException e) {
             log(listener, String.format("Login error PcException: %s", e.getMessage()), true);
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         } catch (Exception e) {
             log(listener, String.format("Login error Exception: %s", e.getMessage()), true);
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         } finally {
             log(listener, String.format("Login: %s", loggedIn ? "succeeded" : "failed"), true);
             log(listener, "", false);
@@ -249,10 +246,10 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             log(listener, String.format("Logout: %s", logoutSucceeded ? "succeeded" : "failed"), true);
         } catch (PcException e) {
             log(listener,String.format("logout error PcException: %s. \n%s", e.getMessage(), e.getStackTrace()), true);
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         } catch (Exception e) {
             log(listener, String.format("logout error Exception: %s. \n%s", e.getMessage(), e.getStackTrace()), true);
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         }
 
         return logoutSucceeded;
@@ -272,13 +269,13 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         PcScripts scripts;
         try {
             scripts = Objects.requireNonNull(restProxy.getScripts());
-        } catch (PcException ex) {
+        } catch (PcException|NullPointerException ex) {
             log(
                     listener, "An error occurred while getting the list of scripts from Performance Center. Error: %s.",
                     true,
                     ex.toString()
             );
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
             return Result.SUCCESS;
         }
 
@@ -324,7 +321,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     false,
                     ex.toString()
             );
-            logStackTrace(listener, /*config,*/ ex);
+            logStackTrace(listener, configureSystemSection, ex);
             throw new RuntimeException(ex);
         } catch (IOException ex) {
             log(
@@ -333,7 +330,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     false,
                     ex.toString()
             );
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
             throw new RuntimeException(ex);
         } finally {
             log(
@@ -353,23 +350,14 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     "++++ Script deleted successfully.",
                     false
             );
-        } catch (IOException ex) {
+        } catch (PcException|IOException ex) {
             log(
                     listener,
                     "**** Could not delete script. Error: %s",
                     false,
                     ex.getMessage()
             );
-            logStackTrace(listener, ex);
-            throw new RuntimeException(ex);
-        } catch (PcException ex) {
-            log(
-                    listener,
-                    "**** Could not delete script. Error: %s.",
-                    false,
-                    ex.getMessage()
-            );
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
             throw new RuntimeException(ex);
         }
     }
@@ -409,10 +397,10 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
         //for every script to add
         for(AffectedFolder script : scriptsForUpload){
-            result = uploadScript(restProxy, allowFolderCreation, result, subjectTestPlan, uploadAllFiles, compressor, script);
+            result = result.combine(uploadScript(restProxy, allowFolderCreation, result, subjectTestPlan, uploadAllFiles, compressor, script));
         }
 
-        log(listener, "Finished uploading all scripts.", true);
+        log(listener, "Finished uploading scripts step.", true);
         log(listener, "", false);
         return result;
     }
@@ -438,7 +426,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     PcScript pcScript = restProxy.getScript(scriptId);
                     log(
                             listener,
-                            "+++++ Script uploaded Successfully: '%s\\%s' (id: %d, protocol: %s, mode: %s).",
+                            "+++++ Script uploaded successfully: '%s\\%s' (id: %d, protocol: %s, mode: %s).",
                             false,
                             pcScript.getTestFolderPath(),
                             pcScript.getName(),
@@ -463,7 +451,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                         false,
                         ex.getMessage()
                 );
-                logStackTrace(listener, ex);
+                logStackTrace(listener, configureSystemSection, ex);
             }
         } catch (IOException ex) {
             result = Result.FAILURE;
@@ -473,7 +461,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     false,
                     ex.getMessage()
             );
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
             throw new RuntimeException(ex);
         }  finally {
             log(
@@ -530,24 +518,23 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         }
 
         if (domain == null || domain.isEmpty()) {
-            message += "No domain specified. ";
-            return false;
+            message = message.concat("No domain specified. ");
         }
 
         if (project == null || project.isEmpty()) {
-            message += "No project specified. ";
+            message = message.concat("No project specified. ");
         }
 
         if (subjectTestPlan == null || subjectTestPlan.isEmpty()) {
-            message += "The path to the folder in the Test Plan is not specified. ";
+            message = message.concat("The path to the folder in the Test Plan is not specified. ");
         }
 
         if (!subjectTestPlan.startsWith("Subject")) {
-            message += String.format("The path to the folder '% s' should start with 'Subject\\'. ", subjectTestPlan);
+            message = message.concat(String.format("The path to the folder '% s' should start with 'Subject\\'. ", subjectTestPlan));
         }
 
         if (credentialsId == null || pcServerAndPort.isEmpty()) {
-            message += "No credentials specified. ";
+            message = message.concat("No credentials specified. ");
         }
 
         if(!message.isEmpty()) {

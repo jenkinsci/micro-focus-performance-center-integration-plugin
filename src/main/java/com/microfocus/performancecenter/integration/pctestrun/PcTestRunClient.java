@@ -49,18 +49,21 @@ import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
 
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.log;
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.logStackTrace;
+import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 
 public class PcTestRunClient {
 
     private PcTestRunModel model;
     private PcRestProxy restProxy;
     private boolean loggedIn;
-    TaskListener listener;
+    private TaskListener listener;
+    private ConfigureSystemSection configureSystemSection;
 
-    public PcTestRunClient(PcTestRunModel pcTestRunModel, TaskListener listener) {
+    public PcTestRunClient(PcTestRunModel pcTestRunModel, TaskListener listener, ConfigureSystemSection configureSystemSection) {
         try {
             this.listener = listener;
             model = pcTestRunModel;
+            this.configureSystemSection = configureSystemSection;
             String credentialsProxyId = model.getCredentialsProxyId(true);
             UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy = PcTestRunBuilder.getCredentialsId(credentialsProxyId);
             String proxyOutUser = (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getUsername();
@@ -106,7 +109,7 @@ public class PcTestRunClient {
             }
         } catch (PcException|IOException e) {
             log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         }
         log(listener, "%s", true, loggedIn ? Messages.LoginSucceeded() : Messages.LoginFailed());
         return loggedIn;
@@ -159,11 +162,11 @@ public class PcTestRunClient {
         }
         catch (NumberFormatException|ClientProtocolException|PcException ex) {
             log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
         }
         catch (IOException ex) {
             log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
         }
         if (!("RETRY".equals(model.getRetry()))) {
             return 0;
@@ -172,8 +175,8 @@ public class PcTestRunClient {
             //counter
             int retryCount = 0;
             //values
-            int retryDelay = model.getRetryDelay();
-            int retryOccurrences = model.getRetryOccurrences();
+            int retryDelay = Integer.parseInt(model.getRetryDelay());
+            int retryOccurrences = Integer.parseInt(model.getRetryOccurrences());
 
             while (retryCount<=retryOccurrences)
             {
@@ -192,7 +195,7 @@ public class PcTestRunClient {
                 }
                 catch (InterruptedException ex) {
                     log(listener, "wait failed", true);
-                    logStackTrace(listener, ex);
+                    logStackTrace(listener, configureSystemSection, ex);
                 }
 
                 try {
@@ -207,13 +210,13 @@ public class PcTestRunClient {
                             Messages.StartRunRetryFailed(),
                             Messages.Error(),
                             ex.getMessage());
-                    logStackTrace(listener, ex);
+                    logStackTrace(listener, configureSystemSection, ex);
                 } catch (IOException ex) {
                     log(listener, "%s. %s: %s", true,
                             Messages.StartRunRetryFailed(),
                             Messages.Error(),
                             ex.getMessage());
-                    logStackTrace(listener, ex);
+                    logStackTrace(listener, configureSystemSection, ex);
                 }
                 int ret = 0;
                 if (response !=null) {
@@ -225,7 +228,7 @@ public class PcTestRunClient {
                                 Messages.RetrievingIDFailed(),
                                 Messages.Error(),
                                 ex.getMessage());
-                        logStackTrace(listener, ex);
+                        logStackTrace(listener, configureSystemSection, ex);
                     }
                 }
                 if (ret != 0) {
@@ -295,7 +298,7 @@ public class PcTestRunClient {
                         Messages.Failure(),
                         Messages.Error(),
                         e.getMessage());
-                logStackTrace(listener, e);
+                logStackTrace(listener, configureSystemSection, e);
                 return Integer.parseInt(null);
             }
         }
@@ -326,7 +329,7 @@ public class PcTestRunClient {
                     }
                 }
                 catch (Exception ex) {
-                    logStackTrace(listener, ex);
+                    logStackTrace(listener, configureSystemSection, ex);
                     throw new PcException(msg + System.getProperty("line.separator") + ex);
                 }
             }
@@ -341,7 +344,7 @@ public class PcTestRunClient {
         }
         catch (PcException|IOException ex) {
             log(listener, "getTestData failed for testId : %s", true, model.getTestId(true));
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
             throw ex;
         }
     }
@@ -464,7 +467,7 @@ public class PcTestRunClient {
             log(listener, "%s: %s", true,
                     Messages.Error(),
                     e.getMessage());
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         }
         log(listener, "%s", true,
                 logoutSucceeded ? Messages.LogoutSucceeded() : Messages.LogoutFailed());
@@ -481,7 +484,7 @@ public class PcTestRunClient {
             log(listener, "%s: %s", true,
                     Messages.Error(),
                     e.getMessage());
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         }
         log(listener, "%s", true,
                 stopRunSucceeded ? Messages.StopRunSucceeded() : Messages.StopRunFailed());
@@ -495,7 +498,7 @@ public class PcTestRunClient {
             log(listener, "%s: %s", true,
                     Messages.Error(),
                     e.getMessage());
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         }
         return null;
     }
@@ -518,12 +521,12 @@ public class PcTestRunClient {
             log(listener, "%s: %s", true,
                     Messages.FailedToAddRunToTrendReport(),
                     e.getMessage());
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         } catch (IOException e) {
             log(listener, "%s: %s.", true,
                     Messages.FailedToAddRunToTrendReport(),
                     Messages.ProblemConnectingToPCServer());
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         }
     }
 
@@ -600,7 +603,7 @@ public class PcTestRunClient {
             log(listener, "%s: %s", true,
                     Messages.FailedToDownloadTrendReport(),
                     e.getMessage());
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
             throw new PcException(e.getMessage());
         }
 
@@ -654,11 +657,11 @@ public class PcTestRunClient {
                 }
             }catch (NoSuchMethodException e){
                 //  logger.println("No such method exception: " + e);
-                //logStackTrace(listener, e);
+                //logStackTrace(listener, configureSystemSection, e);
             }
             catch (Exception e){
                 //log(listener, " Error on getTrendReportByXML: %s ", true, e.getMessage());
-                //logStackTrace(listener, e);
+                //logStackTrace(listener, configureSystemSection, e);
             }
         }
 
