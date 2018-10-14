@@ -65,10 +65,9 @@
 		</snapshotRepository>
 	</distributionManagement>
 	<scm>
-		<connection>scm:git:ssh://github.com:MicroFocus/micro-focus-performance-center-integration.git</connection>
-		<developerConnection>scm:git:ssh://github.com:MicroFocus/micro-focus-performance-center-integration.git
-		</developerConnection>
-		<url>https://github.com/MicroFocus/micro-focus-performance-center-integration</url>
+		<connection>scm:git:ssh://github.com:jenkinsci/micro-focus-performance-center-integration-plugin.git</connection>		
+		<developerConnection>scm:git:ssh://github.com:jenkinsci/micro-focus-performance-center-integration-plugin.git</developerConnection>
+		<url>https://github.com/jenkinsci/micro-focus-performance-center-integration-plugin</url>
 		<tag>HEAD</tag>
 	</scm>
 
