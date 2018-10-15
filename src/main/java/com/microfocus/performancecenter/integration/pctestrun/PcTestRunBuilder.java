@@ -27,6 +27,7 @@
 package com.microfocus.performancecenter.integration.pctestrun;
 
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
+import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 import com.microfocus.performancecenter.integration.pctestrun.helper.AdditionalParametersAction;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.Error;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.Failure ;
@@ -136,6 +137,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
     private File WorkspacePath;
     private FilePath Workspace;
     private TaskListener listener;
+    private ConfigureSystemSection configureSystemSection;
 
     @DataBoundConstructor
     public PcTestRunBuilder(
@@ -160,7 +162,8 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
             String credentialsProxyId,
             String retry,
             String retryDelay,
-            String retryOccurrences) {
+            String retryOccurrences,
+            boolean debug) {
 
         this.serverAndPort = serverAndPort;
         this.pcServerName = pcServerName;
@@ -184,6 +187,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
         this.retry = (retry == null || retry.isEmpty())? "NO_RETRY" : retry;
         this.retryDelay = ("NO_RETRY".equals(this.retry)) ? "0" : (retryDelay == null || retryDelay.isEmpty()) ? "5" : retryDelay;
         this.retryOccurrences = ("NO_RETRY".equals(this.retry)) ? "0" : (retryOccurrences == null || retryOccurrences.isEmpty()) ? "3" : retryOccurrences;
+        configureSystemSection = ConfigureSystemSection.get();
     }
 
     @Override
@@ -400,7 +404,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
         }
         catch (NumberFormatException|PcException|IOException ex) {
             log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
             throw ex;
         }
 
@@ -417,7 +421,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
         catch (PcException|IOException ex) {
             testName = String.format("TestId_%s", getPcTestRunModel().getTestId());
             log(listener, "getTestName failed. Using '%s' as testname. Error: %s \n", true, testName, ex.getMessage());
-            logStackTrace(listener, ex);
+            logStackTrace(listener, configureSystemSection, ex);
         }
 
 
@@ -448,7 +452,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
 
         } catch (PcException e) {
             log(listener, "Error: %s", true, e.getMessage());
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         }
 
         Testsuites ret = new Testsuites();
@@ -456,7 +460,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
         try {
             parsePcTrendResponse(ret,build, pcTestRunClient,trendReportReady, getPcTestRunModel().getTrendReportId(true),runId);
         } catch (IntrospectionException|NoSuchMethodException e) {
-            logStackTrace(listener, e);
+            logStackTrace(listener, configureSystemSection, e);
         }
 
         return ret;
@@ -531,7 +535,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
                             break;
                         } catch (Exception e) {
                             log(listener, "Validation error: method.getName() = '%s', name = '%s', modelMethodName = '%s', exception = '%s'.", true);
-                            logStackTrace(listener, e);
+                            logStackTrace(listener, configureSystemSection, e);
                         }
                     }
                 }
@@ -732,7 +736,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
                         getWorkspacePath().getPath(),
                         Messages.Error(),
                         e.getMessage());
-                logStackTrace(listener, e);
+                logStackTrace(listener, configureSystemSection, e);
             } else {
                 log(listener, "%s: %s. %s. %s: %s", true,
                         Messages.ErrorSavingFile(),
@@ -740,7 +744,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
                         Messages.WorkspacePathIsUnavailable(),
                         Messages.Error(),
                         e.getMessage());
-                logStackTrace(listener, e);
+                logStackTrace(listener, configureSystemSection, e);
             }
             return false;
         }
@@ -898,7 +902,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
             usernamePCPasswordCredentials = getCredentialsById(credentialsId, build, logger);
         if(credentialsProxyId != null && !credentialsProxyId.isEmpty())
             usernamePCPasswordCredentialsForProxy = getCredentialsById(credentialsProxyId, build, logger);
-        PcTestRunClient pcTestRunClient = new PcTestRunClient(getPcTestRunModel(), listener);
+        PcTestRunClient pcTestRunClient = new PcTestRunClient(getPcTestRunModel(), listener, configureSystemSection);
         Testsuites testsuites = execute(listener, pcTestRunClient, build);
 
 //        // Create Trend Report
@@ -987,11 +991,11 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
         return getPcTestRunModel().getRetry();
     }
 
-    public int getRetryOccurrences () {
+    public String getRetryOccurrences () {
         return getPcTestRunModel().getRetryOccurrences();
     }
 
-    public int getRetryDelay () {
+    public String getRetryDelay () {
         return getPcTestRunModel().getRetryDelay();
     }
 
