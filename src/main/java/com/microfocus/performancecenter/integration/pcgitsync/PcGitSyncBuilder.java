@@ -126,7 +126,11 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         this.serverAndPort = serverAndPort;
         this.proxyOutURL = proxyOutURL;
         this.credentialsProxyId = credentialsProxyId;
-        this.subjectTestPlan = subjectTestPlan;
+        //turning first letter to upper case
+        if(subjectTestPlan != null && subjectTestPlan .length() > 0)
+            this.subjectTestPlan = subjectTestPlan.substring(0, 1).toUpperCase() + subjectTestPlan.substring(1);
+        else
+            this.subjectTestPlan = subjectTestPlan;
         this.uploadScriptMode = uploadScriptMode;
         this.removeScriptFromPC = removeScriptFromPC;
 

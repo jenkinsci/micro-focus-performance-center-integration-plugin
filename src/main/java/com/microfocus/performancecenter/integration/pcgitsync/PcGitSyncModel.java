@@ -120,11 +120,14 @@ public class PcGitSyncModel implements Serializable {
     }
 
     public String getSubjectTestPlan() {
-        return this.subjectTestPlan;
+        if(this.subjectTestPlan != null && this.subjectTestPlan .length() > 0)
+            return this.subjectTestPlan.substring(0, 1).toUpperCase() + this.subjectTestPlan.substring(1);
+        else
+            return this.subjectTestPlan;
     }
 
     public String getSubjectTestPlan(boolean fromPcClient){
-        return fromPcClient?useParameterIfNeeded(buildParameters,this.subjectTestPlan):getSubjectTestPlan();
+        return fromPcClient?useParameterIfNeeded(buildParameters,getSubjectTestPlan()):getSubjectTestPlan();
     }
 
     public static List<UploadScriptMode> getUploadScriptModes() {
