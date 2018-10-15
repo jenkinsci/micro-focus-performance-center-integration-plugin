@@ -231,7 +231,10 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 allowFolderCreation = true;
             }
         } catch (PcException|IOException ex) {
-            log(listener, "Performance Center version 12.57 or below detected (Folders in Test Plan tree require to be created manually).", true);
+            log(listener, "Cannot retrieve Test Plan folder tree which means one of the following: ", true);
+            log(listener, "- Performance Center version 12.57 or below is used and this means that folders in Test Plan tree are required to be created manually.", true);
+            log(listener, "- Domain and Project details are wrong.", true);
+
         }
         return allowFolderCreation;
     }
