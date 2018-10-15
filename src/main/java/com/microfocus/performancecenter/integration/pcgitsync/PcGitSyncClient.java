@@ -389,7 +389,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         Result result = Result.SUCCESS;
 
         String subjectTestPlan = this.pcGitSyncModel.getSubjectTestPlan(true);
-        boolean uploadAllFiles = (this.pcGitSyncModel.getUploadScriptMode() == UploadScriptMode.ALL_FILES)?true:false;
+        boolean uploadRunTimeFiles = (this.pcGitSyncModel.getUploadScriptMode() == UploadScriptMode.RUNTIME_FILES)?true:false;
         
         if (scriptsForUpload == null || scriptsForUpload.isEmpty()) {
             return result;
@@ -400,7 +400,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
         //for every script to add
         for(AffectedFolder script : scriptsForUpload){
-            result = result.combine(uploadScript(restProxy, allowFolderCreation, result, subjectTestPlan, uploadAllFiles, compressor, script));
+            result = result.combine(uploadScript(restProxy, allowFolderCreation, result, subjectTestPlan, uploadRunTimeFiles, compressor, script));
         }
 
         log(listener, "Finished uploading scripts step.", true);
@@ -408,7 +408,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         return result;
     }
 
-    private Result uploadScript(PcRestProxy restProxy, boolean allowFolderCreation, Result result, String subjectTestPlan, boolean uploadAllFiles, ICompressor compressor, AffectedFolder script) {
+    private Result uploadScript(PcRestProxy restProxy, boolean allowFolderCreation, Result result, String subjectTestPlan, boolean uploadRunTimeFiles, ICompressor compressor, AffectedFolder script) {
         try {
             String scriptFullPath = script.getFullPath().toString();
             String archive = scriptFullPath + ".zip";
@@ -418,7 +418,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             String targetSubject = allowFolderCreation ? script.getSubjectPath(subjectTestPlan) : subjectTestPlan;
 
             try {
-                int scriptId =restProxy.uploadScript(targetSubject, true, uploadAllFiles, true, archive);
+                int scriptId =restProxy.uploadScript(targetSubject, true, uploadRunTimeFiles, true, archive);
                 if (scriptId != 0) {
                     log(
                             listener,
