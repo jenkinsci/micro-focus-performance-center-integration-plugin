@@ -1019,7 +1019,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep{
     // This indicates to Jenkins that this is an implementation of an extension
     // point
     @Extension
-    @Symbol("pcBuild")
+    @Symbol("pcRunBuild")
     public static final class DescriptorImpl extends BuildStepDescriptor<Builder> {
 
         public DescriptorImpl() {

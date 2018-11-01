@@ -48,6 +48,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 
 import jenkins.model.Jenkins;
+import jenkins.tasks.SimpleBuildStep;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
@@ -74,7 +75,7 @@ import static com.microfocus.performancecenter.integration.common.helpers.utils.
 
 import com.microfocus.performancecenter.integration.common.helpers.services.ModifiedFiles;
 
-public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.DescriptorImpl> {
+public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.DescriptorImpl> implements SimpleBuildStep {
 
     public static final String    ERROR           = "Error";
 
@@ -155,7 +156,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
 
     private String getPcUrl() {
-        return (pcGitSyncModel.getHTTPSProtocol()) + "://" +  this.pcServerName + "/loadtest";
+        return (pcGitSyncModel.getProtocol()) + "://" +  this.pcServerName + "/loadtest";
     }
 
     @Override

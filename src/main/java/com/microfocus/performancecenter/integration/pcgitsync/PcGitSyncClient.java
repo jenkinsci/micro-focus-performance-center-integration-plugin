@@ -177,7 +177,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         String proxyOutPassword= (usernamePCPasswordCredentialsForProxy == null || pcGitSyncModel.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
         PcRestProxy restProxy = null;
         try {
-            restProxy = new PcRestProxy(pcGitSyncModel.getHTTPSProtocol(), pcGitSyncModel.getPcServerName(true), pcGitSyncModel.getAlmDomain(true), pcGitSyncModel.getAlmProject(true), pcGitSyncModel.getProxyOutURL(true), proxyOutUser, proxyOutPassword);
+            restProxy = new PcRestProxy(pcGitSyncModel.getProtocol(), pcGitSyncModel.getPcServerName(true), pcGitSyncModel.getAlmDomain(true), pcGitSyncModel.getAlmProject(true), pcGitSyncModel.getProxyOutURL(true), proxyOutUser, proxyOutPassword);
         }catch (PcException e){
             log(listener,  String.format("Connection to PC server failed. Error: %s", e.getMessage()), true);
             logStackTrace(listener, configureSystemSection, e);
@@ -200,7 +200,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 log(
                         listener,
                         String.format("Login: Attempting to login to Performance Center server '%s://%s/LoadTest' with credentials of user '%s'",
-                                pcGitSyncModel.getHTTPSProtocol(),
+                                pcGitSyncModel.getProtocol(),
                                 pcGitSyncModel.getPcServerName(true),
                                 pcUser
                         ),

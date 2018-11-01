@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Extension
 public class WorkspaceScripts {
@@ -38,11 +39,13 @@ public class WorkspaceScripts {
     public SortedSet<AffectedFolder> getAllScriptsForUpload(Path workspace) throws IOException {
         SortedSet<AffectedFolder> result = new TreeSet<>();
 
-        Files.walk(workspace)
-                .filter(file -> !Files.isDirectory(file))
-                .filter(WorkspaceScripts::isScript)
-                .map(file -> new AffectedFolder(file.getParent(), workspace))
-                .forEachOrdered(result::add);
+        try ( Stream<Path> stream = Files.walk(workspace)) {
+            stream
+                    .filter(file -> !Files.isDirectory(file))
+                    .filter(WorkspaceScripts::isScript)
+                    .map(file -> new AffectedFolder(file.getParent(), workspace))
+                    .forEachOrdered(result::add);
+        }
 
         return result;
     }
@@ -95,9 +98,11 @@ public class WorkspaceScripts {
 
         Optional<Path> script;
         try {
-            script = Files.list(subfolderFullPath)
-                    .filter(WorkspaceScripts::isScript)
-                    .findFirst();
+            try (Stream<Path> stream = Files.list(subfolderFullPath)) {
+                script = stream
+                        .filter(WorkspaceScripts::isScript)
+                        .findFirst();
+            }
         } catch (IOException ioe) {
             script = Optional.empty();
         }

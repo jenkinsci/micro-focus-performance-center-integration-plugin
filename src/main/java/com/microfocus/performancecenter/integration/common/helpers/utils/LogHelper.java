@@ -35,7 +35,7 @@ public class LogHelper {
     public static final String DEFAULT_PATTERN = "E yyyy MMM dd 'at' HH:mm:ss.SSS a zzz";
 
     public static void log(TaskListener listener, String format, boolean addDate, Object... args) {
-        if (listener.equals(TaskListener.NULL)) {
+        if (listener== null || listener.equals(TaskListener.NULL)) {
             return;
         }
         String formatted = format;
@@ -48,14 +48,13 @@ public class LogHelper {
 
 
     public static void logStackTrace(TaskListener listener, ConfigureSystemSection configureSystemSection, Throwable t) {
+        if (listener==null || listener.equals(TaskListener.NULL)) {
+            return;
+        }
         logStackTrace(listener, configureSystemSection.getDebug(), t);
     }
 
     public static void logStackTrace(TaskListener listener, boolean debug, Throwable t) {
-        if (listener.equals(TaskListener.NULL)) {
-            return;
-        }
-
         if(debug) {
             PrintStream ps = listener.getLogger();
             ps.print("  Stack Trace: ");

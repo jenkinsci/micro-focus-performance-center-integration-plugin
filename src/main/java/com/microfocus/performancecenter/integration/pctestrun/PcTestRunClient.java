@@ -107,7 +107,7 @@ public class PcTestRunClient {
                 log(listener, "%s\n[PCServer='%s://%s', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), model.getPcServerName(true), PcTestRunBuilder.usernamePCPasswordCredentials.getUsername());
                 loggedIn = restProxy.authenticate(PcTestRunBuilder.usernamePCPasswordCredentials.getUsername(), PcTestRunBuilder.usernamePCPasswordCredentials.getPassword().getPlainText());
             }
-        } catch (PcException|IOException e) {
+        } catch (NullPointerException|PcException|IOException e) {
             log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
             logStackTrace(listener, configureSystemSection, e);
         }

@@ -30,14 +30,13 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.tasks.BuildStep;
 import hudson.tasks.Builder;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
 @SuppressWarnings("deprecation")
-public abstract class AbstractPcGitBuildStep<T extends AbstractPcGitBuildStepDescriptor> extends Builder implements BuildStep {
+public abstract class AbstractPcGitBuildStep<T extends AbstractPcGitBuildStepDescriptor> extends Builder {
 
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {

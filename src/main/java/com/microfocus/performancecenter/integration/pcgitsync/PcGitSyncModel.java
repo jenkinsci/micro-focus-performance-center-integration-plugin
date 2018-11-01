@@ -190,7 +190,7 @@ public class PcGitSyncModel implements Serializable {
                 proxyOutURL, credentialsProxyId, subjectTestPlan, uploadScriptMode.getValue(), removeScriptFromPC.getValue());
     }
 
-    public String getHTTPSProtocol(){
+    public String getProtocol(){
         if (!httpsProtocol)
             return "http";
         return "https";
