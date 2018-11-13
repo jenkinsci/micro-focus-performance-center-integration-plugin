@@ -29,7 +29,7 @@
 	</parent>
 
 	<artifactId>micro-focus-performance-center-integration</artifactId>
-	<version>0.1.1-beta-SNAPSHOT</version>
+	<version>1.0.0-beta</version>
 	<packaging>hpi</packaging>
 	<name>Micro Focus Performance Center integration With Git</name>
 	<description>The plugin integrates Performance Center with Git.</description>
@@ -64,6 +64,7 @@
 			<url>https://repo.jenkins-ci.org/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
+
 	<scm>
 		<connection>scm:git:ssh://github.com:jenkinsci/micro-focus-performance-center-integration-plugin.git</connection>		
 		<developerConnection>scm:git:ssh://github.com:jenkinsci/micro-focus-performance-center-integration-plugin.git</developerConnection>
@@ -252,6 +253,36 @@
 		</pluginRepository>
 	</pluginRepositories>
 
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.jenkins-ci.plugins</groupId>
+				<artifactId>changes-since-last-success</artifactId>
+				<version>0.5</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jenkins-ci.plugins</groupId>
+				<artifactId>credentials</artifactId>
+				<version>2.1.13</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jenkins-ci.plugins</groupId>
+				<artifactId>git</artifactId>
+				<version>3.1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jenkins-ci.plugins</groupId>
+				<artifactId>git-client</artifactId>
+				<version>2.5.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jenkins-ci.plugins</groupId>
+				<artifactId>structs</artifactId>
+				<version>1.10</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
@@ -379,7 +410,6 @@
 		<dependency>
 			<artifactId>git</artifactId>
 			<groupId>org.jenkins-ci.plugins</groupId>
-			<version>3.5.1</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -430,13 +460,14 @@
 			<version>1.2.3</version>
 		</dependency>
 
-		<!--sonar plugin for compile phase only -->
+		<!--sonar plugin for compile phase only-->
 		<dependency>
-			<groupId>org.jenkins-ci.plugins</groupId>
 			<artifactId>sonar</artifactId>
+			<groupId>org.jenkins-ci.plugins</groupId>
 			<version>2.6.1</version>
-			<scope>compile</scope>
+			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-common</artifactId>
@@ -446,6 +477,12 @@
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-sse</artifactId>
 			<version>2.9</version>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.validation</groupId>
+					<artifactId>validation-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -499,11 +536,6 @@
 			<artifactId>lombok</artifactId>
 			<version>1.16.12</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jenkins-ci.plugins</groupId>
-			<artifactId>git-client</artifactId>
-			<version>2.5.0</version>
 		</dependency>
 
 
