@@ -339,6 +339,39 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
     }
 
+    public String getDescription()
+    {
+        return getPcGitSyncModel().getDescription();
+    }
+
+
+    public String getPcServerName()
+    {
+        return getPcGitSyncModel().getPcServerName();
+    }
+
+    public boolean isHttpsProtocol()
+    {
+        return getPcGitSyncModel().getHttpsProtocol();
+    }
+
+    public String getServerAndPort()
+    {
+        return getPcGitSyncModel().getServerAndPort();
+    }
+
+    public String getProxyOutURL(){ return getPcGitSyncModel().getProxyOutURL();}
+
+    public String getCredentialsProxyId() {
+        return credentialsProxyId;
+    }
+
+    public String getSubjectTestPlan(){ return getPcGitSyncModel().getSubjectTestPlan();}
+
+    public UploadScriptMode getUploadScriptMode(){ return getPcGitSyncModel().getUploadScriptMode();}
+
+    public RemoveScriptFromPC getRemoveScriptFromPC(){ return getPcGitSyncModel().getRemoveScriptFromPC();}
+
     //-----------------------------------------------------------------------------------------
     // This indicates to Jenkins that this is an implementation of an extension
     // point
