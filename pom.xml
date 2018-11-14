@@ -29,7 +29,7 @@
 	</parent>
 
 	<artifactId>micro-focus-performance-center-integration</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 	<name>Micro Focus Performance Center integration With Git</name>
 	<description>The plugin integrates Performance Center with Git.</description>
@@ -69,7 +69,7 @@
 		<connection>scm:git:ssh://github.com/jenkinsci/micro-focus-performance-center-integration-plugin.git</connection>
 		<developerConnection>scm:git:ssh://git@github.com/jenkinsci/micro-focus-performance-center-integration-plugin.git</developerConnection>
 		<url>https://github.com/jenkinsci/micro-focus-performance-center-integration-plugin</url>
-		<tag>micro-focus-performance-center-integration-1.0.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<issueManagement>
