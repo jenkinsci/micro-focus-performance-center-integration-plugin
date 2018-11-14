@@ -29,7 +29,7 @@
 	</parent>
 
 	<artifactId>micro-focus-performance-center-integration</artifactId>
-	<version>1.0.0-beta</version>
+	<version>1.0.0-SNAPSHOT</version>
 	<packaging>hpi</packaging>
 	<name>Micro Focus Performance Center integration With Git</name>
 	<description>The plugin integrates Performance Center with Git.</description>
