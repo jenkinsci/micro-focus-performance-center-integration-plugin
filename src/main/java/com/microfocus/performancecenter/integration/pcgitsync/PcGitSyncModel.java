@@ -25,12 +25,12 @@
  * */
 package com.microfocus.performancecenter.integration.pcgitsync;
 
+import com.microfocus.performancecenter.integration.pcgitsync.helper.YesOrNo;
+import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import com.microfocus.performancecenter.integration.pcgitsync.helper.RemoveScriptFromPC;
-import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
 import java.util.List;
 
 public class PcGitSyncModel implements Serializable {
@@ -50,16 +50,15 @@ public class PcGitSyncModel implements Serializable {
     private final String credentialsProxyId;
     private final String subjectTestPlan;
     private final UploadScriptMode uploadScriptMode;
-    private final RemoveScriptFromPC removeScriptFromPC;
+    private final YesOrNo removeScriptFromPC;
+    private final YesOrNo importTests;
     private String buildParameters;
-
-
 
     @DataBoundConstructor
     public PcGitSyncModel(String description, String pcServerName, String serverAndPort, boolean httpsProtocol,
                           String credentialsId, String almDomain, String almProject,
                           String proxyOutURL, String credentialsProxyId,
-                          String subjectTestPlan, UploadScriptMode uploadScriptMode, RemoveScriptFromPC removeScriptFromPC, String buildParameters) {
+                          String subjectTestPlan, UploadScriptMode uploadScriptMode, YesOrNo removeScriptFromPC, YesOrNo importTests, String buildParameters) {
         this.description = description;
         this.pcServerName = pcServerName;
         this.serverAndPort = serverAndPort;
@@ -72,6 +71,7 @@ public class PcGitSyncModel implements Serializable {
         this.subjectTestPlan = subjectTestPlan.replace("/", "\\").replaceFirst("\\\\$", "").replaceAll("\\$", "");
         this.uploadScriptMode = uploadScriptMode;
         this.removeScriptFromPC = removeScriptFromPC;
+        this.importTests = importTests;
         this.buildParameters = "";
     }
 
@@ -134,8 +134,8 @@ public class PcGitSyncModel implements Serializable {
         return Arrays.asList(UploadScriptMode.values());
     }
 
-    public static List<RemoveScriptFromPC> getDeleteScripts() {
-        return Arrays.asList(RemoveScriptFromPC.values());
+    public static List<YesOrNo> getYesOrNo() {
+        return Arrays.asList(YesOrNo.values());
     }
 
     public String getBuildParameters() {
@@ -172,11 +172,13 @@ public class PcGitSyncModel implements Serializable {
         return this.uploadScriptMode;
     }
 
-    public RemoveScriptFromPC getRemoveScriptFromPC() {
-
+    public YesOrNo getRemoveScriptFromPC() {
         return this.removeScriptFromPC;
     }
 
+    public YesOrNo getImportTests(){
+        return this.importTests;
+    }
 
     @Override
     public String toString() {
@@ -185,9 +187,9 @@ public class PcGitSyncModel implements Serializable {
 
     public String runParamsToString() {
         return String.format("[PCServer='%s', HTTPSProtocol='%s', CredentialsId='%s', Domain='%s', Project='%s', " +
-                        "proxy='%s', CredentialsProxyId='%s', subjectTestPlan = '%s', uploadScriptMode='%s', removeScriptFromPC='%s']",
+                        "proxy='%s', CredentialsProxyId='%s', subjectTestPlan = '%s', uploadScriptMode='%s', removeScriptFromPC='%s', importTests='%s']",
                 pcServerName, httpsProtocol, credentialsId, almDomain, almProject,
-                proxyOutURL, credentialsProxyId, subjectTestPlan, uploadScriptMode.getValue(), removeScriptFromPC.getValue());
+                proxyOutURL, credentialsProxyId, subjectTestPlan, uploadScriptMode.getValue(), removeScriptFromPC.getValue(), importTests.getValue());
     }
 
     public String getProtocol(){

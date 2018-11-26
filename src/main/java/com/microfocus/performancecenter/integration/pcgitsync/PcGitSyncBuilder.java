@@ -27,19 +27,20 @@
 
 package com.microfocus.performancecenter.integration.pcgitsync;
 
-import com.microfocus.performancecenter.integration.common.helpers.configuration.ConfigurationService;
-import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcGitBuildStep;
-import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcGitBuildStepDescriptor;
-import com.microfocus.performancecenter.integration.pcgitsync.helper.RemoveScriptFromPC;
-import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedFile;
-import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
 import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
-import com.cloudbees.plugins.credentials.common.StandardUsernameListBoxModel;
+import com.microfocus.performancecenter.integration.common.helpers.configuration.ConfigurationService;
+import com.microfocus.performancecenter.integration.common.helpers.services.ModifiedFiles;
+import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedFile;
 import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
-
+import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcGitBuildStep;
+import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcGitBuildStepDescriptor;
+import com.microfocus.performancecenter.integration.pcgitsync.helper.YesOrNo;
+import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
 import hudson.*;
 import hudson.model.*;
 import hudson.model.queue.Tasks;
@@ -49,31 +50,26 @@ import hudson.util.ListBoxModel;
 
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.Symbol;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import lombok.Getter;
-import lombok.Setter;
-
-import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
-
+import org.kohsuke.stapler.QueryParameter;
 
 import javax.annotation.Nonnull;
-import java.io.*;
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import javax.inject.Inject;
-
-import org.kohsuke.stapler.QueryParameter;
 
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.log;
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.logStackTrace;
-
-import com.microfocus.performancecenter.integration.common.helpers.services.ModifiedFiles;
 
 public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.DescriptorImpl> implements SimpleBuildStep {
 
@@ -94,7 +90,8 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
     private String credentialsProxyId;
     private final String subjectTestPlan;
     private final UploadScriptMode uploadScriptMode;
-    private final RemoveScriptFromPC removeScriptFromPC;
+    private final YesOrNo removeScriptFromPC;
+    private final YesOrNo importTests;
 
     private PcGitSyncModel pcGitSyncModel;
     private String buildParameters;
@@ -116,7 +113,8 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
             String credentialsProxyId,
             String subjectTestPlan,
             UploadScriptMode uploadScriptMode,
-            RemoveScriptFromPC removeScriptFromPC) {
+            YesOrNo removeScriptFromPC,
+            YesOrNo importTests) {
 
         this.description = description;
         this.pcServerName = pcServerName;
@@ -134,7 +132,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
             this.subjectTestPlan = subjectTestPlan;
         this.uploadScriptMode = uploadScriptMode;
         this.removeScriptFromPC = removeScriptFromPC;
-
+        this.importTests = importTests;
         this.buildParameters = "";
 
         pcGitSyncModel =
@@ -151,6 +149,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                         this.subjectTestPlan.trim(),
                         this.uploadScriptMode,
                         this.removeScriptFromPC,
+                        this.importTests,
                         buildParameters);
     }
 
@@ -370,7 +369,9 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
     public UploadScriptMode getUploadScriptMode(){ return getPcGitSyncModel().getUploadScriptMode();}
 
-    public RemoveScriptFromPC getRemoveScriptFromPC(){ return getPcGitSyncModel().getRemoveScriptFromPC();}
+    public YesOrNo getRemoveScriptFromPC(){ return getPcGitSyncModel().getRemoveScriptFromPC();}
+
+    public YesOrNo importTests() { return getPcGitSyncModel().getImportTests();}
 
     //-----------------------------------------------------------------------------------------
     // This indicates to Jenkins that this is an implementation of an extension
@@ -467,7 +468,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                 }
             }
             // no credentials available, can't check
-            return FormValidation.warning("Cannot find any credentials with id " + value);
+            return FormValidation.warning("Cannot find any credentials with ID " + value);
         }
 
 
@@ -553,10 +554,11 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
             return PcGitSyncModel.getUploadScriptModes();
         }
 
-        public List<RemoveScriptFromPC> getDeleteScripts() {
+        public List<YesOrNo> getYesOrNo() {
 
-            return PcGitSyncModel.getDeleteScripts();
+            return PcGitSyncModel.getYesOrNo();
         }
+
 
     }
 

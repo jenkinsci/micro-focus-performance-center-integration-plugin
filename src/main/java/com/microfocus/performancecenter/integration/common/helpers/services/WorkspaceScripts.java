@@ -22,6 +22,7 @@
 
 package com.microfocus.performancecenter.integration.common.helpers.services;
 
+import com.microfocus.performancecenter.integration.common.helpers.constants.PcTestRunConstants;
 import hudson.Extension;
 import com.microfocus.performancecenter.integration.common.helpers.utils.AffectedFolder;
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedType;
@@ -115,7 +116,7 @@ public class WorkspaceScripts {
     }
 
     private static boolean isScript(Path fullPath) {
-        return !Files.isDirectory(fullPath) && (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(".usr") || fullPath.toString().toLowerCase(Locale.ROOT).endsWith(".jmx"));
+        return !Files.isDirectory(fullPath) && (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.USR_EXTENSION) || fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.JMX_EXTENSION));
     }
 
 }

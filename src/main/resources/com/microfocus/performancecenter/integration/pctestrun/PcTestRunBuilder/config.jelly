@@ -186,14 +186,25 @@
     </f:invisibleEntry>
 
 
-        <script>assignhostPath();</script>
+    <script>assignhostPath();</script>
 
+    <td class="setting-leftspace">&#160;</td>
+    <td>Run test</td>
+    <td colspan="2">
+        <table style="width:100%" id="testTable">
+        <f:radioBlock field="testToRun" name="pc.testToRun" value="EXISTING_TEST" checked="${instance.pcTestRunModel.testToRun =='EXISTING_TEST' || instance.pcTestRunModel.testToRun== null}" title="Existing test" inline="true" >
+            <f:entry title="Test ID" field="testId" >
+                <f:textbox  name="pc.testId" style="width:100%" value="${instance.pcTestRunModel.testId}" inline="true" />
+            </f:entry>
+        </f:radioBlock>
+        <f:radioBlock field="testToRun" name="pc.testToRun" value="CREATE_TEST" checked="${instance.pcTestRunModel.testToRun=='CREATE_TEST'}" title="Create Test from yaml" inline="true" >
+            <f:entry title="Test To Create" field="testContentToCreate" >
+                <f:textarea  name="pc.testContentToCreate" rows="8" style="width:100%" value="${instance.pcTestRunModel.testContentToCreate}" inline="true" />
+            </f:entry>
+        </f:radioBlock>
+        </table>
+    </td>
 
-
-
-	<f:entry title="Test ID" field="testId">
-		<f:textbox name="pc.testId" value="${instance.pcTestRunModel.testId}" />
-	</f:entry>
 	<f:entry title="&#160;&#160;&#160;&#160;&#160;" field="">
 		<a id="pcServerURL" href="#" onclick="verifyURLAvailable();return false;">Browse to find the Test ID</a>
 	</f:entry>

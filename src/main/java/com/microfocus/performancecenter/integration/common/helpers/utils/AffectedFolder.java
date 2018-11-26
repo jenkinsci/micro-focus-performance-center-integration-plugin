@@ -29,6 +29,7 @@ import lombok.Value;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 @Value
@@ -51,17 +52,14 @@ public class AffectedFolder implements Comparable<AffectedFolder> {
     }
 
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "FB doesn't seem to understand Objects.requireNonNull")
-    public String getSubjectPath(String subjectRoot) {
-        String subjectRootWithoutForwarslashAndTrailingBackslash = subjectRoot.replace("/", "\\").replaceFirst("\\\\$", "");
-
-        // UC_00_AAA -> Subject\RestAPI
-        if (relativePath.getNameCount() < 2) {
-            return subjectRootWithoutForwarslashAndTrailingBackslash;
-        }
-
-        // subfolder\UC_00_AAA -> Subject\RestAPI\subfolder
-        Path parent = Objects.requireNonNull(relativePath.getParent());
-        return subjectRootWithoutForwarslashAndTrailingBackslash + "\\" + parent.toString().replace(File.separatorChar, '\\');
+    public String getSubjectPath() {
+        String subjectRoot = "Subject";
+        String scriptPath =  subjectRoot + "\\" + relativePath.toString().replace(File.separatorChar, '\\');
+        Path script = Paths.get(scriptPath);
+        if (script.getParent().toString().equals(subjectRoot))
+            return scriptPath;
+        else
+            return script.getParent().toString();
     }
 
     @Override

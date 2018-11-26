@@ -220,7 +220,7 @@
 
     <f:entry title="Delete script" field="removeScriptFromPC">
         <select id="removeScriptFromPC" name="pcGit.removeScriptFromPC" >
-            <j:forEach var="action" items="${descriptor.deleteScripts}">
+            <j:forEach var="action" items="${descriptor.YesOrNo}">
                 <f:option selected="${action == instance.pcGitSyncModel.removeScriptFromPC}"
                     value="${action}">
                     ${action.value}
@@ -228,5 +228,16 @@
             </j:forEach>
         </select>
     </f:entry>
+
+     <f:entry title="Import Tests" field="importTests">
+            <select id="importTests" name="pcGit.importTests" >
+                <j:forEach var="action" items="${descriptor.YesOrNo}">
+                    <f:option selected="${action == instance.pcGitSyncModel.importTests}"
+                        value="${action}">
+                        ${action.value}
+                            </f:option>
+                </j:forEach>
+            </select>
+        </f:entry>
 
 </j:jelly>

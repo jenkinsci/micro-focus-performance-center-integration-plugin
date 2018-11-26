@@ -29,40 +29,50 @@
 package com.microfocus.performancecenter.integration.pctestrun;
 
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
-
+import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
+import com.microfocus.adm.performancecenter.plugins.common.pcentities.pcsubentities.test.Test;
+import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
+import com.microfocus.performancecenter.integration.common.helpers.constants.PcTestRunConstants;
+import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 import hudson.FilePath;
-
-import java.beans.IntrospectionException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.*;
-import java.util.*;
-
 import hudson.console.HyperlinkNote;
 import hudson.model.TaskListener;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 
-import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
-import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
+import java.beans.IntrospectionException;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.*;
 
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.log;
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.logStackTrace;
-import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 
 public class PcTestRunClient {
 
     private PcTestRunModel model;
+    private String testToCreate;
+    private String testName;
+    private String testFolderPath;
+    private String fileExtension;
     private PcRestProxy restProxy;
     private boolean loggedIn;
     private TaskListener listener;
     private ConfigureSystemSection configureSystemSection;
 
-    public PcTestRunClient(PcTestRunModel pcTestRunModel, TaskListener listener, ConfigureSystemSection configureSystemSection) {
+    public PcTestRunClient(PcTestRunModel pcTestRunModel, String testToCreate, String testName, String testFolderPath, String fileExtension, TaskListener listener, ConfigureSystemSection configureSystemSection) {
         try {
             this.listener = listener;
-            model = pcTestRunModel;
+            this.model = pcTestRunModel;
+            this.testToCreate = testToCreate;
+            this.testName = testName;
+            this.testFolderPath = testFolderPath;
+            this.fileExtension = fileExtension;
             this.configureSystemSection = configureSystemSection;
             String credentialsProxyId = model.getCredentialsProxyId(true);
             UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy = PcTestRunBuilder.getCredentialsId(credentialsProxyId);
@@ -95,17 +105,18 @@ public class PcTestRunClient {
             this.listener = listener;
             String credentialsId = model.getCredentialsId(true);
             UsernamePasswordCredentials usernamePCPasswordCredentials = PcTestRunBuilder.getCredentialsId(credentialsId);
+            log(listener,"",true);
             if(usernamePCPasswordCredentials != null) {
                 if(model.getCredentialsId().startsWith("$"))
                     log(listener, "%s", true, Messages.UsingPCCredentialsBuildParameters());
                 else
                     log(listener, "%s", true, Messages.UsingPCCredentialsConfiguration());
-                log(listener, "%s\n[PCServer='%s://%s', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), model.getPcServerName(true), usernamePCPasswordCredentials.getUsername());
+                log(listener, "%s\n[PCServer='%s://%s/LoadTest', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), model.getPcServerName(true), usernamePCPasswordCredentials.getUsername());
                 loggedIn = restProxy.authenticate(usernamePCPasswordCredentials.getUsername(), usernamePCPasswordCredentials.getPassword().getPlainText());
             }
             else {
-                log(listener, "%s\n[PCServer='%s://%s', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), model.getPcServerName(true), PcTestRunBuilder.usernamePCPasswordCredentials.getUsername());
-                loggedIn = restProxy.authenticate(PcTestRunBuilder.usernamePCPasswordCredentials.getUsername(), PcTestRunBuilder.usernamePCPasswordCredentials.getPassword().getPlainText());
+                log(listener, "Performance Center credentials are missing.", true);
+                loggedIn = false;
             }
         } catch (NullPointerException|PcException|IOException e) {
             log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
@@ -122,13 +133,43 @@ public class PcTestRunClient {
 
     public int startRun() throws NumberFormatException, ClientProtocolException, PcException, IOException {
 
+        int testID;
+        Test test = null;
+        log(listener,"",true);
+        if("EXISTING_TEST".equals(model.getTestToRun())) {
+            testID = Integer.parseInt(model.getTestId(true));
+            test = restProxy.getTest(testID);
+            log(listener, "Running existing test: Test ID %s, Name: %s, Path: %s", true, test.getID(), test.getName(), test.getTestFolderPath());
+        }
+        else {
+            if (testName.isEmpty())
+                test = restProxy.createOrUpdateTestFromYamlTest(testToCreate);
+            else {
+                switch (fileExtension.toLowerCase()) {
+                    case PcTestRunConstants.XML_EXTENSION:
+                        test = restProxy.createOrUpdateTest(testName, testFolderPath, testToCreate);
+                        break;
+                    case PcTestRunConstants.YAML_EXTENSION:
+                    case PcTestRunConstants.YML_EXTENSION:
+                        test = restProxy.createOrUpdateTestFromYamlContent(testName, testFolderPath, testToCreate);
+                        break;
+                    default:
+                        log(listener, "File extension not supported.", true);
+                        break;
+                }
+            }
+            if(test == null) {
+                log(listener, "Could not create test from yaml.", true);
+                return 0;
+            }
+            testID = Integer.parseInt(test.getID());
+            model.setTestId(test.getID());
 
-
-
-        int testID = Integer.parseInt(model.getTestId(true));
+            log(listener, "Running yaml test: Test ID %s, Name: %s, Path: %s", true, test.getID(), test.getName(), test.getTestFolderPath());
+        }
+        log(listener,"",true);
         int testInstance = getCorrectTestInstanceID(testID);
         setCorrectTrendReportID();
-
         log(listener, "\n%s \n" +
                         "====================\n" +
                         "%s: %s \n" +
@@ -139,7 +180,7 @@ public class PcTestRunClient {
                         "%s: %s \n" +
                         "%s: %s \n" +
                         "====================\n",
-                true,
+                false,
                 Messages.ExecutingLoadTest(),
                 Messages.Domain(), model.getAlmDomain(true),
                 Messages.Project(), model.getAlmProject(true),
@@ -276,7 +317,7 @@ public class PcTestRunClient {
                     if (pcTestSets !=null && pcTestSets.getPcTestSetsList() !=null){
                         PcTestSet pcTestSet = pcTestSets.getPcTestSetsList().get(pcTestSets.getPcTestSetsList().size()-1);
                         int testSetID = pcTestSet.getTestSetID();
-                        log(listener, "%s (testID: %s, TestSetID: %s", true,
+                        log(listener, "%s (Test ID: %s, TestSet ID: %s", true,
                                 Messages.CreatingNewTestInstance(),
                                 testID,
                                 testSetID);
@@ -423,10 +464,15 @@ public class PcTestRunClient {
                     Thread.sleep(interval);
                 }
                 threeStrikes = 3;
-            }
-            catch(InterruptedException|PcException e)
-            {
+            }catch(PcException e) {
                 threeStrikes--;
+            }
+            catch(InterruptedException e)
+            {
+                log(listener, "Job execution interrupted: %s", true,
+                        runId,
+                        e.getMessage());
+                break;
             }
         } while (lastState.ordinal() < completionState.ordinal());
         return response;
