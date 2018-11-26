@@ -1,19 +1,19 @@
 ![Micro Focus Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Micro_Focus_logo.svg/220px-Micro_Focus_logo.svg.png)
 # Micro Focus Performance Center integration                       
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8ec4415bffe94fda8ae40415388c063e)](https://www.codacy.com/app/HPEbot/micro-focus-performance-center-integration?utm_source=github.com&utm_medium=referral&utm_content=hpsa/hp-application-automation-tools-plugin&utm_campaign=badger)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8ec4415bffe94fda8ae40415388c063e)](https://app.codacy.com/project/danieldanan/micro-focus-performance-center-integration-plugin/dashboard)
 
 Project status:
-[![Build status](https://ci.appveyor.com/api/projects/status/gqd0x8ov1ebqjjcu?svg=true)](https://ci.appveyor.com/project/HPEbot/micro-focus-performance-center-integration)
+[![Build status](https://ci.jenkins.io/job/Plugins/job/micro-focus-performance-center-integration-plugin/job/master/)
 
 Latest release branch status:
-[![Build status](https://ci.appveyor.com/api/projects/status/gqd0x8ov1ebqjjcu/branch/latest?svg=true)](https://ci.appveyor.com/project/HPEbot/micro-focus-performance-center-integration/branch/latest)
+[![Build status](https://ci.appveyor.com/api/projects/status/gqd0x8ov1ebqjjcu/branch/latest?svg=true)](https://ci.appveyor.com/project/danieldanan/micro-focus-performance-center-integration-plugin)
 
 
 ##### The plugin provides the ability to run Micro Focus Perfomance Center product with Jenkins during builds.
 
 ## Relevant links
--	**Download the most recent LTS version of the plugin** at [Official plugin Wiki page](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Performance+Center+integration)
+-	**Download the most recent LTS version of the plugin** at [Official plugin Wiki page](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Performance+Center+Integration+With+Git)
 -	**Check the open issues (and add new issues)** at [Jenkins plugin Jira](https://issues.jenkins-ci.org/issues/?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20micro-focus-performance-center-integration)
 -	**View the plugin’s usage statistics** at [Jenkins.io plugin statistics](http://stats.jenkins.io/pluginversions/micro-focus-performance-center-integration.html)
 

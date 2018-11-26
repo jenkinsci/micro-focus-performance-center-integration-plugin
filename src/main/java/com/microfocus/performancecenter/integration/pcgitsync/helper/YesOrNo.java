@@ -20,19 +20,20 @@
  *
  */
 
-package com.microfocus.performancecenter.integration.pctestrun;
+package com.microfocus.performancecenter.integration.pcgitsync.helper;
 
-import com.microfocus.adm.performancecenter.plugins.common.pcentities.PostRunAction;
+public enum YesOrNo {
 
-public class MockPcTestRunModel extends PcTestRunModel {
+    YES("Yes"),
+    NO("No");
 
+    private String value;
 
-    public MockPcTestRunModel(String serverAndPort, String pcServerName, String credential, String almDomain,
-                              String almProject, String testToRun, String testId, String testContentToCreate, String autoTestInstanceID, String testInstanceId, String timeslotDurationHours,
-                              String timeslotDurationMinutes, PostRunAction postRunAction, boolean vudsMode, String description, boolean webProtocol, String retry, String retryDelay, String retryOccurrences) {
-        super(serverAndPort, pcServerName, credential, almDomain, almProject, testToRun, testId, testContentToCreate, autoTestInstanceID, testInstanceId, timeslotDurationHours,
-                timeslotDurationMinutes, postRunAction, vudsMode, description, "NO_TREND", null,false,null,null, retry, retryDelay, retryOccurrences
-        );
+    private YesOrNo(String value) {
+        this.value = value;
     }
 
+    public String getValue() {
+        return value;
+    }
 }

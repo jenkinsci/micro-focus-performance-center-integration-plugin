@@ -1,0 +1,299 @@
+<!--
+  ~ © Copyright 2013 EntIT Software LLC
+  ~  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
+  ~  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
+  ~  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
+  ~  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
+  ~  marks are the property of their respective owners.
+  ~ __________________________________________________________________
+  ~ MIT License
+  ~
+  ~ © Copyright 2012-2018 Micro Focus or one of its affiliates.
+  ~
+  ~ The only warranties for products and services of Micro Focus and its affiliates
+  ~ and licensors (“Micro Focus”) are set forth in the express warranty statements
+  ~ accompanying such products and services. Nothing herein should be construed as
+  ~ constituting an additional warranty. Micro Focus shall not be liable for technical
+  ~ or editorial errors or omissions contained herein.
+  ~ The information contained herein is subject to change without notice.
+  ~ ___________________________________________________________________
+  ~
+  -->
+
+<html>
+<head>
+    <style>
+        table#t01 tr:nth-child(even) {
+            background-color: #eee;
+        }
+        table#t01 tr:nth-child(odd) {
+            background-color: #fff;
+        }
+        table#t01 th {
+            background-color: black;
+            color: white;
+            text-align: left;
+            padding: 5px;
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        table#t01 td {
+            padding: 5px;
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+    </style>
+</head>
+<p>
+<p>The content of the field must either be: <ul>
+    <li>a relative path to a yaml file within the workspace (or within your Git repository if you are cloning a git repository within the workspace) representing a Performance Center test. In the yaml file, only specify the 'test_content' parameter (and it sub parameters) explained in the tables below (the test name and test path are respectively concluded from the file name without extension and file location).</li>
+    <li>a text in yaml syntax composed according to the parameters described in the tables below.</li>>
+</ul>
+</p>
+<p><strong>Note:</strong> all parameters must be in lowercase.</p>
+<hr>
+<p>
+<div><strong>test:</strong> (not required within file content)</div>
+<div>
+    <table id="t01">
+        <tbody>
+        <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+            <th>Required</th>
+        </tr>
+        <tr>
+            <td>test_name</td>
+            <td>The test name.</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td>test_folder_path</td>
+            <td>The location of the test in the Test Management folder tree of the Performance Center project (e.g. "MyMainFolder\\MySubfolder\\MySubSubFolder"). Double backslash character should be used as folder separator (\\). Do not include the Performance Center root folder (named "Subject")</td>
+            <td>yes</td>
+        </tr>
+        <tr>
+            <td>test_content</td>
+            <td>The content of the test that requires additional parameters specified in the 'test_content' table below.</td>
+            <td>Yes</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</p>
+<hr>
+<p>
+<div><strong>test_content:</strong></div>
+<div>
+    <table id="t01">
+        <tbody>
+        <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+            <th>Required</th>
+        </tr>
+        <tr>
+            <td>controller</td>
+            <td>Defines the Controller to be used during the test run (it must be an available host in the Performance Center project). If not specified, a Controller will be chosen from the different controllers available in the Performance Center project.</td>
+            <td>No</td>
+        </tr>
+        <tr>
+            <td>lg_amount</td>
+            <td>Number of load generators to allocate to the test (every group in the test will be run by the same load generators).</td>
+            <td>Not required if each group defined in the 'group' parameter defines the load generators it will be using via the 'lg_name' parameter (see 'group' table below).</td>
+        </tr>
+        <tr>
+            <td>group</td>
+            <td>Lists all groups or scripts defined in the test. The parameter to be used in each group are specified in the 'group' table below.</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td>scheduler</td>
+            <td>Defines the duration of a test, and determines whether virtual users are started simultaneously or gradually. See the 'scheduler' table below.</td>
+            <td>No</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</p>
+<hr>
+<p>
+<div><strong>group:</strong></div>
+<div>
+    <table id="t01">
+        <tbody>
+        <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+            <th>Required</th>
+        </tr>
+        <tr>
+            <td>group_name</td>
+            <td>Name of the group (it must be a unique name if several groups are defined).</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td>vusers</td>
+            <td>Number of virtual users to allocate to the group for running the script.</td>
+            <td>Yes</td>
+        </tr>
+        <tr>
+            <td>script_id</td>
+            <td>ID of the script in the Performance Center project.</td>
+            <td>Not required if the 'script_path' parameter is specified.</td>
+        </tr>
+        <tr>
+            <td>script_path</td>
+            <td>Path and name of the script to be added to the group, separated by double backslashes (\\). For example "MyMainFolder\\MySubFolder\\MyScriptName'. Do not include the Performance Center root folder (named "Subject").</td>
+            <td>Not required if 'script_id' parameter is specified</td>
+        </tr>
+        <tr>
+            <td>lg_name</td>
+            <td>List of load generators to allocate to the group for running the script. The supported values are:
+                <ul>
+                    <li>The hostname, as defined in Performance Center, of an existing load generator in Performance Center allocated as a host.</li>
+                    <li>"LG" followed by a number, to use an automatically matched load generator (recommended).</li>
+                    <li>"DOCKER" followed by a number, to use a dynamic load generator (available if your Performance Center server and project are set to work with Docker).</li>
+                </ul>
+            </td>
+            <td>No</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</p>
+<hr>
+<p>
+<div><strong>scheduler:</strong></div>
+<div>
+    <table id="t01">
+        <tbody>
+        <tr>
+            <th>Parameter</th>
+            <th>Description</th>
+            <th>Required</th>
+        </tr>
+        <tr>
+            <td>rampup</td>
+            <td>Time, in seconds, to gradually start all virtual users. Additional virtual users will be added every 15 seconds until the time specified in the parameter ends. If not specified, all virtual users will be started simultaneously at the beginning of the test.</td>
+            <td>No</td>
+        </tr>
+        <tr>
+            <td>duration</td>
+            <td>Time, in seconds, that it will take to run the test after all virtual users are started. After this time, the test run ends. If not specified, the test will run until completion.</td>
+            <td>No</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</p>
+<hr>
+<p>
+<div>In the example below, the yaml specifies the following:
+    <ul>
+        <li>The test name is "mytestname" and it will be placed in the Performance Center project under the folder path "Subject\\Tests\\mytests" (the root folder of the folders, which is "Subject", should not be specified in the parameter). The folder separator is a double backslash (\\).</li>
+        <li>In the content:
+            <ul>
+                <li>Since no Controller or load generator amount were specified, a random available Controller will be used to run the test, and the 'lg_name' parameter specified in each group will be used.</li>
+                <li>In the 'group' parameter:
+                    <ul>
+                        <li>We added two scripts. For each, we provided a unique value in the 'group_name' parameter, and the number of virtual users to run the group.</li>
+                        <li>Since we did not know the ID of the scripts, we used the 'script_path' parameter in which we entered the script path (without "Subject") followed by the script name, and used double backslashes for separators.</li>
+                        <li>We specified the load generators that will be used by each group (in this case, load generators will automatically be matched as we use the 'LG' prefix).</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>In the scheduler:
+            <ul>
+                <li>We want all Virtual Users to be initialized gradually (45 seconds).</li>
+                <li>We want the test to stop after 5 minutes (300 seconds).</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<pre>
+<code>
+##################################################
+#test
+test_name: mytestname
+test_folder_path: "Tests\\mytests"
+test_content:
+#  controller: "mycontroller"
+#  lg_amount: '2'
+  group:
+    - group_name: "TEstInt"
+      vusers: '20'
+#      script_id: '1'
+      script_path: "plugin\\TEstInt"
+      lg_name:
+        - "LG1"
+        - "LG2"
+    - group_name: "Mtours"
+      vusers: '20'
+#      script_id: '2'
+      script_path: "plugin\\mtours"
+      lg_name:
+        - "LG3"
+        - "LG4"
+  scheduler:
+    rampup: '45'
+    duration: '300'
+##################################################
+</code>
+</pre>
+</p>
+<p>
+<div>In the example below, a yaml file location is specified as value and the file contains the following value:
+    <ul>
+        <li>The plugin automatically assigns the file name as the test name, and the folder path of the file in the Git repository is used to create the location of the test under the root folder ('Subject') in the Performance Center project.</li>
+        <li>In the content:
+            <ul>
+                <li>Since no Controller or load generator amount were specified, a random available Controller will be used to run the test, and the 'lg_name' parameter specified in each group will be used.</li>
+                <li>In the 'group' parameter:
+                    <ul>
+                        <li>We added two scripts. For each, we provided a unique value in the 'group_name' parameter, and the number of virtual users to run the group.</li>
+                        <li>Since we did not know the ID of the scripts, we used the 'script_path' parameter in which we entered the script path (without "Subject") followed by the script name, and used double backslashes for separators.</li>
+                        <li>We specified the load generators that will be used by each group (in this case, load generators will automatically be matched as we use the 'LG' prefix).</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>In the scheduler:
+            <ul>
+                <li>We want all Virtual Users to be initialized gradually (45 seconds).</li>
+                <li>We want the test to stop after 5 minutes (300 seconds).</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<pre>
+<code>
+##################################################
+#test_content:
+#controller: "mycontroller"
+#lg_amount: '2'
+group:
+  - group_name: "TEstInt"
+    vusers: '20'
+#    script_id: '1'
+    script_path: "plugin\\TEstInt"
+    lg_name:
+      - "LG1"
+      - "LG2"
+  - group_name: "Mtours"
+    vusers: '20'
+#    script_id: '2'
+    script_path: "plugin\\mtours"
+    lg_name:
+      - "LG3"
+      - "LG4"
+scheduler:
+  rampup: '45'
+  duration: '300'
+##################################################
+</code>
+</pre>
+</p>
+</body>
+</html>

@@ -22,18 +22,13 @@
 
 package com.microfocus.performancecenter.integration.pctestrun;
 
-import com.microfocus.performancecenter.integration.pctestrun.PcTestRunClient;
+import com.microfocus.adm.performancecenter.plugins.common.pcentities.PcRunResponse;
+import com.microfocus.adm.performancecenter.plugins.common.pcentities.RunState;
+import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
 import hudson.FilePath;
-
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.microfocus.performancecenter.integration.pctestrun.PcTestRunBuilder;
-
-import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
-
-import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
 
 @SuppressWarnings({"squid:S2699","squid:S3658"})
 public class TestPcTestRunClient {

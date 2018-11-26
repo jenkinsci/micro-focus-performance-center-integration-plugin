@@ -22,12 +22,7 @@
 
 package com.microfocus.performancecenter.integration.pctestrun;
 
-import com.microfocus.performancecenter.integration.pctestrun.PcTestRunClient;
 import hudson.FilePath;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -35,8 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import com.microfocus.performancecenter.integration.pctestrun.PcTestRunBuilder;
 
 import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
