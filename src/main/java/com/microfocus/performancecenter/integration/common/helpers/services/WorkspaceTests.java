@@ -127,10 +127,8 @@ public class WorkspaceTests {
         Path parentPath = fullPath.getParent();
 
         //files under workspace directory are ignored
-        if(Files.isRegularFile(fullPath) && Files.isDirectory(parentPath) && parentPath.equals(workspace))
-            return false;
+        return !(Files.isRegularFile(fullPath) && Files.isDirectory(parentPath) && parentPath.equals(workspace));
 
-        return true;
     }
 
     //get files ending with usr or jmx extension under specific directory

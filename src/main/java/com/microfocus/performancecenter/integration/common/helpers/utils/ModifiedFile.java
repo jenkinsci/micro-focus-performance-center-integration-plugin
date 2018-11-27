@@ -45,6 +45,8 @@ public class ModifiedFile implements Comparable<ModifiedFile>, Serializable {
     @Getter(AccessLevel.PACKAGE)
     private final int workspaceNameCount;
 
+    private static final long serialVersionUID = 1L;
+
     public ModifiedFile(ModifiedType modifiedType, Path relativePath, Path workspace) {
         Objects.requireNonNull(relativePath, "Relative path must not be null");
         PathVerifier.requireAbsolute(workspace, "Workspace");
@@ -85,7 +87,5 @@ public class ModifiedFile implements Comparable<ModifiedFile>, Serializable {
             return modifiedType + " \\" + getRelativePath().toString().replace("/", "\\");
         return modifiedType + " /" + getRelativePath().toString().replace("\\", "/");
     }
-
-    private static final long serialVersionUID = 1L;
 
 }

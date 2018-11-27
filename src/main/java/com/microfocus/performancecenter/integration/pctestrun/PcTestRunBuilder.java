@@ -34,7 +34,6 @@ import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
 import com.microfocus.performancecenter.integration.common.helpers.configuration.ConfigurationService;
-import com.microfocus.performancecenter.integration.common.helpers.constants.PcTestRunConstants;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.Error;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.Failure;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.*;
@@ -161,8 +160,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             String credentialsProxyId,
             String retry,
             String retryDelay,
-            String retryOccurrences,
-            boolean debug) {
+            String retryOccurrences) {
 
         this.serverAndPort = serverAndPort;
         this.pcServerName = pcServerName;
@@ -953,9 +951,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
     private boolean verifyStringIsPath (String strPossiblePath) throws InterruptedException, IOException {
         FilePath filePath = new FilePath(Workspace.getChannel(), getWorkspacePath().getPath() + "/" + strPossiblePath);
-        if (filePath.exists())
-            return true;
-        return false;
+        return filePath.exists();
     }
 
     private String retreiveFileExtension(String strPossiblePath) {
@@ -1244,11 +1240,12 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 int limit,
                 boolean limitIncluded) {
             FormValidation ret = FormValidation.ok();
+            String messagePrefix = field + " must be ";
             if(value == null || value.isEmpty())
                 return FormValidation.error("value is null or empty");
             value = value.trim();
             if (StringUtils.isBlank(value)) {
-                ret = FormValidation.error(" " + Messages.MustBeSet());
+                ret = FormValidation.error(messagePrefix + " " + Messages.MustBeSet());
             } else {
                 try {
                     //regular expression: parameter (with brackets or not)
@@ -1257,14 +1254,14 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                         //regular expression: number
                     else if (value.matches("[0-9]*$|")) {
                         if (limitIncluded && Integer.parseInt(value) <= limit)
-                            ret = FormValidation.error(" " + Messages.MustBeHigherThan() + " " + limit);
+                            ret = FormValidation.error(messagePrefix + " " + Messages.MustBeHigherThan() + " " + limit);
                         else if (Integer.parseInt(value) < limit)
-                            ret = FormValidation.error(" " + Messages.MustBeAtLeast() + " " + limit);
+                            ret = FormValidation.error(messagePrefix +" " + Messages.MustBeAtLeast() + " " + limit);
                     }
                     else
-                        ret = FormValidation.error(" " + Messages.MustBeAWholeNumberOrAParameter() + ", " + Messages.ForExample() + ": 23, $TESTID or ${TEST_ID}.");
+                        ret = FormValidation.error(messagePrefix + " " + Messages.MustBeAWholeNumberOrAParameter() + ", " + Messages.ForExample() + ": 23, $TESTID or ${TEST_ID}.");
                 } catch (Exception e) {
-                    ret = FormValidation.error(" " + Messages.MustBeAWholeNumberOrAParameter() + " (" + Messages.ForExample() +": $TESTID or ${TestID})");
+                    ret = FormValidation.error(messagePrefix + " " + Messages.MustBeAWholeNumberOrAParameter() + " (" + Messages.ForExample() +": $TESTID or ${TestID})");
                 }
             }
 

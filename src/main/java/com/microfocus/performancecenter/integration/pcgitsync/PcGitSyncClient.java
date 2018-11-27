@@ -290,10 +290,8 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         }
 
         initMessage(listener,"Deleting scripts", false);
-
-        PcScripts scripts;
         try {
-            scripts = Objects.requireNonNull(restProxy.getScripts());
+            Objects.requireNonNull(restProxy.getScripts());
         } catch (PcException|NullPointerException ex) {
             log(
                     listener, "An error occurred while getting the list of scripts from Performance Center. Error: %s.",
@@ -330,7 +328,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             );
 
             PcScript pcScriptToDelete = getScript(targetSubject , localScriptName, restProxy);
-            if (pcScriptToDelete instanceof  PcScript && pcScriptToDelete.getName().toLowerCase().equals(localScriptName.toLowerCase())) {
+            if (pcScriptToDelete instanceof  PcScript && pcScriptToDelete.getName().equalsIgnoreCase(localScriptName)) {
                 deleteScript(restProxy, pcScriptToDelete);
             } else {
                 log(
@@ -445,6 +443,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     }
 
     private Result uploadScript(PcRestProxy restProxy, boolean allowFolderCreation, Result result, String subjectTestPlan, boolean uploadRunTimeFiles, ICompressor compressor, AffectedFolder script) {
+        Result resultToReturn = result;
         try {
             String scriptFullPath = script.getFullPath().toString();
             String archive = scriptFullPath + ".zip";
@@ -474,7 +473,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                             pcScript.getWorkingMode()
                     );
                 } else {
-                    result = Result.FAILURE;
+                    resultToReturn = Result.FAILURE;
                     log(
                             listener,
                             "----- Failed to upload the script.",
@@ -483,7 +482,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 }
 
             } catch (PcException ex) {
-                result = Result.FAILURE;
+                resultToReturn = Result.FAILURE;
                 log(
                         listener,
                         "***** Failed to upload the script. Error: %s.",
@@ -493,7 +492,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 logStackTrace(listener, configureSystemSection, ex);
             }
         } catch (IOException ex) {
-            result = Result.FAILURE;
+            resultToReturn = Result.FAILURE;
             log(
                     listener,
                     "***** Failed to upload the script. Error IOException: %s.",
@@ -508,14 +507,14 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     false
             );
         }
-        return result;
+        return resultToReturn;
     }
 
     private Result createOrUpdateTest(PcRestProxy restProxy, boolean allowFolderCreation, Result result, String subjectTestPlan, AffectedFile test) {
+        Result resultToReturn = result;
         try {
             String testFullPath = test.getFullPath().toString();
             String ext = FilenameUtils.getExtension(testFullPath);
-            String testRelativePath = test.getRelativePath().toString();
             String targetSubject = allowFolderCreation ? test.getSubjectPath() : subjectTestPlan;
             String testFileContent = test.getTestContent();
 
@@ -532,13 +531,13 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 else if(PcTestRunConstants.YAML_EXTENSION.substring(1).equalsIgnoreCase(ext) || PcTestRunConstants.YML_EXTENSION.substring(1).equalsIgnoreCase(ext))
                     createdTest = restProxy.createOrUpdateTestFromYamlContent(test.getTestName(), targetSubject, testFileContent);
                 if(createdTest == null) {
-                    result = Result.FAILURE;
+                    resultToReturn = Result.FAILURE;
                     log(
                     listener,
                             "----- Test was not created/updated",
                             false
                     );
-                    return result;
+                    return resultToReturn;
                 }
                 if (Common.stringToInteger(createdTest.getID()) > 0) {
                     log(
@@ -550,7 +549,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                             createdTest.getID()
                     );
                 } else {
-                    result = Result.FAILURE;
+                    resultToReturn = Result.FAILURE;
                     log(
                             listener,
                             "----- Failed to create/update the test.",
@@ -559,7 +558,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 }
 
             } catch (PcException ex) {
-                result = Result.FAILURE;
+                resultToReturn = Result.FAILURE;
                 log(
                         listener,
                         "***** Failed to create/update the test. Error: %s.",
@@ -569,7 +568,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 logStackTrace(listener, configureSystemSection, ex);
             }
         } catch (IOException ex) {
-            result = Result.FAILURE;
+            resultToReturn = Result.FAILURE;
             log(
                     listener,
                     "***** Failed to create/update the script. Error: %s.",
@@ -584,7 +583,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     false
             );
         }
-        return result;
+        return resultToReturn;
     }
 
 

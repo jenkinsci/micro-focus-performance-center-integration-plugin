@@ -300,7 +300,6 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         usernamePCPasswordCredentialsForProxy = getCredentialsProxyId(credentialsProxyId);
 
         EnvVars env = build.getEnvironment(listener);
-        String expandedSubject = env.expand(subjectTestPlan);
         ConfigureSystemSection configureSystemSection = ConfigureSystemSection.get();
 
         PcGitSyncClient pcGitSyncClient = new PcGitSyncClient(
@@ -342,7 +341,6 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
     {
         return getPcGitSyncModel().getDescription();
     }
-
 
     public String getPcServerName()
     {
@@ -432,14 +430,14 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
         }
 
-        private FormValidation CheckCredentialsId (Item project, String url, String value)
+        private FormValidation CheckCredentialsId (Item project, String url, String urlValue)
         {
             if (project == null || !project.hasPermission(Item.EXTENDED_READ)) {
                 return FormValidation.ok();
             }
 
-            value = Util.fixEmptyAndTrim(value);
-            if (value == null) {
+            String urlValueFixed = Util.fixEmptyAndTrim(urlValue);
+            if (urlValueFixed == null) {
                 return FormValidation.ok();
             }
 
@@ -461,14 +459,14 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                     project,
                     project instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) project) : ACL.SYSTEM,
                     URIRequirementBuilder.create().build(),
-                    new IdMatcher(value))) {
+                    new IdMatcher(urlValueFixed))) {
 
-                if (StringUtils.equals(value, o.value)) {
+                if (StringUtils.equals(urlValueFixed, o.value)) {
                     return FormValidation.ok();
                 }
             }
             // no credentials available, can't check
-            return FormValidation.warning("Cannot find any credentials with ID " + value);
+            return FormValidation.warning("Cannot find any credentials with ID " + urlValueFixed);
         }
 
 
@@ -478,12 +476,12 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
          *            higher than limit.
          */
         private FormValidation validateHigherThanInt(
-                String value,
+                String valueToValidate,
                 String field,
                 int limit,
                 boolean limitIncluded) {
             FormValidation ret = FormValidation.ok();
-            String valueTrimmed = value.trim();
+            String valueTrimmed = valueToValidate.trim();
             String messagePrefix = field + " must be ";
             if (StringUtils.isBlank(valueTrimmed)) {
                 ret = FormValidation.error(messagePrefix + "set");
@@ -510,9 +508,9 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
         }
 
-        private FormValidation validateString(String value, String field) {
+        private FormValidation validateString(String valueToValidate, String field) {
             FormValidation ret = FormValidation.ok();
-            if (StringUtils.isBlank(value.trim())) {
+            if (StringUtils.isBlank(valueToValidate.trim())) {
                 ret = FormValidation.error(field + " must be set");
             }
 
