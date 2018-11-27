@@ -409,6 +409,7 @@ public class PcTestRunClient {
                 break;
             default:
                 state = RunState.UNDEFINED;
+                break;
         }
         return waitForRunState(runId, state, interval);
     }
@@ -711,14 +712,9 @@ public class PcTestRunClient {
             }
         }
 
-
-
-
         //  logger.print(res);
 
-
         return measurmentsMap;
-
 
     }
 

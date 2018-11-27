@@ -28,6 +28,8 @@ public class ConfigureSystemSection extends GlobalConfiguration implements Seria
         return GlobalConfiguration.all().get(ConfigureSystemSection.class);
     }
 
+    private final static long serialVersionUID = 1L;
+
     @Override
     public boolean configure(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
         req.bindJSON(this, json);
@@ -35,5 +37,5 @@ public class ConfigureSystemSection extends GlobalConfiguration implements Seria
         return super.configure(req, json);
     }
 
-    private final static long serialVersionUID = 1L;
+
 }

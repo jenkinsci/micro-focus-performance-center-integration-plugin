@@ -50,7 +50,7 @@ public class TestPcTestRunClient {
     @Test
     public void testLogin(){
         System.out.println("Testing Login to PC server");
-        boolean loginSucceded = pcTestRunClient.login(null);
+        pcTestRunClient.login(null);
         Assert.assertTrue("Failed to login with pcTestRunClient", true);
     }
 

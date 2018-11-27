@@ -69,7 +69,7 @@ public class AffectedFile implements Comparable<AffectedFile>{
             return "";
         try {
             String content = readFile(this.fullPath.toString(), Charset.defaultCharset());
-            if (content != null || !content.isEmpty())
+            if (content != null && !content.isEmpty())
                 return content;
         } catch (IOException e) {
         }
