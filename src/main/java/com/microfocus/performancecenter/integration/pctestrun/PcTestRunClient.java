@@ -134,42 +134,109 @@ public class PcTestRunClient {
     public int startRun() throws NumberFormatException, ClientProtocolException, PcException, IOException {
 
         int testID;
-        Test test = null;
         log(listener,"",true);
         if("EXISTING_TEST".equals(model.getTestToRun())) {
-            testID = Integer.parseInt(model.getTestId(true));
-            test = restProxy.getTest(testID);
-            log(listener, "Running existing test: Test ID %s, Name: %s, Path: %s", true, test.getID(), test.getName(), test.getTestFolderPath());
+            testID = getTestForExistingTestId();
         }
         else {
-            if (testName.isEmpty())
-                test = restProxy.createOrUpdateTestFromYamlTest(testToCreate);
-            else {
-                switch (fileExtension.toLowerCase()) {
-                    case PcTestRunConstants.XML_EXTENSION:
-                        test = restProxy.createOrUpdateTest(testName, testFolderPath, testToCreate);
-                        break;
-                    case PcTestRunConstants.YAML_EXTENSION:
-                    case PcTestRunConstants.YML_EXTENSION:
-                        test = restProxy.createOrUpdateTestFromYamlContent(testName, testFolderPath, testToCreate);
-                        break;
-                    default:
-                        log(listener, "File extension not supported.", true);
-                        break;
-                }
-            }
+            Test test = createTestFromYamlOrXml();
             if(test == null) {
                 log(listener, "Could not create test from yaml.", true);
                 return 0;
             }
             testID = Integer.parseInt(test.getID());
             model.setTestId(test.getID());
-
             log(listener, "Running yaml test: Test ID %s, Name: %s, Path: %s", true, test.getID(), test.getName(), test.getTestFolderPath());
         }
         log(listener,"",true);
         int testInstance = getCorrectTestInstanceID(testID);
         setCorrectTrendReportID();
+        printInitMessage(testInstance);
+        PcRunResponse response = null;
+        try {
+            response = restProxy.startRun(testID,
+                    testInstance,
+                    model.getTimeslotDuration(),
+                    model.getPostRunAction().getValue(),
+                    model.isVudsMode());
+            log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s)", true, Messages.RunStarted(), response.getTestID(), response.getID(), response.getTimeslotID());
+
+            return response.getID();
+        } catch (NumberFormatException|ClientProtocolException|PcException ex) {
+            log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
+            logStackTrace(listener, configureSystemSection, ex);
+        } catch (IOException ex) {
+            log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
+            logStackTrace(listener, configureSystemSection, ex);
+        }
+        if (!("RETRY".equals(model.getRetry()))) {
+            return 0;
+        }
+        else {
+            //counter
+            int retryCount = 0;
+            //values
+            int retryDelay = Integer.parseInt(model.getRetryDelay());
+            int retryOccurrences = Integer.parseInt(model.getRetryOccurrences());
+
+            while (retryCount<=retryOccurrences) {
+                retryCount++;
+                try {
+                    if(retryCount <= retryOccurrences) {
+                        log(listener, "%s. %s (%s %s). %s: %s.", true,
+                                Messages.StartRunRetryFailed(),
+                                Messages.AttemptingStartAgainSoon(),
+                                retryDelay,
+                                Messages.Minutes(),
+                                Messages.AttemptsRemaining(),
+                                retryOccurrences - retryCount + 1);
+                        Thread.sleep(retryDelay * 60 * 1000);
+                    }
+                } catch (InterruptedException ex) {
+                    log(listener, "wait interrupted", true);
+                    logStackTrace(listener, configureSystemSection, ex);
+                    return 0;
+                }
+
+                response = startRunAgain(testID, testInstance, response);
+                int ret = (response !=null) ? response.getID() : 0;
+                if (ret != 0) {
+                    log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s))", true,
+                            Messages.RunStarted(),
+                            response.getTestID(),
+                            response.getID(),
+                            response.getTimeslotID());
+                }
+                return ret;
+            }
+        }
+        return 0;
+    }
+
+    private PcRunResponse startRunAgain(int testID, int testInstance, PcRunResponse response) {
+        try {
+            response = restProxy.startRun(testID,
+                    testInstance,
+                    model.getTimeslotDuration(),
+                    model.getPostRunAction().getValue(),
+                    model.isVudsMode());
+        } catch (NumberFormatException| ClientProtocolException | PcException ex) {
+            log(listener, "%s. %s: %s", true,
+                    Messages.StartRunRetryFailed(),
+                    Messages.Error(),
+                    ex.getMessage());
+            logStackTrace(listener, configureSystemSection, ex);
+        } catch (IOException ex) {
+            log(listener, "%s. %s: %s", true,
+                    Messages.StartRunRetryFailed(),
+                    Messages.Error(),
+                    ex.getMessage());
+            logStackTrace(listener, configureSystemSection, ex);
+        }
+        return response;
+    }
+
+    private void printInitMessage(int testInstance) {
         log(listener, "\n%s \n" +
                         "====================\n" +
                         "%s: %s \n" +
@@ -189,102 +256,35 @@ public class PcTestRunClient {
                 Messages.TimeslotDuration(), model.getTimeslotDuration(),
                 Messages.PostRunAction(), model.getPostRunAction().getValue(),
                 Messages.UseVUDS(), model.isVudsMode());
-
-        PcRunResponse response = null;
-        try {
-            response = restProxy.startRun(testID,
-                    testInstance,
-                    model.getTimeslotDuration(),
-                    model.getPostRunAction().getValue(),
-                    model.isVudsMode());
-            log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s)", true, Messages.RunStarted(), response.getTestID(), response.getID(), response.getTimeslotID());
-
-            return response.getID();
-        }
-        catch (NumberFormatException|ClientProtocolException|PcException ex) {
-            log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
-            logStackTrace(listener, configureSystemSection, ex);
-        }
-        catch (IOException ex) {
-            log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
-            logStackTrace(listener, configureSystemSection, ex);
-        }
-        if (!("RETRY".equals(model.getRetry()))) {
-            return 0;
-        }
-        else {
-            //counter
-            int retryCount = 0;
-            //values
-            int retryDelay = Integer.parseInt(model.getRetryDelay());
-            int retryOccurrences = Integer.parseInt(model.getRetryOccurrences());
-
-            while (retryCount<=retryOccurrences)
-            {
-                retryCount++;
-                try {
-                    if(retryCount <= retryOccurrences) {
-                        log(listener, "%s. %s (%s %s). %s: %s.", true,
-                                Messages.StartRunRetryFailed(),
-                                Messages.AttemptingStartAgainSoon(),
-                                retryDelay,
-                                Messages.Minutes(),
-                                Messages.AttemptsRemaining(),
-                                retryOccurrences - retryCount + 1);
-                        Thread.sleep(retryDelay * 60 * 1000);
-                    }
-                }
-                catch (InterruptedException ex) {
-                    log(listener, "wait failed", true);
-                    logStackTrace(listener, configureSystemSection, ex);
-                }
-
-                try {
-                    response = restProxy.startRun(testID,
-                            testInstance,
-                            model.getTimeslotDuration(),
-                            model.getPostRunAction().getValue(),
-                            model.isVudsMode());
-                }
-                catch (NumberFormatException|ClientProtocolException|PcException ex) {
-                    log(listener, "%s. %s: %s", true,
-                            Messages.StartRunRetryFailed(),
-                            Messages.Error(),
-                            ex.getMessage());
-                    logStackTrace(listener, configureSystemSection, ex);
-                } catch (IOException ex) {
-                    log(listener, "%s. %s: %s", true,
-                            Messages.StartRunRetryFailed(),
-                            Messages.Error(),
-                            ex.getMessage());
-                    logStackTrace(listener, configureSystemSection, ex);
-                }
-                int ret = 0;
-                if (response !=null) {
-                    try {
-                        ret = response.getID();
-                    }
-                    catch (Exception ex) {
-                        log(listener, "%s. %s: %s", true,
-                                Messages.RetrievingIDFailed(),
-                                Messages.Error(),
-                                ex.getMessage());
-                        logStackTrace(listener, configureSystemSection, ex);
-                    }
-                }
-                if (ret != 0) {
-                    log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s))", true,
-                            Messages.RunStarted(),
-                            response.getTestID(),
-                            response.getID(),
-                            response.getTimeslotID());
-                    return ret;
-                }
-            }
-        }
-        return 0;
     }
 
+    private Test createTestFromYamlOrXml() throws IOException, PcException {
+        Test test = null;
+        if (testName.isEmpty())
+            test = restProxy.createOrUpdateTestFromYamlTest(testToCreate);
+        else {
+            switch (fileExtension.toLowerCase()) {
+                case PcTestRunConstants.XML_EXTENSION:
+                    test = restProxy.createOrUpdateTest(testName, testFolderPath, testToCreate);
+                    break;
+                case PcTestRunConstants.YAML_EXTENSION:
+                case PcTestRunConstants.YML_EXTENSION:
+                    test = restProxy.createOrUpdateTestFromYamlContent(testName, testFolderPath, testToCreate);
+                    break;
+                default:
+                    log(listener, "File extension not supported.", true);
+                    break;
+            }
+        }
+        return test;
+    }
+
+    private int getTestForExistingTestId() throws IOException, PcException {
+        int testID = Integer.parseInt(model.getTestId(true));
+        Test test = restProxy.getTest(testID);
+        log(listener, "Running existing test: Test ID %s, Name: %s, Path: %s", true, test.getID(), test.getName(), test.getTestFolderPath());
+        return testID;
+    }
 
     private int getCorrectTestInstanceID(int testID) throws IOException, PcException {
         if("AUTO".equals(model.getAutoTestInstanceID())){

@@ -123,25 +123,19 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             } else { // upload/delete only deltas taken from the changelog:
 
                 if (!modifiedFiles.isEmpty()) {
-                    log(listener, "", true);
                     logSetOfChangedFiles("List of files modified in GIT repository since last successful build:", modifiedFiles);
-                    log(listener, "", true);
 
                     Set<AffectedFolder> affectedFolders = wss.getAllAffectedFolders(modifiedFiles, workspace.toPath());
 
                     logSetOfAffectedScripts("List of folders modified in GIT repository since last successful build:", affectedFolders);
-                    log(listener, "", true);
 
                     if (deleteScripts) {
                         scriptsForDelete = wss.getAllScriptsForDelete(modifiedFiles, workspace.toPath());
                         logSetOfAffectedScripts("List of scripts deleted from Git that will be deleted from Performance Center:", scriptsForDelete);
-                        log(listener, "", true);
-
                     }
 
                     scriptsForUpload = wss.getAllScriptsForUpload(affectedFolders, workspace.toPath());
                     logSetOfAffectedScripts("List of scripts added to Git that will be uploaded to Performance Center:", scriptsForUpload);
-                    log(listener, "", true);
 
                     if(pcGitSyncModel.getImportTests()!=null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES)) {
                         Set<AffectedFile> affectedFiles = wst.getAllAffectedFiles(modifiedFiles, workspace.toPath());
@@ -152,7 +146,6 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     log(listener, "No files were modified since the last successful build", true);
                     return result;
                 }
-
             }
             log(listener, "", true);
 
@@ -602,10 +595,12 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     }
 
     private void logSetOfChangedFiles(String header, Set<ModifiedFile> modifiedFiles) {
+        log(listener, "", true);
         log(listener, header, true);
         modifiedFiles.forEach(changedFile -> {
             log(listener, changedFile.toString(true), false);
         });
+        log(listener, "", true);
     }
 
     private void logSetOfAffectedScripts(String header, Set<AffectedFolder> affectedFiles) {
@@ -619,6 +614,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         affectedFiles.forEach(affectedFile -> {
             log(listener, affectedFile.toString(true), false);
         });
+        log(listener, "", true);
     }
 
     private void logSetOfAffectedTests(String header, Set<AffectedFile> affectedFiles) {

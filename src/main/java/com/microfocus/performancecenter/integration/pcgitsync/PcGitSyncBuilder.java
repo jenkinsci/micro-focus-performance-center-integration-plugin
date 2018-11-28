@@ -153,11 +153,6 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                         buildParameters);
     }
 
-
-    private String getPcUrl() {
-        return (pcGitSyncModel.getProtocol()) + "://" +  this.pcServerName + "/loadtest";
-    }
-
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
