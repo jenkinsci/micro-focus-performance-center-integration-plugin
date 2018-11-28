@@ -505,12 +505,12 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
     private Result createOrUpdateTest(PcRestProxy restProxy, boolean allowFolderCreation, Result result, String subjectTestPlan, AffectedFile test) {
         Result resultToReturn = result;
+        String testFullPath = test.getFullPath().toString();
+        String ext = FilenameUtils.getExtension(testFullPath);
+        boolean isXmlFile = PcTestRunConstants.XML_EXTENSION.substring(1).equalsIgnoreCase(ext);
         try {
-            String testFullPath = test.getFullPath().toString();
-            String ext = FilenameUtils.getExtension(testFullPath);
             String targetSubject = allowFolderCreation ? test.getSubjectPath() : subjectTestPlan;
             String testFileContent = test.getTestContent();
-
             try {
                 log(
                         listener,
@@ -518,19 +518,14 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                         true,
                         test.getRelativePath().toString().concat("\\").concat(test.getFullPath().getFileName().toString())
                 );
-                Test createdTest = null;
-                if(PcTestRunConstants.XML_EXTENSION.substring(1).equalsIgnoreCase(ext))
-                    createdTest = restProxy.createOrUpdateTest(test.getTestName(), targetSubject, testFileContent);
-                else if(PcTestRunConstants.YAML_EXTENSION.substring(1).equalsIgnoreCase(ext) || PcTestRunConstants.YML_EXTENSION.substring(1).equalsIgnoreCase(ext))
-                    createdTest = restProxy.createOrUpdateTestFromYamlContent(test.getTestName(), targetSubject, testFileContent);
+                Test createdTest = doCreateOrUpdateTest(restProxy, test, ext, isXmlFile, targetSubject, testFileContent);
                 if(createdTest == null) {
-                    resultToReturn = Result.FAILURE;
                     log(
-                    listener,
+                            listener,
                             "----- Test was not created/updated",
                             false
                     );
-                    return resultToReturn;
+                    return isXmlFile ? Result.SUCCESS: Result.FAILURE;
                 }
                 if (Common.stringToInteger(createdTest.getID()) > 0) {
                     log(
@@ -542,7 +537,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                             createdTest.getID()
                     );
                 } else {
-                    resultToReturn = Result.FAILURE;
+                    resultToReturn = isXmlFile ? Result.SUCCESS: Result.FAILURE;
                     log(
                             listener,
                             "----- Failed to create/update the test.",
@@ -551,7 +546,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 }
 
             } catch (PcException ex) {
-                resultToReturn = Result.FAILURE;
+                resultToReturn = isXmlFile ? Result.SUCCESS: Result.FAILURE;
                 log(
                         listener,
                         "***** Failed to create/update the test. Error: %s.",
@@ -561,7 +556,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 logStackTrace(listener, configureSystemSection, ex);
             }
         } catch (IOException ex) {
-            resultToReturn = Result.FAILURE;
+            resultToReturn = isXmlFile ? Result.SUCCESS: Result.FAILURE;
             log(
                     listener,
                     "***** Failed to create/update the script. Error: %s.",
@@ -577,6 +572,16 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             );
         }
         return resultToReturn;
+    }
+
+    private Test doCreateOrUpdateTest(PcRestProxy restProxy, AffectedFile test, String ext, boolean isXmlFile, String targetSubject, String testFileContent) throws IOException, PcException {
+        Test createdTest = null;
+
+        if(isXmlFile) {
+            createdTest = restProxy.createOrUpdateTest(test.getTestName(), targetSubject, testFileContent);
+        } else if(PcTestRunConstants.YAML_EXTENSION.substring(1).equalsIgnoreCase(ext) || PcTestRunConstants.YML_EXTENSION.substring(1).equalsIgnoreCase(ext))
+            createdTest = restProxy.createOrUpdateTestFromYamlContent(test.getTestName(), targetSubject, testFileContent);
+        return createdTest;
     }
 
 
