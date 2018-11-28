@@ -99,8 +99,14 @@ public class WorkspaceTests {
         if( (Files.isDirectory(fullPath) && fullPath.equals(workspace)))
             return true;
 
+        isParentsNotScript = isParentsNotScript(fullPath, workspace, isParentsNotScript);
+
+        return isParentsNotScript;
+    }
+
+    private static boolean isParentsNotScript(Path fullPath, Path workspace, boolean isParentsNotScript) {
         Path parentPath = fullPath.getParent();
-        File[] files = finder(parentPath.toString());
+        File[] files = usrOrJmxFinder(parentPath.toString());
         boolean parentPathContainsUsrOrJmxfiles = files != null ? (files.length > 0) : false;
 
         //directories and subdirectories are verified
@@ -108,7 +114,6 @@ public class WorkspaceTests {
             isParentsNotScript = isParentsNotScript(parentPath, workspace);
         else if (parentPath.getParent().equals(workspace) && !parentPathContainsUsrOrJmxfiles)
             isParentsNotScript = true;
-
         return isParentsNotScript;
     }
 
@@ -132,7 +137,7 @@ public class WorkspaceTests {
     }
 
     //get files ending with usr or jmx extension under specific directory
-    private static File[] finder( String dirName){
+    private static File[] usrOrJmxFinder(String dirName){
         File dir = new File(dirName);
 
         return dir.listFiles(new FilenameFilter() {
