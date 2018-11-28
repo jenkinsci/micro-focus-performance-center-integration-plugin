@@ -4,7 +4,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8ec4415bffe94fda8ae40415388c063e)](https://app.codacy.com/project/danieldanan/micro-focus-performance-center-integration-plugin/dashboard)
 
 Project status:
-[![Build status](https://ci.appveyor.com/api/projects/status/gqd0x8ov1ebqjjcu?svg=true)](https://ci.jenkins.io/buildStatus/icon?job=Plugins/micro-focus-performance-center-integration-plugin/master)
+[![Build status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/micro-focus-performance-center-integration-plugin/master)](https://ci.jenkins.io/job/Plugins/job/micro-focus-performance-center-integration-plugin/job/master/)
 
 The plugin provides the ability to run Micro Focus Perfomance Center product with Jenkins during builds
 
@@ -34,4 +34,4 @@ The plugin provides the ability to run Micro Focus Perfomance Center product wit
 -  Document your code – it enables others to continue the great work you did on the code and update it.
 -  SonarLint your code – we use SonarQube with its basic built-in rule set. In the future, we will provide direct online access to test with a custom rule set.
 
- Feel free to contact us on any question related to contributions.
+Feel free to contact us on any question related to contributions.
