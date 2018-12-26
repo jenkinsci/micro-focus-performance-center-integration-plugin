@@ -146,7 +146,7 @@ public class PcTestRunClient {
             }
             testID = Integer.parseInt(test.getID());
             model.setTestId(test.getID());
-            log(listener, "Running yaml test: Test ID %s, Name: %s, Path: %s", true, test.getID(), test.getName(), test.getTestFolderPath());
+            log(listener, "Running YAML test: Test ID %s, Name: %s, Path: %s", true, test.getID(), test.getName(), test.getTestFolderPath());
         }
         log(listener,"",true);
         int testInstance = getCorrectTestInstanceID(testID);

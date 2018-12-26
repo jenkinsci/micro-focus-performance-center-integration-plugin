@@ -1,8 +1,6 @@
 ![Micro Focus Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Micro_Focus_logo.svg/220px-Micro_Focus_logo.svg.png)
 # Micro Focus Performance Center integration                       
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8ec4415bffe94fda8ae40415388c063e)](https://app.codacy.com/project/danieldanan/micro-focus-performance-center-integration-plugin/dashboard)
-
 Project status:
 [![Build status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/micro-focus-performance-center-integration-plugin/master)](https://ci.jenkins.io/job/Plugins/job/micro-focus-performance-center-integration-plugin/job/master/)
 
