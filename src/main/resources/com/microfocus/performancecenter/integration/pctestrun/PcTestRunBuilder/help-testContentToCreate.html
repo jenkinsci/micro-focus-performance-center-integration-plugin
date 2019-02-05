@@ -107,7 +107,10 @@
         </tr>
         <tr>
             <td>controller</td>
-            <td>Defines the Controller to be used during the test run (it must be an available host in the Performance Center project). If not specified, a Controller will be chosen from the different controllers available in the Performance Center project.</td>
+            <td>
+				<div>Defines the Controller to be used during the test run (it must be an available host in the Performance Center project). If not specified, a Controller will be chosen from the different controllers available in the Performance Center project.</div>
+				<div>From Performance Center 12.62 and plugin version 1.1.1, the option to provision a Controller as a Docker image is available by specifying the value "Elastic" and providing a value for the 'controller_elastic_configuration' parameter (see 'controller_elastic_configuration' table below).</div>
+			</td>
             <td>No</td>
         </tr>
         <tr>
@@ -125,6 +128,16 @@
             <td>Defines the duration of a test, and determines whether virtual users are started simultaneously or gradually. See the 'scheduler' table below.</td>
             <td>No</td>
         </tr>
+		<tr>
+			<td>lg_elastic_configuration</td>
+			<td>Defines the image to be used in order to provision load generators. See the 'lg_elastic_configuration' table below. Available from Performance Center 12.62 and plugin version 1.1.1.</td>
+			<td>Yes, if a load generator is defined to be provisioned from a Docker image.</td>
+		</tr>
+		<tr>
+			<td>controller_elastic_configuration</td>
+			<td>Defines the image to be used in order to provision the Controller. See the 'controller_elastic_configuration' table below. Available from Performance Center 12.62 and plugin version 1.1.1.</td>
+			<td>Yes, if the Controller is defined to be provisioned from a Docker image.</td>
+		</tr>
         </tbody>
     </table>
 </div>
@@ -166,7 +179,7 @@
 				<ul>
 					<li>The hostname, as defined in Performance Center, of an existing load generator in Performance Center allocated as a host.</li>
 					<li><strong>"LG"</strong> followed by a number, to use an automatically matched load generator (recommended).</li>
-					<li><strong>"DOCKER"</strong> followed by a number, to use a dynamic load generator (available if your Performance Center server and project are set to work with Docker).</li>
+					<li><strong>"DOCKER"</strong> followed by a number, to use a dynamic load generator. Available from Performance Center 12.62, if your project is set to work with Docker. This option requires the 'lg_elastic_configuration' parameter to be defined (see the 'lg_elastic_configuration' table below).</li>
 				</ul>
 			</td>
 			<td>No</td>
@@ -417,6 +430,76 @@
 </p>
 <hr>
 <p>
+<div><strong>lg_elastic_configuration:</strong> (available from Performance Center 12.62 and plugin version 1.1.1)</div>
+<div>
+	<table id="t01">
+		<tbody>
+		<tr>
+			<th>Parameter</th>
+			<th>Description</th>
+			<th>Required</th>
+		</tr>
+		<tr>
+			<td>image_id</td>
+			<td>This number can be retrieved from: 
+				<ul>
+				<li>The Administration page of Performance Center (you might need to turn to your Performance Center administrator as accessing this page requires admin privileges): select the <strong>Orchestration</strong> section -> switch to <strong>Docker Images</strong> tab -> you will have the list of all available Docker images for Load Generator purposes with their ID. You can make sure the images are available to your project from the <strong>Orchestrators</strong> tab.</li>
+				<li>A Performance Center Rest API command applied on the project (replace the bracketed values): GET - <a href="#">http(s)://(PCServer):(PortNumber)/LoadTest/rest/domains/(DomainName)/projects/(ProjectName)/dockerimages/</a>  and select any valid image not having the value 'controller' for purpose.</li>
+				</ul>
+			</td>
+			<td>Yes if one of the load generator is defined to be provisioned from Docker image.</td>
+		</tr>
+		<tr>
+			<td>memory_limit</td>
+			<td>This parameter can be retrieved from <strong>My PC</strong> -> <strong>Test Management</strong> -> edit a test -> Press <strong>Assign LG</strong> button -> in the <strong>Elastic</strong> section, select <strong>DOCKER1<strong>  -> select the relevant image (based on the image name) -> use the values provided in the 'Memory(GB)' dropdown list (if not specified, this parameter should be ignored).</td>
+			<td>Yes, if the image is defined with resource limits</td>
+		</tr>
+		<tr>
+			<td>cpu_limit</td>
+			<td>This parameter can be retrieved from <strong>My PC</strong> -> <strong>Test Management</strong> -> edit a test -> Press <strong>Assign LG</strong> button -> in the <strong>Elastic</strong> section, select <strong>DOCKER1<strong>  -> select the relevant image (based on the image name) -> use the values provided in the 'CUPs' dropdown list (if not specified, this parameter should be ignored).</td>
+			<td>Yes, if the image is defined with resource limits</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+</p>
+<hr>
+<p>
+<div><strong>controller_elastic_configuration:</strong> (available from Performance Center 12.62 and plugin version 1.1.1)</div>
+<div>
+	<table id="t01">
+		<tbody>
+		<tr>
+			<th>Parameter</th>
+			<th>Description</th>
+			<th>Required</th>
+		</tr>
+		<tr>
+			<td>image_id</td>
+			<td>This number can be retrieved from: 
+				<ul>
+				<li>The Administration page of Performance Center (you might need to turn to your Performance Center administrator as accessing this page requires admin privileges): select the <strong>Orchestration</strong> section -> switch to <strong>Docker Images</strong> tab -> you will have the list of all available Docker images for Controller purposes with their ID. You can make sure the images are available to your project from the <strong>Orchestrators</strong> tab.</li>
+				<li>A Performance Center Rest API command applied on the project (replace the bracketed values): GET - <a href="#">http(s)://(PCServer):(PortNumber)/LoadTest/rest/domains/(DomainName)/projects/(ProjectName)/dockerimages/</a>  and select any valid image having the value 'controller' for purpose.</li>
+				</ul>
+			</td>
+			<td>Yes if the Controller is defined to be provisioned from Docker image.</td>
+		</tr>
+		<tr>
+			<td>memory_limit</td>
+			<td>This parameter can be retrieved from <strong>My PC</strong> -> <strong>Test Management</strong> -> edit a test -> select the Controller -> choose <strong>Elastic</strong> option -> select the relevant image -> Under the <strong>Resource Limits</strong> label, find and use the values provided in the 'Memory(GB)' dropdown list  (if not specified, this parameter should be ignored).</td>
+			<td>Yes, if the image is defined with resource limits</td>
+		</tr>
+		<tr>
+			<td>cpu_limit</td>
+			<td>This parameter can be retrieved from <strong>My PC</strong> -> <strong>Test Management</strong> -> edit a test -> select the Controller -> choose <strong>Elastic</strong> option -> select the relevant image -> Under the <strong>Resource Limits</strong> label, find and use the values provided in the 'CUPs' dropdown list (if not specified, this parameter should be ignored).</td>
+			<td>Yes, if the image is defined with resource limits</td>
+		</tr>
+		</tbody>
+	</table>
+</div>
+</p>
+<hr>
+<p>
 <div>In the next example, the value of the field is set with the code below:
     <ul>
         <li>The test name is "mytestname" and it will be placed in the Performance Center project under the folder path "Subject\\Tests\\mytests" (the root folder of the folders, which is "Subject", should not be specified in the parameter). The folder separator is a double backslash (\\).</li>
@@ -545,7 +628,6 @@ group:
   - group_name: "JavaVuser_LR_Information_pacing_immediately_thinktime_ignore"
     vusers: 50
     script_id: 394
-    command_line: "echo hello from JavaVuser_LR_Information_pacing_immediately_thinktime_ignore > c:\\hello_from_JavaVuser_LR_Information_pacing_immediately_thinktime_ignore.txt"
     rts:
       pacing:
         number_of_iterations: 2
@@ -564,7 +646,6 @@ group:
   - group_name: "JavaHTTP_BigXML_pacing_fixed_delay_thinktime_replay"
     vusers: 50
     script_path: "scripts\\java_protocols\\JavaHTTP_BigXML"
-    command_line: "echo hello from JavaHTTP_BigXML_pacing_fixed_delay_thinktime_replay > c:\\hello_from_JavaHTTP_BigXML_pacing_fixed_delay_thinktime_replay.txt"
     rts:
       pacing:
         number_of_iterations: 2
@@ -581,7 +662,6 @@ group:
   - group_name: "JavaVuser_LR_Information_immediately_pacing_random_delay_thinktime_modify"
     vusers: 50
     script_id: 394
-    command_line: "echo hello from JavaVuser_LR_Information_immediately_pacing_random_delay_thinktime_modify > c:\\hello_from_JavaVuser_LR_Information_immediately_pacing_random_delay_thinktime_modify.txt"
     rts:
       pacing:
         number_of_iterations: 2
@@ -604,7 +684,6 @@ group:
     vusers: 50
     #script_id: 392
     script_path: "scripts\\java_protocols\\JavaHTTP_BigXML"
-    command_line: "echo hello from JavaHTTP_BigXML_pacing_fixed_interval_thinktime_random > c:\\hello_from_JavaHTTP_BigXML_pacing_fixed_interval_thinktime_random.txt"
     rts:
       pacing:
         number_of_iterations: 2
@@ -626,7 +705,6 @@ group:
   - group_name: "JavaHTTP_BigXML_pacing_random_interval"
     vusers: 50
     script_path: "scripts\\java_protocols\\JavaHTTP_BigXML"
-    command_line: "echo hello from JavaHTTP_BigXML_pacing_random_interval > c:\\hello_from_JavaHTTP_BigXML_pacing_random_interval.txt"
     rts:
       pacing:
         number_of_iterations: 2
@@ -644,7 +722,6 @@ group:
   - group_name: "Mtours_pacing_random_interval"
     vusers: 50
     script_path: "scripts\\Mtours"
-    command_line: "echo hello from Mtours_pacing_random_interval > c:\\hello_from_Mtours_pacing_random_interval.txt"
     rts:
       pacing:
         number_of_iterations: 2
@@ -660,7 +737,6 @@ group:
   - group_name: "Mtours_pacing_random_interval_Jmeter_default_port"
     vusers: 50
     script_path: "scripts\\Mtours"
-    command_line: "echo hello from Mtours_pacing_random_interval_Jmeter_default_port > c:\\hello_from_Mtours_pacing_random_interval_Jmeter_default_port.txt"
     rts:
       pacing:
         number_of_iterations: 2
