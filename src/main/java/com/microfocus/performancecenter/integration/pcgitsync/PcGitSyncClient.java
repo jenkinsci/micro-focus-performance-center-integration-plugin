@@ -119,7 +119,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
                 scriptsForUpload = wss.getAllScriptsForUpload(workspace.toPath());
                 if(pcGitSyncModel.getImportTests()!=null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES))
-                    testsToCreateOrUpdate = wst.getAllTestsToCreateOrUpdate(workspace.toPath());
+                    testsToCreateOrUpdate = wst.getAllTestsToCreateOrUpdate(workspace.toPath(), configureSystemSection.getDebug());
             } else { // upload/delete only deltas taken from the changelog:
 
                 if (!modifiedFiles.isEmpty()) {
@@ -139,7 +139,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
                     if(pcGitSyncModel.getImportTests()!=null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES)) {
                         Set<AffectedFile> affectedFiles = wst.getAllAffectedFiles(modifiedFiles, workspace.toPath());
-                        testsToCreateOrUpdate = wst.getAllTestsToCreateOrUpdate(affectedFiles, workspace.toPath());
+                        testsToCreateOrUpdate = wst.getAllTestsToCreateOrUpdate(affectedFiles, workspace.toPath(), configureSystemSection.getDebug());
                         logSetOfAffectedTests("List of tests added to Git that will be uploaded to Performance Center:", testsToCreateOrUpdate);
                     }
                 } else {
@@ -511,6 +511,8 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         try {
             String targetSubject = allowFolderCreation ? test.getSubjectPath() : subjectTestPlan;
             String testFileContent = test.getTestContent();
+            if (isXmlFile && (!testFileContent.toLowerCase().contains("<Test xmlns=\"http://www.hp.com/PC/REST/API".toLowerCase()) || !configureSystemSection.getDebug()))
+                return resultToReturn;
             try {
                 log(
                         listener,
@@ -588,14 +590,14 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     private void uploadScriptsInitialMessage() {
         initMessage(listener,"Uploading scripts", false);
 
-        log(listener, "(Each script folder will be automatically compressed in the workspace and then uploaded to the Performance Center project)", false);
+        log(listener, "Each script folder will be automatically compressed in the workspace and then uploaded to the Performance Center project:", false);
         log(listener, "", false);
     }
 
     private void uploadTestsInitialMessage() {
         initMessage(listener,"Creating or updating Tests", false);
 
-        log(listener, "(Each test file (yaml or xml) will be created or updated to the Performance Center project)", false);
+        log(listener, String.format("Each test file (yaml%s) will be created or updated to the Performance Center project:",  configureSystemSection.getDebug()? " or xml": ""), false);
         log(listener, "", false);
     }
 

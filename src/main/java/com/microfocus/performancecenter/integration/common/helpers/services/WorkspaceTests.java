@@ -30,13 +30,13 @@ public class WorkspaceTests {
         return result;
     }
 
-    public SortedSet<AffectedFile> getAllTestsToCreateOrUpdate(Path workspace) throws IOException {
+    public SortedSet<AffectedFile> getAllTestsToCreateOrUpdate(Path workspace, boolean considerXML) throws IOException {
         SortedSet<AffectedFile> result = new TreeSet<>();
 
         try ( Stream<Path> stream = Files.walk(workspace)) {
             stream
                     .filter(file -> !Files.isDirectory(file))
-                    .filter(file -> WorkspaceTests.verifyFileIsTest(file, workspace))
+                    .filter(file -> WorkspaceTests.verifyFileIsTest(file, workspace, considerXML))
                     .map(file -> new AffectedFile(file, workspace))
                     .forEachOrdered(result::add);
         }
@@ -44,11 +44,11 @@ public class WorkspaceTests {
         return result;
     }
 
-    public SortedSet<AffectedFile> getAllTestsToCreateOrUpdate(Set<AffectedFile> allAffectedFiles, Path workspace) {
+    public SortedSet<AffectedFile> getAllTestsToCreateOrUpdate(Set<AffectedFile> allAffectedFiles, Path workspace, boolean considerXML) {
         SortedSet<AffectedFile> result = new TreeSet<>();
 
         allAffectedFiles.stream()
-                .map(affectedFile -> getOptionalPathIfFileIsTest(affectedFile.getFullPath(), workspace))
+                .map(affectedFile -> getOptionalPathIfFileIsTest(affectedFile.getFullPath(), workspace, considerXML))
                 .filter(Optional::isPresent)
                 .map(testFile -> new AffectedFile(testFile.get(), workspace))
                 .forEachOrdered(result::add);
@@ -56,14 +56,14 @@ public class WorkspaceTests {
     }
 
 
-    private Optional<Path> getOptionalPathIfFileIsTest(Path fileFullPath, Path workspace) {
+    private Optional<Path> getOptionalPathIfFileIsTest(Path fileFullPath, Path workspace, boolean considerXML) {
         if (fileFullPath == null || fileFullPath.getParent().equals(workspace) ) {
             return Optional.empty();
         }
 
         Optional<Path> testToReturn = Optional.empty();
         Path test = Paths.get(fileFullPath.toString());
-        if (isNotDirectlyUnderRootWorkspace(test, workspace) && isParentsNotScript(test, workspace) && isPossiblyTest(test)) {
+        if (isNotDirectlyUnderRootWorkspace(test, workspace) && isParentsNotScript(test, workspace) && isPossiblyTest(test, considerXML)) {
             testToReturn = Optional.of(test);
         }
 
@@ -74,14 +74,14 @@ public class WorkspaceTests {
         return testToReturn;
     }
 
-    private static boolean verifyFileIsTest(Path fileFullPath, Path workspace) {
+    private static boolean verifyFileIsTest(Path fileFullPath, Path workspace, boolean considerXML) {
         if (fileFullPath == null || fileFullPath.getParent().equals(workspace) ) {
             return false;
         }
 
         boolean verifyFileIsTest = false;
         Path test = Paths.get(fileFullPath.toString());
-        if (isNotDirectlyUnderRootWorkspace(test, workspace) && isParentsNotScript(test, workspace) && isPossiblyTest(test)) {
+        if (isNotDirectlyUnderRootWorkspace(test, workspace) && isParentsNotScript(test, workspace) && isPossiblyTest(test, considerXML)) {
             verifyFileIsTest = true;
         }
 
@@ -117,10 +117,10 @@ public class WorkspaceTests {
         return isParentsNotScript;
     }
 
-    //verify that file has xml or yaml extension
-    private static boolean isPossiblyTest(Path fullPath) {
+    //verify that file has xml (if considerXML is true) or yaml extension
+    private static boolean isPossiblyTest(Path fullPath, boolean considerXML) {
         return Files.isRegularFile(fullPath)
-                && (fullPath.toString().endsWith(PcTestRunConstants.XML_EXTENSION) || fullPath.toString().endsWith(PcTestRunConstants.YAML_EXTENSION) || fullPath.toString().endsWith(PcTestRunConstants.YML_EXTENSION));
+                && ((fullPath.toString().endsWith(PcTestRunConstants.XML_EXTENSION) && considerXML) || fullPath.toString().endsWith(PcTestRunConstants.YAML_EXTENSION) || fullPath.toString().endsWith(PcTestRunConstants.YML_EXTENSION));
     }
 
     //verify fullpath is not a file right under the workspace
