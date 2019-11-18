@@ -484,21 +484,50 @@ public class PcTestRunClient {
         if (runResultsList.getResultsList() != null){
             for (PcRunResult result : runResultsList.getResultsList()) {
                 if (result.getName().equals(PcTestRunBuilder.pcReportArchiveName)) {
-                    File dir = new File(reportDirectory);
-                    dir.mkdirs();
-                    String reportArchiveFullPath = dir.getCanonicalPath() + IOUtils.DIR_SEPARATOR + PcTestRunBuilder.pcReportArchiveName;
-                    log(listener, Messages.PublishingAnalysisReport(), true);
-                    restProxy.GetRunResultData(runId, result.getID(), reportArchiveFullPath);
-                    FilePath fp = new FilePath(new File(reportArchiveFullPath));
-                    fp.unzip(fp.getParent());
-                    fp.delete();
-                    FilePath reportFile = fp.sibling(PcTestRunBuilder.pcReportFileName);
-                    if (reportFile.exists())
-                        return reportFile;
+                    FilePath reportFile = getFilePath(runId, reportDirectory, result, false);
+                    if (reportFile != null) return reportFile;
                 }
             }
         }
         log(listener, Messages.FailedToGetRunReport(), true);
+        return null;
+    }
+
+    public FilePath publishRunNVInsightsReport(int runId, String reportDirectory) throws IOException, PcException, InterruptedException {
+        PcRunResults runResultsList = restProxy.getRunResults(runId);
+        if (runResultsList.getResultsList() != null){
+            for (PcRunResult result : runResultsList.getResultsList()) {
+                if (result.getName().equals(PcTestRunBuilder.pcNVInsightsReportArchiveName)) {
+                    FilePath reportFile = getFilePath(runId, reportDirectory, result, true);
+                    if (reportFile != null) return reportFile;
+                }
+            }
+        }
+        //log(listener, Messages.FailedToGetRunNVInsightsReport(), true);
+        return null;
+    }
+
+    private FilePath getFilePath(int runId, String reportDirectory, PcRunResult result, boolean nvInsights) throws IOException, PcException, InterruptedException {
+        File dir = new File(reportDirectory);
+        dir.mkdirs();
+        String reportArchiveFullPath = dir.getCanonicalPath() + IOUtils.DIR_SEPARATOR + (nvInsights ? PcTestRunBuilder.pcNVInsightsReportArchiveName : PcTestRunBuilder.pcReportArchiveName);
+        try {
+            restProxy.GetRunResultData(runId, result.getID(), reportArchiveFullPath);
+        } catch (PcException ex)
+        {
+            if(!nvInsights)
+                throw ex;
+            else
+                return null;
+        }
+        FilePath fp = new FilePath(new File(reportArchiveFullPath));
+        fp.unzip(fp.getParent());
+        fp.delete();
+        FilePath reportFile = fp.sibling(nvInsights ? PcTestRunBuilder.pcNVInsightsReportFileName : PcTestRunBuilder.pcReportFileName);
+        if (reportFile.exists()) {
+            log(listener, (nvInsights ?  Messages.PublishingNVInsightsReport() : Messages.PublishingAnalysisReport()), true);
+            return reportFile;
+        }
         return null;
     }
 

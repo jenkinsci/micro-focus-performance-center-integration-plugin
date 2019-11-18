@@ -1,6 +1,6 @@
 /*
  * © Copyright 2013 EntIT Software LLC
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
+ *  Certain versions of software and/or documents ("Material") accessible here may contain branding from
  *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
  *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
  *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
@@ -11,7 +11,7 @@
  * © Copyright 2012-2018 Micro Focus or one of its affiliates.
  *
  * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
+ * and licensors ("Micro Focus") are set forth in the express warranty statements
  * accompanying such products and services. Nothing herein should be construed as
  * constituting an additional warranty. Micro Focus shall not be liable for technical
  * or editorial errors or omissions contained herein.
@@ -22,7 +22,7 @@
 
 
 /*
- * Create the PCModel and the PCClient and allows the connection between the job and PC
+ * Create the PCModel and the PCClient and allows the connection between the job and PC\LRE
  * */
 package com.microfocus.performancecenter.integration.pctestrun;
 
@@ -84,9 +84,12 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     private static final String artifactsDirectoryName = "archive";
     public static final String artifactsResourceName = "artifact";
     public static final String runReportStructure = "%s/%s/performanceTestsReports/pcRun";
+    public static final String runNVInsightsReportStructure = "%s/%s/performanceTestsNVInsights/pcRun";
     public static final String trendReportStructure = "%s/%s/performanceTestsReports/TrendReports";
     public static final String pcReportArchiveName = "Reports.zip";
+    public static final String pcNVInsightsReportArchiveName = "NVInsights.zip";
     public static final String pcReportFileName = "Report.html";
+    public static final String pcNVInsightsReportFileName = "index.html";
     private static final String RUNID_BUILD_VARIABLE = "PC_RUN_ID";
 
     public static final String    TRENDED         = "Trended";
@@ -128,6 +131,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     private int runId;
     private String testName;
     private FilePath pcReportFile;
+    private FilePath pcNVInsgithsFile;
     private String junitResultsFileName;
     private static PrintStream logger;
     private File WorkspacePath;
@@ -330,14 +334,28 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         return runReportStructure;
     }
 
-    public static String getPcReportArchiveName() {
+    public static String getRunNVInsightsReportStructure() {
+        return runNVInsightsReportStructure;
+    }
 
+    public static String getPcReportArchiveName() {
         return pcReportArchiveName;
     }
 
-    public static String getPcreportFileName() {
+    public static String getPcNBInsightsReportArchiveName() {
+        return pcNVInsightsReportArchiveName;
+    }
 
+    public static String getPcreportFileName() {
         return pcReportFileName;
+    }
+
+    public static String getPcNVInsightsReportFileName() {
+        return pcNVInsightsReportFileName;
+    }
+
+    public static String getPcNVInsightsReportArchiveName() {
+        return pcNVInsightsReportArchiveName;
     }
 
     private void setBuildParameters (AbstractBuild<?, ?> build)
@@ -436,6 +454,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
             if (response != null && RunState.get(response.getRunState()) == FINISHED && getPcTestRunModel().getPostRunAction() != PostRunAction.DO_NOTHING) {
                 pcReportFile = pcTestRunClient.publishRunReport(runId, getReportDirectory(build));
+                pcNVInsgithsFile = pcTestRunClient.publishRunNVInsightsReport(runId, getNVInsightsReportDirectory(build));
 
                 // Adding the trend report section if ID has been set or if the Associated Trend report is selected.
                 if(((("USE_ID").equals(getPcTestRunModel().getAddRunToTrendReport()) && getPcTestRunModel().getTrendReportId(true) != null) || ("ASSOCIATED").equals(getPcTestRunModel().getAddRunToTrendReport())) && RunState.get(response.getRunState()) != RUN_FAILURE){
@@ -484,6 +503,13 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     private String getReportDirectory(Run<?, ?> build) {
         return String.format(
                 runReportStructure,
+                build.getRootDir().getPath(),
+                artifactsDirectoryName);
+    }
+
+    private String getNVInsightsReportDirectory(Run<?, ?> build) {
+        return String.format(
+                runNVInsightsReportStructure,
                 build.getRootDir().getPath(),
                 artifactsDirectoryName);
     }
@@ -600,6 +626,9 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         testCase.setTime(String.valueOf(runResponse.getDuration() * 60));
         if (pcReportFile != null && pcReportFile.exists() && runState == FINISHED) {
             testCase.getSystemOut().add(getOutputForReportLinks(build));
+        }
+        if (pcNVInsgithsFile != null && pcNVInsgithsFile.exists() && runState == FINISHED) {
+            testCase.getSystemOut().add(getOutputForNVInsightsReportLinks(build));
         }
         updateTestStatus(testCase, runResponse, errorMessage, eventLogString);
         testSuite.getTestcase().add(testCase);
@@ -811,7 +840,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     }
 
     private String getOutputForReportLinks(Run<?, ?> build) {
-        String urlPattern = getArtifactsUrlPattern(build);
+        String urlPattern = getArtifactsUrlPattern(build, false);
         String viewUrl = String.format(urlPattern + "/%s", pcReportFileName);
         String downloadUrl = String.format(urlPattern + "/%s", "*zip*/pcRun");
         logger.println(String.format("%s", HyperlinkNote.encodeTo(viewUrl, "View analysis report of run " + runId)));
@@ -824,11 +853,26 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 Messages.DownloadReport(), getPcTestRunModel().getServerAndPort() + "/" + build.getUrl() + downloadUrl);
     }
 
-    private String getArtifactsUrlPattern(Run<?, ?> build) {
+    private String getOutputForNVInsightsReportLinks(Run<?, ?> build) {
+        String urlPattern = getArtifactsUrlPattern(build, true);
+        String viewUrl = String.format(urlPattern + "/%s", pcNVInsightsReportFileName);
+        String downloadUrl = String.format(urlPattern + "/%s", "*zip*/pcRunNV");
+        logger.println(String.format("%s", HyperlinkNote.encodeTo(viewUrl, "View NVInsights report of run " + runId)));
 
-        String runReportUrlTemp = runReportStructure.replaceFirst("%s/", "");
+        return String.format("%s: %s" +
+                        "\n\n%s:\n%s" +
+                        "\n\n%s:\n%s",
+                Messages.LoadTestRunID(), runId,
+                Messages.ViewAnalysisReport(), getPcTestRunModel().getServerAndPort() +  "/" +  build.getUrl() + viewUrl,
+                Messages.DownloadReport(), getPcTestRunModel().getServerAndPort() + "/" + build.getUrl() + downloadUrl);
+    }
+
+    private String getArtifactsUrlPattern(Run<?, ?> build, boolean NVInsights) {
+
+        String runReportUrlTemp = NVInsights ? runNVInsightsReportStructure : runReportStructure;
+        String runReportUrlTempReplaced = runReportUrlTemp.replaceFirst("%s/", "");
         return String.format(
-                runReportUrlTemp,
+                runReportUrlTempReplaced,
                 artifactsResourceName);
     }
 

@@ -46,6 +46,7 @@ public interface PcTestBase {
 	public static final String        RUN_ID                          = "7";
 	public static final String        RUN_ID_WAIT                     = "8";
 	public static final String        REPORT_ID                       = "9";
+	public static final String        NV_INSIGHTS_REPORT_ID           = "10";
 	public static final String        STOP_MODE                       = "stop";
 	public static final String		  WEB_PROTOCOL					  = "http";
 	public static final Boolean		  IS_HTTPS					  	  = false;
@@ -100,6 +101,12 @@ public interface PcTestBase {
 			"<Type>HTML Report</Type>" +
 			"<RunID>" + RUN_ID + "</RunID>" +
 			"</RunResult>" +
+			"<RunResult>" +
+            "<ID>" + NV_INSIGHTS_REPORT_ID + "</ID>" +
+            "<Name>NVInsights.zip</Name>" +
+	        "<Type>HTML REPORT</Type>" +
+			"<RunID>" + RUN_ID + "</RunID>" +
+            "</RunResult>" +
 			"<RunResult>" +
 			"<ID>1306</ID>" +
 			"<Name>HighLevelReport_7.xls</Name>" +
