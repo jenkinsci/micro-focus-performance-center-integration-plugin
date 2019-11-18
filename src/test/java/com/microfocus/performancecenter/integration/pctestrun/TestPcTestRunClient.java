@@ -98,6 +98,25 @@ public class TestPcTestRunClient {
     }
 
     @Test
+    public void testPublishRunNVInsightsReport(){
+
+        System.out.println("Testing Publish PC Run NVInsights to Jenkins server with PC client");
+        try {
+
+            FilePath reportHtml = pcTestRunClient.publishRunNVInsightsReport(Integer.parseInt(PcTestBase.RUN_ID),
+                    String.format(PcTestRunBuilder.getRunNVInsightsReportStructure(), RESOURCES_DIR, PcTestRunBuilder.getArtifactsDirectoryName(), PcTestBase.RUN_ID));
+            Assert.assertTrue("Failed to publish PC NV Insights report", reportHtml.exists());
+            try {
+                // Test cleanup
+                reportHtml.getParent().getParent().getParent().deleteRecursive();
+            } catch (Exception e) {
+            }
+        } catch (Exception e) {
+            Assert.fail(e.toString());
+        }
+    }
+
+    @Test
     public void testLogout() {
         System.out.println("Testing Logout from PC server");
         Assert.assertTrue("Failed to logout with pcTestRunClient", pcTestRunClient.logout());

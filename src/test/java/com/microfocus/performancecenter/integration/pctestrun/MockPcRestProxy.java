@@ -83,6 +83,12 @@ public class MockPcRestProxy extends PcRestProxy {
             response = getOkResponse();
             response.setEntity(new FileEntity(
                     new File(getClass().getResource(PcTestRunBuilder.pcReportArchiveName).getPath()), ContentType.DEFAULT_BINARY));
+
+        } else if (requestUrl.equals(String.format(getBaseURL() + "/%s/%s/%s/%s/data", RUNS_RESOURCE_NAME, PcTestBase.RUN_ID,
+                RESULTS_RESOURCE_NAME, PcTestBase.NV_INSIGHTS_REPORT_ID))) {
+            response = getOkResponse();
+            response.setEntity(new FileEntity(
+                    new File(getClass().getResource(PcTestRunBuilder.pcNVInsightsReportArchiveName).getPath()), ContentType.DEFAULT_BINARY));
         }
         if (response == null)
             throw new PcException(String.format("%s %s is not recognized by PC Rest Proxy", request.getMethod(), requestUrl));

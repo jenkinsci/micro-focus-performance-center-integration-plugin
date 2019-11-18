@@ -98,6 +98,22 @@ public class TestPcTestRunClientNegativeScenrios {
     }
 
     @Test
+    public void testPublishRunNVInsightsReportWithEmptyResults() {
+
+        System.out.println("Testing Publish PC Run Report to while run results are empty");
+        try {
+
+            FilePath reportHtml = pcTestRunClient.publishRunReport(Integer.parseInt(PcTestBase.RUN_ID),
+                    String.format(PcTestRunBuilder.getRunNVInsightsReportStructure(), RESOURCES_DIR, PcTestRunBuilder.getArtifactsDirectoryName(),PcTestBase.RUN_ID));
+            Assert.assertNull("pcTestRunClient.publishRunReport should have returned null due to empty run results",
+                    reportHtml);
+        } catch (Exception e) {
+            Assert.fail("pcTestRunClient.publishRunReport threw an exception (should have returned null due to empty run results): "
+                    + e.toString());
+        }
+    }
+
+    @Test
     public void testStopNonExistingRun() {
 
         System.out.println("Testing stopping a non-exising run with PC client");
