@@ -35,7 +35,7 @@
         so it should be straightforward to find them.
     -->
     
-    <f:section title="Micro Focus Performance Center Integration">
+    <f:section title="Micro Focus LoadRunner Enterprise Integration">
         <f:entry title="Debug" field="debug">
             <f:checkbox />
         </f:entry>

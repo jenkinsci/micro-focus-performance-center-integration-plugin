@@ -140,7 +140,7 @@
                 var popup = window.open(scheme + "://" + pcServer + "/loadtest/");
                 popup.opener = null;
             }else{
-                alert("Performance Center Server name is missing.");
+                alert("LoadRunner Enterprise Server name is missing.");
             }
             return false;
 		}
@@ -168,7 +168,7 @@
 		<f:textbox name="pcgit.description" value="${instance.pcGitSyncModel.description}" />
 	</f:entry>
 
-	<f:entry title="PC Server" field="pcServerName">
+	<f:entry title="LRE Server" field="pcServerName">
         <f:textbox name="pcgit.pcServerName" value="${instance.pcGitSyncModel.pcServerName}" />
     </f:entry>
 
