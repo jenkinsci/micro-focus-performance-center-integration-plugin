@@ -36,5 +36,5 @@
 -->
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin enables integration with Performance Center.
+  This plugin enables integration with LoadRunner Enterprise.
 </div>
