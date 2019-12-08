@@ -1,5 +1,5 @@
 ![Micro Focus Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Micro_Focus_logo.svg/220px-Micro_Focus_logo.svg.png)
-# Micro Focus LoadRunner Enterprise Integration With Git
+# Micro Focus LoadRunner Enterprise Integration with Git
 This plugin integrates Micro Focus LoadRunner Enterprise with Git via Jenkins.
 
 ---
@@ -38,16 +38,16 @@ This version provides the following enhancements:
 
 ### Version 1.1.0
 This version provides the following enhancements:
-- Git Synchronization: ability to create LoadRunner Enterprise test from yaml files stored in Git.
-- Test Execution: Ability to create a test (from yaml file or from yaml content) before running it.
+- Git Synchronization: ability to create a LoadRunner Enterprise test from YAML files stored in Git.
+- Test Execution: Ability to create a test (from YAML file or from YAML content) before running it.
 
 ### Version 1.1.1
-Fix for a defect related to a technology preview (REST API usage of LoadGenerator and Controllers dynamic provision).
+Fixed a defect relating to a tech preview feature (REST API usage of LoadGenerator and Controller for dynamic provision).
 
 ### Version 1.1.2
 This version provides the following enhancements:
-- Network Virtualization Insights report to be publish in the Build's logs (works with LoadRunner Enterprise but requires a hotfix in all Performance Center versions).
-- Rebranding from "Performance Center" product name to "LoadRunner Enterprise" product name, from "PC" acronym to "LRE" acronym, and from "My PC" expression to "LoadRunner Enterprise Application" expression.
+- Network Virtualization Insights report is published in the Build's logs (this works with LoadRunner Enterprise but requires a hotfix in all Performance Center versions).
+- Rebranded the product name from "Performance Center" to "LoadRunner Enterprise", "PC" to "LRE" and "My PC" to "LoadRunner Enterprise Application".
 
 ### Downloads
 You can download the plugin from this link:
@@ -63,7 +63,7 @@ You can download the plugin from this link:
 3. Git Repository on GitHub or GitLab server.
 4. Jenkins versions: This plugin supports only the latest five LTS versions of Jenkins (currently 2.60.3). This is a result of the Jenkins policy to no longer support older update centers. Jenkins 2.54 and higher requires you to have Java 8 installed on the machine.
 5. Content Security Policy: Starting with version 1.641 (or 1.625.3), Jenkins introduced the Content-Security-Policy header. This causes some of the integration links, such as links to reports, to become inoperable. For details, see [Configuring Content Security Policy](https://wiki.jenkins.io/display/JENKINS/Configuring+Content+Security+Policy) and [Jenkins Security Advisory](https://jenkins.io/security/advisory/2015-12-09/) . For suggested workarounds until the issue is resolved, see [Content Security Policy Header](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools#MicroFocusApplicationAutomationTools-ContentSecurityPolicyHeader).
-6. LoadRunner Enterprise projects having Version Control enabled are not supported.
+6. LoadRunner Enterprise projects with Version Control enabled are not supported.
 
 ## Synchronize LoadRunner Enterprise With Git
 For details on how to perform this, see [Synchronize LoadRunner Enterprise With Git](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Sync_PC_with_Git.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
@@ -74,6 +74,6 @@ Available in version 1.1.0. For details on how to perform this, see [Run Perform
 ---
 **NOTE** 
 
-For details on this and other LoadRunner Enterprise integrations, see the ["LoadRunner Enterprise and Git"](https://admhelp.microfocus.com/pc/en/12.60-12.61/online_help/Content/PC/Git-integration.htm) and ["LoadRunner Enterprise plugins"](https://admhelp.microfocus.com/pc/en/12.60/online_help/Content/PC/Performance-Center-Plugins.htm) topics in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
+For details on this and other LoadRunner Enterprise integrations, see the ["LoadRunner Enterprise and Git"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Git-integration.htm) and ["LoadRunner Enterprise plugins"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Performance-Center-Plugins.htm) topics in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
 
 ---
