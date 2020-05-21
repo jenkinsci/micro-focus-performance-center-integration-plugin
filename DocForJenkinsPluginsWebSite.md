@@ -65,6 +65,52 @@ You can download the plugin from this link:
 5. Content Security Policy: Starting with version 1.641 (or 1.625.3), Jenkins introduced the Content-Security-Policy header. This causes some of the integration links, such as links to reports, to become inoperable. For details, see [Configuring Content Security Policy](https://wiki.jenkins.io/display/JENKINS/Configuring+Content+Security+Policy) and [Jenkins Security Advisory](https://jenkins.io/security/advisory/2015-12-09/) . For suggested workarounds until the issue is resolved, see [Content Security Policy Header](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools#MicroFocusApplicationAutomationTools-ContentSecurityPolicyHeader).
 6. LoadRunner Enterprise projects with Version Control enabled are not supported.
 
+## Support for Pipelines
+
+##### **Generate pipeline code**
+
+1.  To set up a pipeline test job for your Micro Focus testing tool:  
+    1.  From Jenkins Dashboard, click **New Job** or select an existing
+        one.
+    2.  On the page that opens, enter a job name (for a new job),
+        click **Build a Pipeline project**, and click **OK**.
+    3.  In the Project Configuration page, scroll down to the Pipeline
+        section.
+    4.  Enter the **stage** and **node** arguments into
+        the **Script** area. For example, 
+        
+        ```
+        stage('RunTestFromFS'){ // The stage name
+        node('Test'){ //  The name of the node in which to run the test.
+        ```
+        
+2.  Prepare the code for your testing tool:
+    1.  Click the **Pipeline Syntax** link.
+    2.  In the Snippet Generator drop down, select the desired step, for
+        example, ****pcGitBuild: Synchronize Performance Center with
+        Git****.
+    3.  Fill in the fields as required. Fields marked in red are
+        mandatory. **Note:** For fields that take multiple values, such
+        as in the **Tests** field, separate multiple entries with a line
+        break.
+    4.  Click **Generate Pipeline Script**. Copy the code to the
+        clipboard.
+3.  Return to the Project Configuration page, and paste the generated
+    Groovy script into the **Script** field in the Pipeline section.
+4.  Repeat the above steps to add other commands to your script.
+5.  Save the script and run or schedule the job as you would with any
+    standard Jenkins job.
+    
+##### **Supported Pipeline job types**
+
+The available Pipeline job types are:
+
+| Product            | Pipeline step name | Description                                                                |
+|--------------------|--------------------|----------------------------------------------------------------------------|
+| Performance Center | pcGitBuild         | Synchronize Performance Center With Git                                    |
+| Performance Center | pcRunBuild         | Run Performance Test Using Performance Center (available in version 1.1.0) |
+
+
 ## Synchronize LoadRunner Enterprise With Git
 For details on how to perform this, see [Synchronize LoadRunner Enterprise With Git](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Sync_PC_with_Git.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
 
