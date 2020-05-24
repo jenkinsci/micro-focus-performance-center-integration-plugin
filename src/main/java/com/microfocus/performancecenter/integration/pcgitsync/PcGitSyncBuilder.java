@@ -364,7 +364,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
     public YesOrNo getRemoveScriptFromPC(){ return getPcGitSyncModel().getRemoveScriptFromPC();}
 
-    public YesOrNo importTests() { return getPcGitSyncModel().getImportTests();}
+    public YesOrNo getImportTests() { return getPcGitSyncModel().getImportTests();}
 
     //-----------------------------------------------------------------------------------------
     // This indicates to Jenkins that this is an implementation of an extension
