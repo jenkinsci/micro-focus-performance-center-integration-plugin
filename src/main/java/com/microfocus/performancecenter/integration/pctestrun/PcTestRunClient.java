@@ -111,7 +111,7 @@ public class PcTestRunClient {
                     log(listener, "%s", true, Messages.UsingPCCredentialsBuildParameters());
                 else
                     log(listener, "%s", true, Messages.UsingPCCredentialsConfiguration());
-                log(listener, "%s\n[PCServer='%s://%s/LoadTest', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), model.getPcServerName(true), usernamePCPasswordCredentials.getUsername());
+                log(listener, "%s\n[PCServer='%s://%s/LoadTest/%s', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), restProxy.GetPcServer(), restProxy.GetTenant(), usernamePCPasswordCredentials.getUsername());
                 loggedIn = restProxy.authenticate(usernamePCPasswordCredentials.getUsername(), usernamePCPasswordCredentials.getPassword().getPlainText());
             }
             else {

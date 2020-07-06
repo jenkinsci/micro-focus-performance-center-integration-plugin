@@ -35,6 +35,7 @@ import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.microfocus.performancecenter.integration.common.helpers.configuration.ConfigurationService;
 import com.microfocus.performancecenter.integration.common.helpers.services.ModifiedFiles;
+import com.microfocus.performancecenter.integration.common.helpers.utils.BuildParametersAndEnvironmentVariables;
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedFile;
 import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcGitBuildStep;
@@ -67,6 +68,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import hudson.util.LogTaskListener;
+import java.util.Map;
+import java.util.HashMap;
+
+import hudson.model.Run;
 
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.log;
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.logStackTrace;
@@ -160,7 +168,10 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
             WorkspacePath =  new File(build.getWorkspace().toURI());
         else
             WorkspacePath =  null;
-        try { pcGitSyncModel.setBuildParameters(((AbstractBuild)build).getBuildVariables().toString()); } catch (Exception ex) { }
+
+        if((getPcGitSyncModel() != null) && (build != null) && (build instanceof AbstractBuild))
+            setPcGitSyncModelBuildParameters(build, listener);
+
         if(build.getWorkspace() != null)
             perform(build, build.getWorkspace(), launcher, listener);
         else
@@ -172,10 +183,11 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         return WorkspacePath;
     }
 
-    private void setPcModelBuildParameters(AbstractBuild<?, ?> build) {
-        String buildParameters = build.getBuildVariables().toString();
-        if (!buildParameters.isEmpty())
-            getPcGitSyncModel().setBuildParameters(buildParameters);
+    private void setPcGitSyncModelBuildParameters(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
+        BuildParametersAndEnvironmentVariables buildParametersAndEnvironmentVariables = new BuildParametersAndEnvironmentVariables(build, listener).invoke();
+        String buildParametersAndEnvars = buildParametersAndEnvironmentVariables.getBuildParametersAndEnvars();
+        if (!buildParametersAndEnvars.isEmpty())
+            getPcGitSyncModel().setBuildParameters(buildParametersAndEnvars);
     }
 
     public String getAlmProject()

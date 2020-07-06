@@ -73,6 +73,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
+import java.util.HashMap;
+import hudson.util.LogTaskListener;
+import java.util.logging.Level;
+import com.microfocus.performancecenter.integration.common.helpers.utils.BuildParametersAndEnvironmentVariables;
 
 import static com.microfocus.adm.performancecenter.plugins.common.pcentities.RunState.FINISHED;
 import static com.microfocus.adm.performancecenter.plugins.common.pcentities.RunState.RUN_FAILURE;
@@ -207,7 +211,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         else
             WorkspacePath =  null;
         if((getPcTestRunModel() != null) && (build != null) && (build instanceof AbstractBuild))
-            setPcTestRunModelBuildParameters(build);
+            setPcTestRunModelBuildParameters(build, listener);
         if(build.getWorkspace() != null)
             perform(build, build.getWorkspace(), launcher, listener);
         else
@@ -215,10 +219,11 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         return true;
     }
 
-    private void setPcTestRunModelBuildParameters(AbstractBuild<?, ?> build) {
-        String buildParameters = build.getBuildVariables().toString();
-        if (!buildParameters.isEmpty())
-            getPcTestRunModel().setBuildParameters(buildParameters);
+    private void setPcTestRunModelBuildParameters(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
+        BuildParametersAndEnvironmentVariables buildParametersAndEnvironmentVariables = new BuildParametersAndEnvironmentVariables(build, listener).invoke();
+        String buildParametersAndEnvars = buildParametersAndEnvironmentVariables.getBuildParametersAndEnvars();
+        if (!buildParametersAndEnvars.isEmpty())
+            getPcTestRunModel().setBuildParameters(buildParametersAndEnvars);
     }
 
     public File getWorkspacePath(){
@@ -385,7 +390,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 log(listener, "Error: IllegalStateException '%s'", true, ex.getMessage());
             }
             if((getPcTestRunModel() !=null) && (build != null) && (build instanceof AbstractBuild))
-                setPcTestRunModelBuildParameters((AbstractBuild) build);
+                setPcTestRunModelBuildParameters((AbstractBuild) build, null);
             if (!StringUtils.isBlank(getPcTestRunModel().getDescription()))
                 log(listener, "%s: %s", true, Messages.TestDescription(), getPcTestRunModel().getDescription());
             if (!beforeRun(pcTestRunClient, listener))
@@ -411,7 +416,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             throws InterruptedException, ClientProtocolException,
             IOException, PcException {
         if((getPcTestRunModel() !=null) && (build != null) && (build instanceof AbstractBuild))
-            setPcTestRunModelBuildParameters((AbstractBuild) build);
+            setPcTestRunModelBuildParameters((AbstractBuild) build, null);
         PcRunResponse response = null;
         String errorMessage = "";
         String eventLogString = "";
@@ -710,6 +715,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 new TriTrendReportTypes(TrendReportTypes.DataType.Transaction, TrendReportTypes.PctType.TRT, TrendReportTypes.Measurement.PCT_STDDEVIATION),
                 new TriTrendReportTypes(TrendReportTypes.DataType.Transaction, TrendReportTypes.PctType.TRT, TrendReportTypes.Measurement.PCT_COUNT1),
                 new TriTrendReportTypes(TrendReportTypes.DataType.Transaction, TrendReportTypes.PctType.TRT, TrendReportTypes.Measurement.PCT_PERCENTILE_90),
+                new TriTrendReportTypes(TrendReportTypes.DataType.Transaction, TrendReportTypes.PctType.TRT, TrendReportTypes.Measurement.PCT_PERCENTILE_95),
                 // Transaction - TPS
                 new TriTrendReportTypes(TrendReportTypes.DataType.Transaction, TrendReportTypes.PctType.TPS, TrendReportTypes.Measurement.PCT_MINIMUM),
                 new TriTrendReportTypes(TrendReportTypes.DataType.Transaction, TrendReportTypes.PctType.TPS, TrendReportTypes.Measurement.PCT_MAXIMUM),
@@ -1360,5 +1366,6 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         }
 
     }
+
 
 }

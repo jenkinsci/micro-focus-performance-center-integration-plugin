@@ -207,16 +207,17 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
         boolean loggedIn = false;
         try {
-            initMessage(listener,"Login to Performance Center", false);
+            initMessage(listener,"Login to LoadRunner Enterprise Server", false);
 
             if (pcGitSyncModel == null) {
                 log(listener, String.format("pcGitSyncModel is null"), true);
             } else {
                 log(
                         listener,
-                        String.format("Login: Attempting to login to Performance Center server '%s://%s/LoadTest' with credentials of user '%s'",
+                        String.format("Login: Attempting to login to LoadRunner Enterprise server '%s://%s/LoadTest/%s' with credentials of user '%s'",
                                 pcGitSyncModel.getProtocol(),
-                                pcGitSyncModel.getPcServerName(true),
+                                restProxy.GetPcServer(),
+                                restProxy.GetTenant(),
                                 pcUser
                         ),
                         true
