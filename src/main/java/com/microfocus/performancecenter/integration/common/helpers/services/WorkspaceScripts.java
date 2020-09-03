@@ -33,6 +33,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Stream;
+import com.microfocus.performancecenter.integration.common.helpers.utils.Helper;
+
 
 @Extension
 public class WorkspaceScripts {
@@ -44,7 +46,7 @@ public class WorkspaceScripts {
             stream
                     .filter(file -> !Files.isDirectory(file))
                     .filter(WorkspaceScripts::isScript)
-                    .map(file -> new AffectedFolder(file.getParent(), workspace))
+                    .map(file -> new AffectedFolder(Helper.getParent(file), workspace))
                     .forEachOrdered(result::add);
         }
 
@@ -55,7 +57,7 @@ public class WorkspaceScripts {
         SortedSet<AffectedFolder> result = new TreeSet<>();
 
         allModifiedFiles.stream()
-                .map(changedFile -> changedFile.getFullPath().getParent())
+                .map(changedFile -> Helper.getParent(changedFile.getFullPath()))
                 .map(parent -> new AffectedFolder(parent, workspace))
                 .forEachOrdered(result::add);
 
@@ -68,7 +70,7 @@ public class WorkspaceScripts {
         allModifiedFiles.stream()
                 .filter(modifiedFile -> modifiedFile.getModifiedType() == ModifiedType.DELETED)
                 .filter(changedFile -> isScript(changedFile.getFullPath()))
-                .map(changedFile -> changedFile.getFullPath().getParent())
+                .map(changedFile -> Helper.getParent(changedFile.getFullPath()))
                 .filter(parent -> !Files.exists(parent))
                 .map(parent -> new AffectedFolder(parent, workspace))
                 .forEachOrdered(result::add);
@@ -112,7 +114,7 @@ public class WorkspaceScripts {
             return Optional.of(subfolderFullPath);
         }
 
-        return getScriptFolderForSubfolder(subfolderFullPath.getParent(), workspace);
+        return getScriptFolderForSubfolder(Helper.getParent(subfolderFullPath), workspace);
     }
 
     private static boolean isScript(Path fullPath) {

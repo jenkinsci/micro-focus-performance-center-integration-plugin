@@ -31,6 +31,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import com.microfocus.performancecenter.integration.common.helpers.utils.Helper;
 
 @Value
 @EqualsAndHashCode(of = "relativePath")
@@ -56,10 +57,10 @@ public class AffectedFolder implements Comparable<AffectedFolder> {
         String subjectRoot = "Subject";
         String scriptPath =  subjectRoot + "\\" + relativePath.toString().replace(File.separatorChar, '\\');
         Path script = Paths.get(scriptPath);
-        if (script.getParent().toString().equals(subjectRoot))
+        if (Helper.getParent(script).toString().equals(subjectRoot))
             return scriptPath;
         else
-            return script.getParent().toString();
+            return Helper.getParent(script).toString();
     }
 
     @Override
@@ -79,4 +80,5 @@ public class AffectedFolder implements Comparable<AffectedFolder> {
             return "\\" + relativePath.toString().replace("/", "\\");
         return "//" + relativePath.toString().replace("\\", "//");
     }
+
 }

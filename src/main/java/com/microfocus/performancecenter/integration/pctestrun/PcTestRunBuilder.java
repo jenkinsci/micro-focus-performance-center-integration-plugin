@@ -33,12 +33,14 @@ import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
+import com.microfocus.adm.performancecenter.plugins.common.pcentities.pcsubentities.test.Test;
 import com.microfocus.performancecenter.integration.common.helpers.configuration.ConfigurationService;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.Error;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.Failure;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.*;
 import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 import com.microfocus.performancecenter.integration.pctestrun.helper.AdditionalParametersAction;
+import com.thoughtworks.xstream.XStream;
 import hudson.*;
 import hudson.console.HyperlinkNote;
 import hudson.model.*;
@@ -752,9 +754,10 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
     private boolean saveFileToWorkspacePath(PcTestRunClient pcTestRunClient, String trendReportID, int runId, TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType, TrendReportTypes.Measurement measurement)throws IOException, PcException, IntrospectionException, NoSuchMethodException{
         String fileName = measurement.toString().toLowerCase()  + "_" +  pctType.toString().toLowerCase() + ".csv";
-        Map<String, String> measurementMap = pcTestRunClient.getTrendReportByXML(trendReportID, runId, dataType, pctType, measurement);
+
 
         try {
+            Map<String, String> measurementMap = pcTestRunClient.getTrendReportByXML(trendReportID, runId, dataType, pctType, measurement);
             FilePath filePath = new FilePath(Workspace.getChannel(), getWorkspacePath().getPath() + "/" + fileName);
             String filepathContent="";
             for (String key : measurementMap.keySet()) {
@@ -897,11 +900,21 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         Result ret = Result.SUCCESS;
         try {
             if (testsuites != null) {
-                StringWriter writer = new StringWriter();
-                JAXBContext context = JAXBContext.newInstance(Testsuites.class);
-                Marshaller marshaller = context.createMarshaller();
-                marshaller.marshal(testsuites, writer);
-                filePath.write(writer.toString(), null);
+                try {
+                    StringWriter writer = new StringWriter();
+                    JAXBContext context = JAXBContext.newInstance(Testsuites.class);
+                    Marshaller marshaller = context.createMarshaller();
+                    marshaller.marshal(testsuites, writer);
+                    filePath.write(writer.toString(), null);
+                }
+                catch (Exception ex)
+                {
+                    StringWriter writer = new StringWriter();
+                    XStream xstream = new XStream();
+                    xstream.autodetectAnnotations(true);
+                    xstream.toXML(testsuites, writer);
+                    filePath.write(writer.toString(), null);
+                }
                 if (containsErrorsOrFailures(testsuites.getTestsuite())) {
                     ret = Result.FAILURE;
                 }
@@ -909,7 +922,6 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 logger.println(String.format("%s", Messages.EmptyResults()));
                 ret = Result.FAILURE;
             }
-
         } catch (Exception cause) {
             logger.print(String.format(
                     "%s. %s: %s",

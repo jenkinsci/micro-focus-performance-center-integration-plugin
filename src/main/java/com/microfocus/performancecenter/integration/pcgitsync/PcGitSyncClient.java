@@ -519,7 +519,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                         listener,
                         "Creating or updating test '%s' from Git to Performance Center",
                         true,
-                        test.getRelativePath().toString().concat("\\").concat(test.getFullPath().getFileName().toString())
+                        test.getRelativePath().toString().replace("/", "\\").concat("\\").concat(test.getFullPath().getFileName().toString())
                 );
                 Test createdTest = doCreateOrUpdateTest(restProxy, test, ext, isXmlFile, targetSubject, testFileContent);
                 if(createdTest == null) {

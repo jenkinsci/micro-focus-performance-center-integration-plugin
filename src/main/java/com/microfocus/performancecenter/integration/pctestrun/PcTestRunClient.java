@@ -702,49 +702,31 @@ public class PcTestRunClient {
     // <Virtual transaction 2:0.51>
     // This function uses reflection since we know only at runtime which transactions data will be reposed from the rest request.
     public Map<String, String>  getTrendReportByXML(String trendReportId, int runId, TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType,TrendReportTypes.Measurement measurement) throws IOException, PcException, IntrospectionException, NoSuchMethodException {
-
         Map<String, String> measurmentsMap = new LinkedHashMap<String, String>();
         measurmentsMap.put("RunId","_" + runId + "_");
         measurmentsMap.put("Trend Measurement Type",measurement.toString() + "_" + pctType.toString());
-
-
-
         TrendReportTransactionDataRoot res = restProxy.getTrendReportByXML(trendReportId, runId);
-
-//            java.lang.reflect.Method rootMethod =  res.getClass().getMethod("getTrendReport" + dataType.toString() + "DataRowsList");
-//            ArrayList<Object> RowsListObj = (ArrayList<Object>) rootMethod.invoke(res);
-//            RowsListObj.get(0);
-
         List<Object> RowsListObj = res.getTrendReportRoot();
-
-        for (int i=0; i< RowsListObj.size();i++){
-            try {
-
-                java.lang.reflect.Method rowListMethod = RowsListObj.get(i).getClass().getMethod("getTrendReport" + dataType.toString() + "DataRowList");
-
-                for ( Object DataRowObj : (ArrayList<Object>)rowListMethod.invoke(RowsListObj.get(i)))
-                {
-                    if (DataRowObj.getClass().getMethod("getPCT_TYPE").invoke(DataRowObj).equals(pctType.toString()))
-                    {
-                        java.lang.reflect.Method method;
-                        method = DataRowObj.getClass().getMethod("get" + measurement.toString());
-                        measurmentsMap.put(DataRowObj.getClass().getMethod("getPCT_NAME").invoke(DataRowObj).toString(),method.invoke(DataRowObj)==null?"":method.invoke(DataRowObj).toString());
+        if(RowsListObj != null) {
+            for (int i = 0; i < RowsListObj.size(); i++) {
+                try {
+                    java.lang.reflect.Method rowListMethod = RowsListObj.get(i).getClass().getMethod("getTrendReport" + dataType.toString() + "DataRowList");
+                    for (Object DataRowObj : (ArrayList<Object>) rowListMethod.invoke(RowsListObj.get(i))) {
+                        if (DataRowObj.getClass().getMethod("getPCT_TYPE").invoke(DataRowObj).equals(pctType.toString())) {
+                            java.lang.reflect.Method method;
+                            method = DataRowObj.getClass().getMethod("get" + measurement.toString());
+                            measurmentsMap.put(DataRowObj.getClass().getMethod("getPCT_NAME").invoke(DataRowObj).toString(), method.invoke(DataRowObj) == null ? "" : method.invoke(DataRowObj).toString());
+                        }
                     }
+                } catch (NoSuchMethodException e) {
+                    //  logger.println("No such method exception: " + e);
+                    //logStackTrace(listener, configureSystemSection, e);
+                } catch (Exception e) {
+                    //log(listener, " Error on getTrendReportByXML: %s ", true, e.getMessage());
+                    //logStackTrace(listener, configureSystemSection, e);
                 }
-            }catch (NoSuchMethodException e){
-                //  logger.println("No such method exception: " + e);
-                //logStackTrace(listener, configureSystemSection, e);
-            }
-            catch (Exception e){
-                //log(listener, " Error on getTrendReportByXML: %s ", true, e.getMessage());
-                //logStackTrace(listener, configureSystemSection, e);
             }
         }
-
-        //  logger.print(res);
-
         return measurmentsMap;
-
     }
-
 }

@@ -3,6 +3,7 @@ package com.microfocus.performancecenter.integration.common.helpers.services;
 
 import com.microfocus.performancecenter.integration.common.helpers.constants.PcTestRunConstants;
 import com.microfocus.performancecenter.integration.common.helpers.utils.AffectedFile;
+import com.microfocus.performancecenter.integration.common.helpers.utils.Helper;
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedFile;
 import hudson.Extension;
 
@@ -129,7 +130,7 @@ public class WorkspaceTests {
         if(fullPath == null || workspace == null || (Files.isDirectory(fullPath) && fullPath.equals(workspace)))
             return false;
 
-        Path parentPath = fullPath.getParent();
+        Path parentPath = Helper.getParent(fullPath);
 
         //files under workspace directory are ignored
         return !(Files.isRegularFile(fullPath) && Files.isDirectory(parentPath) && parentPath.equals(workspace));

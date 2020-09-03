@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import com.microfocus.performancecenter.integration.common.helpers.utils.Helper;
 
 @Value
 @SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "lombok generated sources")
@@ -30,13 +31,13 @@ public class AffectedFile implements Comparable<AffectedFile>{
         PathVerifier.requireAbsolute(fileFullPath, "FullPath");
         PathVerifier.requireAbsolute(workspace, "Workspace");
 
-        this.relativePath = workspace.relativize(fileFullPath.getParent());
+        this.relativePath = workspace.relativize(Helper.getParent(fileFullPath));
         this.testName = FilenameUtils.removeExtension(fileFullPath.getFileName().toString());
     }
 
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "FB doesn't seem to understand Objects.requireNonNull")
     public String getSubjectPath() {
-        return  relativePath.toString().replace(File.separatorChar, '\\');
+        return  relativePath.toString().replace(File.separatorChar, '\\').replace("/", "\\");
     }
 
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "FB doesn't seem to understand Objects.requireNonNull")
