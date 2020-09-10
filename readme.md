@@ -64,7 +64,7 @@ You can download the plugin from this link:
 - [Version 1.1.0](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.0/micro-focus-performance-center-integration-1.1.0.hpi).
 - [Version 1.1.1](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.1/micro-focus-performance-center-integration-1.1.1.hpi).
 - [Version 1.1.2](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.2/micro-focus-performance-center-integration-1.1.2.hpi).
-- [Version 1.1.3](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.2/micro-focus-performance-center-integration-1.1.3.hpi).
+- [Version 1.1.3](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.3/micro-focus-performance-center-integration-1.1.3.hpi).
 
 ## Prerequisites
 1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.

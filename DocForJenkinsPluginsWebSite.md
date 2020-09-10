@@ -10,6 +10,7 @@ This plugin integrates Micro Focus LoadRunner Enterprise with Git via Jenkins.
     + [Version 1.1.0](#version-110)
     + [Version 1.1.1](#version-111)
     + [Version 1.1.2](#version-112)
+    + [Version 1.1.3](#version-113)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
   * [Synchronize LoadRunner Enterprise With Git](#synchronize-loadrunner-enterprise-with-git)
@@ -49,6 +50,10 @@ This version provides the following enhancements:
 - Network Virtualization Insights report is published in the Build's logs (this works with LoadRunner Enterprise but requires a hotfix in all Performance Center versions).
 - Rebranded the product name from "Performance Center" to "LoadRunner Enterprise", "PC" to "LRE" and "My PC" to "LoadRunner Enterprise Application".
 
+### Version 1.1.3
+- Fix for Java 11.
+- Connect to LRE 2020 SP2 and above with tenant.
+
 ### Downloads
 You can download the plugin from this link:
 
@@ -56,6 +61,7 @@ You can download the plugin from this link:
 - [Version 1.1.0](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.0/micro-focus-performance-center-integration-1.1.0.hpi).
 - [Version 1.1.1](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.1/micro-focus-performance-center-integration-1.1.1.hpi).
 - [Version 1.1.2](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.2/micro-focus-performance-center-integration-1.1.2.hpi).
+- [Version 1.1.3](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.3/micro-focus-performance-center-integration-1.1.3.hpi).
 
 ## Prerequisites
 1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
