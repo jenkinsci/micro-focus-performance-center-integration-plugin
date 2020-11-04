@@ -107,13 +107,13 @@ public class WorkspaceTests {
 
     private static boolean isParentsNotScript(Path fullPath, Path workspace, boolean isParentsNotScript) {
         Path parentPath = fullPath.getParent();
-        File[] files = usrOrJmxFinder(parentPath.toString());
-        boolean parentPathContainsUsrOrJmxfiles = files != null ? (files.length > 0) : false;
+        File[] files = lrSupportedScriptSignatureFinder(parentPath.toString());
+        boolean parentPathContainsLrSupportedScriptSignature = files != null ? (files.length > 0) : false;
 
         //directories and subdirectories are verified
-        if (!parentPath.getParent().equals(workspace) && !parentPathContainsUsrOrJmxfiles)
+        if (!parentPath.getParent().equals(workspace) && !parentPathContainsLrSupportedScriptSignature)
             isParentsNotScript = isParentsNotScript(parentPath, workspace);
-        else if (parentPath.getParent().equals(workspace) && !parentPathContainsUsrOrJmxfiles)
+        else if (parentPath.getParent().equals(workspace) && !parentPathContainsLrSupportedScriptSignature)
             isParentsNotScript = true;
         return isParentsNotScript;
     }
@@ -138,18 +138,30 @@ public class WorkspaceTests {
     }
 
     //get files ending with usr or jmx extension under specific directory
-    private static File[] usrOrJmxFinder(String dirName){
+    private static File[] lrSupportedScriptSignatureFinder(String dirName){
         File dir = new File(dirName);
 
         return dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String filename)
-            { return (filename.endsWith(PcTestRunConstants.USR_EXTENSION) || filename.endsWith(PcTestRunConstants.JMX_EXTENSION)) ; }
-        } );
+            public boolean accept(File dir, String filename) {
+                return (filename.endsWith(PcTestRunConstants.USR_EXTENSION)
+                    || filename.endsWith(PcTestRunConstants.JMX_EXTENSION)
+                    || filename.endsWith(PcTestRunConstants.GATLING_EXTENSION)
+                    || (filename.equalsIgnoreCase(PcTestRunConstants.DEVWEB_MAIN_FILE)) && rstFinder(dir.toString()).length> 0);
+            }
+        });
+    }
+
+    private static File[] rstFinder(String dirName){
+        File dir = new File(dirName);
+        return dir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String filename) {
+                return (filename.equalsIgnoreCase(PcTestRunConstants.DEVWEB_RTS_FILE));
+            }
+        });
     }
 
     //verify child path is subdirectory of parent
     private static boolean isChild(Path child, Path parent) {
         return child.toAbsolutePath().startsWith(parent.toAbsolutePath());
     }
-
 }

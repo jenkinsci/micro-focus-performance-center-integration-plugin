@@ -30,6 +30,7 @@ import hudson.model.TaskListener;
 import hudson.scm.ChangeLogSet;
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedType;
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedFile;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
 import javax.annotation.CheckForNull;
 import java.io.File;
@@ -53,6 +54,10 @@ public class ModifiedFiles {
 
         if (lastSuccess == null) {
             log(listener, "No previously successful build was found. All scripts will be uploaded.", addDate);
+            return null;
+        }
+        if (current instanceof WorkflowRun) {
+            log(listener, "Because this is being run through a pipeline job, no Comparison will be made to previous build and all scripts will be uploaded to LRE project.", addDate);
             return null;
         }
         log(listener, "The last successful build was found (ID = %d). Only modified scripts will be loaded", addDate, lastSuccess.getNumber());

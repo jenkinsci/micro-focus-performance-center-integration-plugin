@@ -28,6 +28,8 @@ import com.microfocus.performancecenter.integration.common.helpers.utils.Affecte
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedType;
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedFile;
 
+import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -118,7 +120,32 @@ public class WorkspaceScripts {
     }
 
     private static boolean isScript(Path fullPath) {
-        return !Files.isDirectory(fullPath) && (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.USR_EXTENSION) || fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.JMX_EXTENSION));
+        return !Files.isDirectory(fullPath)
+                && (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.USR_EXTENSION)
+                || fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.JMX_EXTENSION)
+                || fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.GATLING_EXTENSION)
+                || (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.DEVWEB_MAIN_FILE) && isParentDirContainsRTS(fullPath)));
     }
 
+    private static boolean isParentDirContainsRTS(Path fullPath) {
+        if(fullPath != null) {
+            Path parentPath = fullPath.getParent();
+            if(parentPath != null)
+                return rstFinder(parentPath.toString()).length > 0;
+        }
+        return false;
+    }
+
+    private static File[] rstFinder(String dirName){
+        File dir = new File(dirName);
+        File[] noFiles = {};
+        if(dir != null) {
+            return dir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String filename) {
+                    return (filename.equalsIgnoreCase(PcTestRunConstants.DEVWEB_RTS_FILE));
+                }
+            });
+        }
+        return noFiles;
+    }
 }

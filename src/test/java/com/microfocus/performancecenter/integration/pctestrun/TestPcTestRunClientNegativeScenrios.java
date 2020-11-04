@@ -45,7 +45,7 @@ public class TestPcTestRunClientNegativeScenrios {
 
     @BeforeClass
     public static void setUp() {
-        System.out.println("Starting Performance Center client negative testing scenarios:");
+        System.out.println("Starting LoadRunner Enterprise client negative testing scenarios:");
         try {
             PcRestProxy resetProxy = new MockPcRestProxyBadResponses(PcTestBase.WEB_PROTOCOL,PcTestBase.PC_SERVER_NAME, PcTestBase.ALM_DOMAIN,
                     PcTestBase.ALM_PROJECT,PcTestBase.LOGGER);
@@ -57,7 +57,7 @@ public class TestPcTestRunClientNegativeScenrios {
 
     @AfterClass
     public static void tearDown() {
-        System.out.println("End of Performance Center client negative testing scenarios");
+        System.out.println("End of LoadRunner Enterprise client negative testing scenarios");
     }
 
     @Test

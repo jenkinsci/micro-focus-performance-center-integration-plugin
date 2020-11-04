@@ -1,5 +1,9 @@
 package com.microfocus.performancecenter.integration.common.helpers.utils;
 
+import com.microfocus.performancecenter.integration.common.helpers.constants.PcTestRunConstants;
+
+import java.io.File;
+import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -27,5 +31,19 @@ public class Helper {
         int index = strPathToHandle.lastIndexOf(chrSeparatorBackward);
         strPathToHandle = strPathToHandle.substring(0, index);
         return strPathToHandle;
+    }
+
+    public static boolean isUsrScript(String strPath)
+    {
+        File dir = new File(strPath);
+        File[] foundFiles = {};
+        if(dir != null) {
+            foundFiles = dir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String filename) {
+                    return (filename.equalsIgnoreCase(PcTestRunConstants.USR_EXTENSION));
+                }
+            });
+        }
+        return foundFiles.length > 0;
     }
 }

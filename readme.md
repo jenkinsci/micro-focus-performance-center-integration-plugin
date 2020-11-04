@@ -14,6 +14,7 @@ Project status:
     + [Version 1.1.1](#version-111)
     + [Version 1.1.2](#version-112)
     + [Version 1.1.3](#version-113)
+    + [Version 1.1.4](#version-114)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
   * [Synchronize LoadRunner Enterprise With Git](#synchronize-loadrunner-enterprise-with-git)
@@ -57,6 +58,12 @@ This version provides the following enhancements:
 - Fix for Java 11.
 - Connect to LRE 2020 SP2 and above with tenant.
 
+### Version 1.1.4
+- Fix for pipeline build (FreeStyle project works fine): problem: first build can pass and sync everything but second build supposed to only sync the changes in the Git repository could not calculate the difference. Fix: For now, all pipeline builds will behave as if they are first build and will sync everything.
+- Added support for LoadRunner Developer scripts (DevWeb protocol): A folder containing both files "main.js" and rts.yml will be considered as LoadRunner Developer script. 
+- Added support for Gatling script. A folder containing a file having ".scala" for extension will be considered as Gatling script.
+- This plugin will not fail the build for failed attempts to sync "LoadRunner Developer" and Gatling scripts as there are many versions of Performance Center and LoadRunner Enterprise that do not support those scripts.
+
 ### Downloads
 You can download the plugin from this link:
 
@@ -65,6 +72,7 @@ You can download the plugin from this link:
 - [Version 1.1.1](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.1/micro-focus-performance-center-integration-1.1.1.hpi).
 - [Version 1.1.2](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.2/micro-focus-performance-center-integration-1.1.2.hpi).
 - [Version 1.1.3](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.3/micro-focus-performance-center-integration-1.1.3.hpi).
+- [Version 1.1.4](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.4/micro-focus-performance-center-integration-1.1.4.hpi).
 
 ## Prerequisites
 1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
