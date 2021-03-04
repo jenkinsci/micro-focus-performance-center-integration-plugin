@@ -61,13 +61,14 @@ public class PcTestRunModel {
     private String                 retry;
     private String                 retryDelay;
     private String                 retryOccurrences;
+    private final boolean          authenticateWithToken;
 
 
     @DataBoundConstructor
     public PcTestRunModel(String serverAndPort, String pcServerName, String credentialsId, String almDomain, String almProject, String testToRun,
                           String testId, String testContentToCreate, String autoTestInstanceID, String testInstanceId, String timeslotDurationHours, String timeslotDurationMinutes,
                           PostRunAction postRunAction, boolean vudsMode, String description, String addRunToTrendReport, String trendReportId, boolean HTTPSProtocol,
-                          String proxyOutURL, String credentialsProxyId, String retry, String retryDelay, String retryOccurrences ) {
+                          String proxyOutURL, String credentialsProxyId, String retry, String retryDelay, String retryOccurrences, boolean authenticateWithToken) {
 
         this.serverAndPort = serverAndPort;
         this.pcServerName = pcServerName;
@@ -92,6 +93,7 @@ public class PcTestRunModel {
         this.retry = retry;
         this.retryDelay = verifyStringValueIsIntAndPositive(retryDelay, 5);
         this.retryOccurrences = verifyStringValueIsIntAndPositive(retryOccurrences, 3);
+        this.authenticateWithToken = authenticateWithToken;
 
     }
 
@@ -273,7 +275,6 @@ public class PcTestRunModel {
         return this.buildParameters;
     }
 
-
     @Override
     public String toString() {
 
@@ -287,11 +288,11 @@ public class PcTestRunModel {
 
         return String.format("[PCServer='%s', CredentialsId='%s', Domain='%s', Project='%s', TestID='%s', " +
                         "TestInstanceID='%s', TimeslotDuration='%s', PostRunAction='%s', " +
-                        "VUDsMode='%s'%s, HTTPSProtocol='%s']",
+                        "VUDsMode='%s', trending='%s', HTTPSProtocol='%s', authenticateWithToken='%s']",
 
                 pcServerName, credentialsId, almDomain, almProject, testId,
                 testInstanceId, timeslotDuration, postRunAction.getValue(),
-                vudsModeString, trendString, HTTPSProtocol);
+                vudsModeString, trendString, HTTPSProtocol, authenticateWithToken);
     }
 
 
@@ -308,7 +309,7 @@ public class PcTestRunModel {
     }
 
     public String getAddRunToTrendReport() {
-        return addRunToTrendReport;
+        return this.addRunToTrendReport;
     }
 
     public String isHTTPSProtocol(){
@@ -316,6 +317,8 @@ public class PcTestRunModel {
             return "http";
         return "https";
     }
+
+    public boolean isAuthenticateWithToken() { return this.authenticateWithToken; }
 
     public void setBuildParameters(String buildParameters){
         this.buildParameters = buildParameters;
@@ -331,9 +334,6 @@ public class PcTestRunModel {
                 }
             }
         }
-
         return attribute;
     }
-
-
 }

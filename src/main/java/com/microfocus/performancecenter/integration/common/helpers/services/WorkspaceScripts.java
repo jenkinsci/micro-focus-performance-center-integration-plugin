@@ -31,8 +31,10 @@ import com.microfocus.performancecenter.integration.common.helpers.utils.Modifie
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Stream;
 import com.microfocus.performancecenter.integration.common.helpers.utils.Helper;
@@ -124,7 +126,9 @@ public class WorkspaceScripts {
                 && (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.USR_EXTENSION)
                 || fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.JMX_EXTENSION)
                 || fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.GATLING_EXTENSION)
-                || (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.DEVWEB_MAIN_FILE) && isParentDirContainsRTS(fullPath)));
+                || (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.DEVWEB_MAIN_FILE) && isParentDirContainsRTS(fullPath))
+                || (fullPath.toString().toLowerCase(Locale.ROOT).endsWith(PcTestRunConstants.SELENIUM_EXTENSION) && isFileContainSeleniumPackageReference(fullPath))
+        );
     }
 
     private static boolean isParentDirContainsRTS(Path fullPath) {
@@ -134,6 +138,30 @@ public class WorkspaceScripts {
                 return rstFinder(parentPath.toString()).length > 0;
         }
         return false;
+    }
+
+    private static boolean isFileContainSeleniumPackageReference(Path fullPath) {
+        if(fullPath != null) {
+            String javaFileContent = readLineByLineJava8(fullPath);
+            if(javaFileContent != null && javaFileContent.toLowerCase().contains(PcTestRunConstants.SELENIUM_JAVA_CONTENT))
+                return true;
+        }
+        return false;
+    }
+
+    private static String readLineByLineJava8(Path filePath)
+    {
+        StringBuilder contentBuilder = new StringBuilder();
+
+        try (Stream<String> stream = Files.lines( Paths.get(filePath.toString()), StandardCharsets.UTF_8))
+        {
+            stream.forEach(s -> contentBuilder.append(s).append("\n"));
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return contentBuilder.toString();
     }
 
     private static File[] rstFinder(String dirName){

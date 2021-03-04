@@ -133,6 +133,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     private String retry;
     private String retryDelay;
     private String retryOccurrences;
+    private boolean authenticateWithToken;
 
     private int runId;
     private String testName;
@@ -170,7 +171,8 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             String credentialsProxyId,
             String retry,
             String retryDelay,
-            String retryOccurrences) {
+            String retryOccurrences,
+            boolean authenticateWithToken) {
 
         this.serverAndPort = serverAndPort;
         this.pcServerName = pcServerName;
@@ -196,6 +198,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         this.retry = (retry == null || retry.isEmpty())? "NO_RETRY" : retry;
         this.retryDelay = ("NO_RETRY".equals(this.retry)) ? "0" : (retryDelay == null || retryDelay.isEmpty()) ? "5" : retryDelay;
         this.retryOccurrences = ("NO_RETRY".equals(this.retry)) ? "0" : (retryOccurrences == null || retryOccurrences.isEmpty()) ? "3" : retryOccurrences;
+        this.authenticateWithToken = authenticateWithToken;
         configureSystemSection = ConfigureSystemSection.get();
     }
 
@@ -316,7 +319,8 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                             credentialsProxyId,
                             retry,
                             retryDelay,
-                            retryOccurrences);
+                            retryOccurrences,
+                            authenticateWithToken);
         }
         return pcTestRunModel;
     }
@@ -1102,6 +1106,11 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     public boolean isVudsMode()
     {
         return getPcTestRunModel().isVudsMode();
+    }
+
+    public boolean isAuthenticateWithToken()
+    {
+        return getPcTestRunModel().isAuthenticateWithToken();
     }
 
     public String getRetry () {

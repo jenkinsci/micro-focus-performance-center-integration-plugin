@@ -39,7 +39,7 @@ public class TestPcTestRunClient {
     @BeforeClass
     public static void setUp() {
         try {
-            PcRestProxy resetProxy = new MockPcRestProxy(PcTestBase.WEB_PROTOCOL, PcTestBase.PC_SERVER_NAME, PcTestBase.ALM_DOMAIN,
+            PcRestProxy resetProxy = new MockPcRestProxy(PcTestBase.WEB_PROTOCOL, PcTestBase.PC_SERVER_NAME, PcTestBase.AUTHENTICATE_WITH_TOKEN, PcTestBase.ALM_DOMAIN,
                     PcTestBase.ALM_PROJECT,PcTestBase.LOGGER);
             pcTestRunClient = new PcTestRunClient(PcTestBase.pcModel, resetProxy);
         } catch (Exception e) {

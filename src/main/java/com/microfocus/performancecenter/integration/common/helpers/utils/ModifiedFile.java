@@ -49,8 +49,8 @@ public class ModifiedFile implements Comparable<ModifiedFile>, Serializable {
 
     public ModifiedFile(ModifiedType modifiedType, Path relativePath, Path workspace) {
         Objects.requireNonNull(relativePath, "Relative path must not be null");
-        PathVerifier.requireAbsolute(workspace, "Workspace");
-        PathVerifier.requireRelative(relativePath, "File");
+//        PathVerifier.requireAbsolute(workspace, "Workspace");
+//        PathVerifier.requireRelative(relativePath, "File");
 
         this.modifiedType = modifiedType;
         this.fullPathAsUri = workspace.resolve(relativePath).toUri();

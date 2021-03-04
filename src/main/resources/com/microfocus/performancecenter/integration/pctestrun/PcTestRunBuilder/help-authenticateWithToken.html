@@ -21,5 +21,9 @@
   -->
 
 <div>
-    LoadRunner Enterprise User / Token's Credentials or parameter pointing to such credentials.
+    <div>From LRE 2021 R1, you can use a token associated with your user for authentication.</div>
+    <div>If LRE is defined to use SSO, this will be the only way for this plugin to authenticate to LRE.</div>
+    <div>To use it, have a token issued to your user in LRE.</div>
+    <div>In Jenkins, create new Jenkins credentials based on the LRE token you received: use the ClientIdKey in the Username and the ClientSecretKey key in the password.</div>
+    <div>Then use the new Jenkins credentials with this checkbox switched on.</div>
 </div>

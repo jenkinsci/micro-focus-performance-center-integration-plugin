@@ -87,11 +87,10 @@ public class PcTestRunClient {
                         log(listener, "%s  %s.", true,  Messages.UsingProxyCredentialsConfiguration(), proxyOutUser);
                 }
             }
-            restProxy = new PcRestProxy(model.isHTTPSProtocol(), model.getPcServerName(true), model.getAlmDomain(true), model.getAlmProject(true), model.getProxyOutURL(true),proxyOutUser,proxyOutPassword);
+            restProxy = new PcRestProxy(model.isHTTPSProtocol(), model.getPcServerName(true), model.isAuthenticateWithToken(), model.getAlmDomain(true), model.getAlmProject(true), model.getProxyOutURL(true),proxyOutUser,proxyOutPassword);
         }catch (PcException e){
             log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
         }
-
     }
 
     public <T extends PcRestProxy> PcTestRunClient(PcTestRunModel pcTestRunModel, /*PrintStream logger,*/ T proxy) {
@@ -126,10 +125,7 @@ public class PcTestRunClient {
         return loggedIn;
     }
 
-    public boolean isLoggedIn() {
-
-        return loggedIn;
-    }
+    public boolean isLoggedIn() { return loggedIn; }
 
     public int startRun() throws NumberFormatException, ClientProtocolException, PcException, IOException {
 

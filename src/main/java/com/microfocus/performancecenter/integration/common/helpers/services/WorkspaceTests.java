@@ -146,7 +146,9 @@ public class WorkspaceTests {
                 return (filename.endsWith(PcTestRunConstants.USR_EXTENSION)
                     || filename.endsWith(PcTestRunConstants.JMX_EXTENSION)
                     || filename.endsWith(PcTestRunConstants.GATLING_EXTENSION)
-                    || (filename.equalsIgnoreCase(PcTestRunConstants.DEVWEB_MAIN_FILE)) && rstFinder(dir.toString()).length> 0);
+                    || ((filename.equalsIgnoreCase(PcTestRunConstants.DEVWEB_MAIN_FILE)) && rstFinder(dir.toString()).length> 0)
+                    || (filename.endsWith(PcTestRunConstants.SELENIUM_EXTENSION))
+                );
             }
         });
     }

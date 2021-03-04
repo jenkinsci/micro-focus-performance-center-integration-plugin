@@ -15,6 +15,7 @@ Project status:
     + [Version 1.1.2](#version-112)
     + [Version 1.1.3](#version-113)
     + [Version 1.1.4](#version-114)
+    + [Version 1.1.5](#version-115)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
   * [Synchronize LoadRunner Enterprise With Git](#synchronize-loadrunner-enterprise-with-git)
@@ -25,9 +26,9 @@ Project status:
 Using this plugin, you can:
 - Upload LoadRunner and JMeter scripts from a GitHub repository or a GitLab project to a project on a LoadRunner Enterprise server.
 - Create LoadRunner Enterprise tests from a YAML file.
-- Run a LoadRunner Enterprise test from its ID or create it from YAML file or YAML syntax and then run it.
+- Run a LoadRunner Enterprise test from its ID, or create it from a YAML file or YAML syntax and then run it.
 
-There is another plugin for running performance tests using LoadRunner Enterprise. For details, see [Micro Focus Application Automation Tools](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools) - [LoadRunner Enterprise Integration](https://wiki.jenkins.io/display/JENKINS/Performance+Center+Integration).
+There is a separate plugin for running performance tests using LoadRunner Enterprise. For details, see [Micro Focus Application Automation Tools](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools) - [LoadRunner Enterprise Integration](https://wiki.jenkins.io/display/JENKINS/Performance+Center+Integration).
 
 **Submit issues and feedback through [JIRA](https://issues.jenkins-ci.org/browse/JENKINS-36795?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20micro-focus-performance-center-integration)**
 
@@ -43,26 +44,37 @@ This version provides the following enhancements:
 
 ### Version 1.1.0
 This version provides the following enhancements:
-- Git Synchronization: ability to create a LoadRunner Enterprise test from YAML files stored in Git.
-- Test Execution: Ability to create a test (from YAML file or from YAML content) before running it.
+- Git Synchronization: Ability to create a LoadRunner Enterprise test from YAML files stored in Git.
+- Test Execution: Ability to create a test (from a YAML file or YAML content) before running it.
 
 ### Version 1.1.1
-Fixed a defect relating to a tech preview feature (REST API usage of LoadGenerator and Controller for dynamic provision).
+Fixed a defect relating to a tech preview feature (REST API usage of Load Generator and Controller for dynamic provisioning).
 
 ### Version 1.1.2
 This version provides the following enhancements:
 - Network Virtualization Insights report is published in the Build's logs (this works with LoadRunner Enterprise but requires a hotfix in all Performance Center versions).
-- Rebranded the product name from "Performance Center" to "LoadRunner Enterprise", "PC" to "LRE" and "My PC" to "LoadRunner Enterprise Application".
+- Rebranded the product name from "Performance Center" to "LoadRunner Enterprise", "PC" to "LRE", and "My PC" to "LoadRunner Enterprise Application".
 
 ### Version 1.1.3
+This version provides the following enhancements:
 - Fix for Java 11.
-- Connect to LRE 2020 SP2 and above with tenant.
+- Connect to LoadRunner Enterprise 2020 SP2 and later with a tenant.
 
 ### Version 1.1.4
-- Fix for pipeline build (FreeStyle project works fine): problem: first build can pass and sync everything but second build supposed to only sync the changes in the Git repository could not calculate the difference. Fix: For now, all pipeline builds will behave as if they are first build and will sync everything.
-- Added support for LoadRunner Developer scripts (DevWeb protocol): A folder containing both files "main.js" and rts.yml will be considered as LoadRunner Developer script. 
-- Added support for Gatling script. A folder containing a file having ".scala" for extension will be considered as Gatling script.
-- This plugin will not fail the build for failed attempts to sync "LoadRunner Developer" and Gatling scripts as there are many versions of Performance Center and LoadRunner Enterprise that do not support those scripts.
+This version provides the following enhancements:
+- Fix for pipeline build (FreeStyle project works fine): 
+  - problem: While the first build passes and synchronizes everything, subsequent builds, supposed to only synchronize the changes in the Git repository, cannot calculate the difference and fail.
+  - Resolution: All pipeline builds now behave as if they are the first build and will synchronize everything.
+- Added support for LoadRunner Developer scripts (DevWeb protocol): A folder containing both the "main.js" and "rts.yml" files is considered a LoadRunner Developer script.
+- Added support for Gatling scripts: A folder containing a file with ".scala" for extension is considered a Gatling script.
+- This plugin does not fail the build if there are failed attempts to synchronize "LoadRunner Developer" and Gatling scripts because there are many versions of Performance Center and LoadRunner Enterprise that do not support those scripts.
+- Additional rebranding (changing "Performance Center" to "LoadRunner Enterprise" in the build logs).
+
+### Version 1.1.5 (soon, without commitment)
+This version provides the following enhancements:
+- Possibility to use an LRE token associated with a user for authentication (available from LRE2021 R1).
+- Added support for Selenium script (available from LRE2021 R1). A folder containing a file having ".java" for extension and containing the expression "import org.openqa.selenium" will be considered as selenium script.
+- Fixed a defect caused by the plugin trying to validate a Linux OS system path according to Windows OS criteria and vice versa occuring when the jenkins server and the remote agent are on different OS type.
 
 ### Downloads
 You can download the plugin from this link:
@@ -83,14 +95,14 @@ You can download the plugin from this link:
 6. LoadRunner Enterprise projects with Version Control enabled are not supported.
 
 ## Synchronize LoadRunner Enterprise With Git
-For details on how to perform this, see [Synchronize LoadRunner Enterprise With Git](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Sync_PC_with_Git.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
+For details on how to perform this, see [Synchronize LoadRunner Enterprise with Git](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Sync_PC_with_Git.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
 
 ## Run Performance Test Using LoadRunner Enterprise
-Available in version 1.1.0. For details on how to perform this, see [Run Performance Test Using LoadRunner Enterprise](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Run_test_using_PC.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
+Available in version 1.1.0. For details on how to perform this, see [Run a performance test using LoadRunner Enterprise](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Run_test_using_PC.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
 
 ---
 **NOTE** 
 
-For details on this and other LoadRunner Enterprise integrations, see the ["LoadRunner Enterprise and Git"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Git-integration.htm) and ["LoadRunner Enterprise plugins"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Performance-Center-Plugins.htm) topics in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
+For details on this and other LoadRunner Enterprise integrations, see the ["LoadRunner Enterprise and Git"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Git-integration.htm) and ["Plugins"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Performance-Center-Plugins.htm) topics in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
 
 ---

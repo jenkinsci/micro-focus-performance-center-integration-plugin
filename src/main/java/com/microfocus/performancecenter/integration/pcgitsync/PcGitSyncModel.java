@@ -52,13 +52,15 @@ public class PcGitSyncModel implements Serializable {
     private final UploadScriptMode uploadScriptMode;
     private final YesOrNo removeScriptFromPC;
     private final YesOrNo importTests;
+    private final boolean authenticateWithToken;
     private String buildParameters;
+
 
     @DataBoundConstructor
     public PcGitSyncModel(String description, String pcServerName, String serverAndPort, boolean httpsProtocol,
                           String credentialsId, String almDomain, String almProject,
                           String proxyOutURL, String credentialsProxyId,
-                          String subjectTestPlan, UploadScriptMode uploadScriptMode, YesOrNo removeScriptFromPC, YesOrNo importTests, String buildParameters) {
+                          String subjectTestPlan, UploadScriptMode uploadScriptMode, YesOrNo removeScriptFromPC, YesOrNo importTests, boolean authenticateWithToken, String buildParameters) {
         this.description = description;
         this.pcServerName = pcServerName;
         this.serverAndPort = serverAndPort;
@@ -73,6 +75,7 @@ public class PcGitSyncModel implements Serializable {
         this.removeScriptFromPC = removeScriptFromPC;
         this.importTests = importTests;
         this.buildParameters = "";
+        this.authenticateWithToken = authenticateWithToken;
     }
 
     public String getDescription() {
@@ -187,9 +190,9 @@ public class PcGitSyncModel implements Serializable {
 
     public String runParamsToString() {
         return String.format("[PCServer='%s', HTTPSProtocol='%s', CredentialsId='%s', Domain='%s', Project='%s', " +
-                        "proxy='%s', CredentialsProxyId='%s', subjectTestPlan = '%s', uploadScriptMode='%s', removeScriptFromPC='%s', importTests='%s']",
+                        "proxy='%s', CredentialsProxyId='%s', subjectTestPlan = '%s', uploadScriptMode='%s', removeScriptFromPC='%s', importTests='%s', UseTokenForAuthentication= '%s']",
                 pcServerName, httpsProtocol, credentialsId, almDomain, almProject,
-                proxyOutURL, credentialsProxyId, subjectTestPlan, uploadScriptMode.getValue(), removeScriptFromPC.getValue(), importTests.getValue());
+                proxyOutURL, credentialsProxyId, subjectTestPlan, uploadScriptMode.getValue(), removeScriptFromPC.getValue(), importTests.getValue(), authenticateWithToken);
     }
 
     public String getProtocol(){
@@ -198,6 +201,9 @@ public class PcGitSyncModel implements Serializable {
         return "https";
     }
 
+    //public boolean getAuthenticateWithToken(){ return this.authenticateWithToken; }
+
+    public boolean isAuthenticateWithToken(){ return this.authenticateWithToken; }
 
     private static String useParameterIfNeeded (String buildParameters,String attribute){
         if (buildParameters!=null && attribute!=null && attribute.startsWith("$")) {

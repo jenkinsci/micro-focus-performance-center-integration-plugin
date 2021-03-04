@@ -7,6 +7,8 @@ public interface PcTestRunConstants {
     String YAML_EXTENSION = ".yaml";
     String YML_EXTENSION = ".yml";
     String GATLING_EXTENSION = ".scala";
+    String SELENIUM_EXTENSION = ".java";
     String DEVWEB_MAIN_FILE = "main.js";
     String DEVWEB_RTS_FILE = "rts.yml";
+    String SELENIUM_JAVA_CONTENT = "import org.openqa.selenium";
 }

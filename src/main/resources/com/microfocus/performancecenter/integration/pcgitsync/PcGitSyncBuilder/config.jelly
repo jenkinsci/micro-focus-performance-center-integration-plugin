@@ -176,6 +176,10 @@
         <f:checkbox title="Use HTTPS Protocol" field="httpsProtocol" name="pcgit.httpsProtocol" checked="${instance.pcGitSyncModel.httpsProtocol}" />
     </f:entry>
 
+    <f:entry title="&#160;" field="authenticateWithToken">
+        <f:checkbox title="Use Token For Authentication" field="authenticateWithToken" name="pcgit.authenticateWithToken" checked="${instance.pcGitSyncModel.authenticateWithToken}" />
+    </f:entry>
+
     <f:entry title="Credentials" field="credentialsId">
         <c:select expressionAllowed="true" />
     </f:entry>

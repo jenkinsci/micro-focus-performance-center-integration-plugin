@@ -68,11 +68,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import hudson.util.LogTaskListener;
-import java.util.Map;
-import java.util.HashMap;
 
 import hudson.model.Run;
 
@@ -100,7 +95,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
     private final UploadScriptMode uploadScriptMode;
     private final YesOrNo removeScriptFromPC;
     private final YesOrNo importTests;
-
+    private final boolean authenticateWithToken;
     private PcGitSyncModel pcGitSyncModel;
     private String buildParameters;
     private boolean addDate = true;
@@ -122,7 +117,8 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
             String subjectTestPlan,
             UploadScriptMode uploadScriptMode,
             YesOrNo removeScriptFromPC,
-            YesOrNo importTests) {
+            YesOrNo importTests,
+            boolean authenticateWithToken) {
 
         this.description = description;
         this.pcServerName = pcServerName;
@@ -142,6 +138,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         this.removeScriptFromPC = removeScriptFromPC;
         this.importTests = importTests;
         this.buildParameters = "";
+        this.authenticateWithToken = authenticateWithToken;
 
         pcGitSyncModel =
                 new PcGitSyncModel(
@@ -158,7 +155,8 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                         this.uploadScriptMode,
                         this.removeScriptFromPC,
                         this.importTests,
-                        buildParameters);
+                        this.authenticateWithToken,
+                        this.buildParameters);
     }
 
     @Override
@@ -354,10 +352,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         return getPcGitSyncModel().getPcServerName();
     }
 
-    public boolean isHttpsProtocol()
-    {
-        return getPcGitSyncModel().getHttpsProtocol();
-    }
+    public boolean isHttpsProtocol() { return getPcGitSyncModel().getHttpsProtocol(); }
 
     public String getServerAndPort()
     {
@@ -377,6 +372,11 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
     public YesOrNo getRemoveScriptFromPC(){ return getPcGitSyncModel().getRemoveScriptFromPC();}
 
     public YesOrNo getImportTests() { return getPcGitSyncModel().getImportTests();}
+
+    public boolean isAuthenticateWithToken()
+    {
+        return getPcGitSyncModel().isAuthenticateWithToken();
+    }
 
     //-----------------------------------------------------------------------------------------
     // This indicates to Jenkins that this is an implementation of an extension

@@ -193,7 +193,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         String proxyOutPassword= (usernamePCPasswordCredentialsForProxy == null || pcGitSyncModel.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
         PcRestProxy restProxy = null;
         try {
-            restProxy = new PcRestProxy(pcGitSyncModel.getProtocol(), pcGitSyncModel.getPcServerName(true), pcGitSyncModel.getAlmDomain(true), pcGitSyncModel.getAlmProject(true), pcGitSyncModel.getProxyOutURL(true), proxyOutUser, proxyOutPassword);
+            restProxy = new PcRestProxy(pcGitSyncModel.getProtocol(), pcGitSyncModel.getPcServerName(true), pcGitSyncModel.isAuthenticateWithToken(), pcGitSyncModel.getAlmDomain(true), pcGitSyncModel.getAlmProject(true), pcGitSyncModel.getProxyOutURL(true), proxyOutUser, proxyOutPassword);
         }catch (PcException e){
             log(listener,  String.format("Connection to PC server failed. Error: %s", e.getMessage()), true);
             logStackTrace(listener, configureSystemSection, e);
