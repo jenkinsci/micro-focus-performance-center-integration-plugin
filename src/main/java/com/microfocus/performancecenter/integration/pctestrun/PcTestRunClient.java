@@ -110,11 +110,11 @@ public class PcTestRunClient {
                     log(listener, "%s", true, Messages.UsingPCCredentialsBuildParameters());
                 else
                     log(listener, "%s", true, Messages.UsingPCCredentialsConfiguration());
-                log(listener, "%s\n[PCServer='%s://%s/LoadTest/%s', User='%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), restProxy.GetPcServer(), restProxy.GetTenant(), usernamePCPasswordCredentials.getUsername());
+                log(listener, "%s\n[Login: Attempting to login to LoadRunner Enterprise server '%s://%s/LoadTest/%s' with credentials of %s '%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), restProxy.GetPcServer(), restProxy.GetTenant(), model.isAuthenticateWithToken() ? "ClientIdKey" : "User", usernamePCPasswordCredentials.getUsername());
                 loggedIn = restProxy.authenticate(usernamePCPasswordCredentials.getUsername(), usernamePCPasswordCredentials.getPassword().getPlainText());
             }
             else {
-                log(listener, "Performance Center credentials are missing.", true);
+                log(listener, "LoadRunner Enterprise credentials are missing.", true);
                 loggedIn = false;
             }
         } catch (NullPointerException|PcException|IOException e) {

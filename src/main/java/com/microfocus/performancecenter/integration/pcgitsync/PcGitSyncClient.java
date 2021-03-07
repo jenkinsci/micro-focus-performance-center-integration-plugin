@@ -215,10 +215,11 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             } else {
                 log(
                         listener,
-                        String.format("Login: Attempting to login to LoadRunner Enterprise server '%s://%s/LoadTest/%s' with credentials of user '%s'",
+                        String.format("Login: Attempting to login to LoadRunner Enterprise server '%s://%s/LoadTest/%s' with credentials of %s '%s'",
                                 pcGitSyncModel.getProtocol(),
                                 restProxy.GetPcServer(),
                                 restProxy.GetTenant(),
+                                pcGitSyncModel.isAuthenticateWithToken() ? "ClientIdKey" : "User",
                                 pcUser
                         ),
                         true
