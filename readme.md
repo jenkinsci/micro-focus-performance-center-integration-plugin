@@ -70,7 +70,7 @@ This version provides the following enhancements:
 - This plugin does not fail the build if there are failed attempts to synchronize "LoadRunner Developer" and Gatling scripts because there are many versions of Performance Center and LoadRunner Enterprise that do not support those scripts.
 - Additional rebranding (changing "Performance Center" to "LoadRunner Enterprise" in the build logs).
 
-### Version 1.1.5 (soon, without commitment)
+### Version 1.1.5
 This version provides the following enhancements:
 - Ability to use an LoadRunner Enterprise token API access key associated with a user for authentication (available in LoadRunner Enterprise 2021 R1 and later).
 - Added support for Selenium script (available from LoadRunner Enterprise 2021 R1 and later). A folder containing a file with ".java" extension and containing the expression "import org.openqa.selenium" is considered Selenium script.
@@ -85,6 +85,7 @@ You can download the plugin from this link:
 - [Version 1.1.2](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.2/micro-focus-performance-center-integration-1.1.2.hpi).
 - [Version 1.1.3](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.3/micro-focus-performance-center-integration-1.1.3.hpi).
 - [Version 1.1.4](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.4/micro-focus-performance-center-integration-1.1.4.hpi).
+- [Version 1.1.5](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.5/micro-focus-performance-center-integration-1.1.5.hpi).
 
 ## Prerequisites
 1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
