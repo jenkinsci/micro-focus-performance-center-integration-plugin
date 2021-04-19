@@ -400,7 +400,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
         public FormValidation doCheckPcServerName(@QueryParameter String value) {
 
-            return validateString(value, "PC Server");
+            return validateString(value, "LRE Server");
         }
 
         public FormValidation doCheckAlmUserName(@QueryParameter String value) {

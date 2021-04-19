@@ -1168,7 +1168,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
         public FormValidation doCheckPcServerName(@QueryParameter String value) {
 
-            return validateString(value, "PC Server");
+            return validateString(value, "LRE Server");
         }
 
         public FormValidation doCheckAlmDomain(@QueryParameter String value) {
