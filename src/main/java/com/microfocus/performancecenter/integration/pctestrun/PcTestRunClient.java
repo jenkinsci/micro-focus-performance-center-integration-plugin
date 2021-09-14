@@ -629,7 +629,7 @@ public class PcTestRunClient {
                 } else {
                     Thread.sleep(5000);
                     counterPublishStarted++;
-                    if(counterPublishStarted >= 120){
+                    if(counterPublishStarted >= 360){
                         String msg = String.format("%s: %s",
                                 Messages.Error(),
                                 Messages.PublishingEndTimeout());
@@ -640,7 +640,7 @@ public class PcTestRunClient {
             if (!publishEnded && resultNotFound) {
                 Thread.sleep(5000);
                 counterPublishNotStarted++;
-                if(counterPublishNotStarted >= 120){
+                if(counterPublishNotStarted >= 180){
                     String msg = String.format("%s: %s",
                             Messages.Error(),
                             Messages.PublishingStartTimeout());
