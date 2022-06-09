@@ -393,6 +393,11 @@
         </f:radioBlock>
         </table>
     </td>
-
-  
+	<f:block>
+		<br />
+	</f:block>
+    <td>Trend Report Wait Time</td>
+  	<f:entry title="Amount of time, in seconds, to wait before downloading the trend report" field="trendReportWaitTime">
+  		<f:textbox name="pc.trendReportWaitTime" style="width:40px;height:24px;text-align:center;margin:0px" value="${instance.pcTestRunModel.trendReportWaitTime}" default="0" />
+  	</f:entry>
 </j:jelly>

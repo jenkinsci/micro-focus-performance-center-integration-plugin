@@ -133,6 +133,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     private String retry;
     private String retryDelay;
     private String retryOccurrences;
+    private String trendReportWaitTime;
     private boolean authenticateWithToken;
 
     private int runId;
@@ -172,6 +173,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             String retry,
             String retryDelay,
             String retryOccurrences,
+            String trendReportWaitTime,
             boolean authenticateWithToken) {
 
         this.serverAndPort = serverAndPort;
@@ -198,6 +200,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         this.retry = (retry == null || retry.isEmpty())? "NO_RETRY" : retry;
         this.retryDelay = ("NO_RETRY".equals(this.retry)) ? "0" : (retryDelay == null || retryDelay.isEmpty()) ? "5" : retryDelay;
         this.retryOccurrences = ("NO_RETRY".equals(this.retry)) ? "0" : (retryOccurrences == null || retryOccurrences.isEmpty()) ? "3" : retryOccurrences;
+        this.trendReportWaitTime = (trendReportWaitTime != null && !retryDelay.isEmpty() && isInteger(trendReportWaitTime)) ? trendReportWaitTime : "0";
         this.authenticateWithToken = authenticateWithToken;
         configureSystemSection = ConfigureSystemSection.get();
     }
@@ -320,6 +323,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                             retry,
                             retryDelay,
                             retryOccurrences,
+                            trendReportWaitTime,
                             authenticateWithToken);
         }
         return pcTestRunModel;
@@ -472,6 +476,12 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                     Thread.sleep(5000);
                     pcTestRunClient.addRunToTrendReport(this.runId, getPcTestRunModel().getTrendReportId(true));
                     pcTestRunClient.waitForRunToPublishOnTrendReport(this.runId, getPcTestRunModel().getTrendReportId(true));
+                    int waitTimeInSecondsBeforeRequestingTrendReport = getWaitTimeInSecondsBeforeRequestingTrendReport();
+                    if(waitTimeInSecondsBeforeRequestingTrendReport > 0) {
+                        String waitTimeBeforeRequestingTrendReportMessage = String.format("Waiting %s seconds before downloading trend report", waitTimeInSecondsBeforeRequestingTrendReport);
+                        log(listener, "%s", true, waitTimeBeforeRequestingTrendReportMessage);
+                        Thread.sleep(waitTimeInSecondsBeforeRequestingTrendReport * 1000);
+                    }
                     pcTestRunClient.downloadTrendReportAsPdf(getPcTestRunModel().getTrendReportId(true), getTrendReportsDirectory(build));
                     trendReportReady = true;
                 }
@@ -495,6 +505,13 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         }
 
         return ret;
+    }
+
+    private int getWaitTimeInSecondsBeforeRequestingTrendReport() {
+        int waitTimeInSecondsBeforeRequestingTrendReport = Integer.parseInt(trendReportWaitTime);
+        waitTimeInSecondsBeforeRequestingTrendReport = waitTimeInSecondsBeforeRequestingTrendReport > 300 ? 300 : waitTimeInSecondsBeforeRequestingTrendReport;
+        waitTimeInSecondsBeforeRequestingTrendReport = waitTimeInSecondsBeforeRequestingTrendReport < 0 ? 0 : waitTimeInSecondsBeforeRequestingTrendReport;
+        return waitTimeInSecondsBeforeRequestingTrendReport;
     }
 
     private String buildEventLogString(PcRunEventLog eventLog) {
@@ -618,6 +635,22 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         logger.println(String.format("%s", res.toString().replace(": <div/>","")));
 
         return res.equals(FormValidation.ok());
+    }
+
+    public static boolean isInteger(String s) {
+        return isInteger(s,10);
+    }
+
+    public static boolean isInteger(String s, int radix) {
+        if(s.isEmpty()) return false;
+        for(int i = 0; i < s.length(); i++) {
+            if(i == 0 && s.charAt(i) == '-') {
+                if(s.length() == 1) return false;
+                else continue;
+            }
+            if(Character.digit(s.charAt(i),radix) < 0) return false;
+        }
+        return true;
     }
 
     private Testsuites parsePcRunResponse(Testsuites ret,
@@ -1121,6 +1154,10 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         return getPcTestRunModel().getRetryOccurrences();
     }
 
+    public String getTrendReportWaitTime () {
+        return getPcTestRunModel().getTrendReportWaitTime();
+    }
+
     public String getRetryDelay () {
         return getPcTestRunModel().getRetryDelay();
     }
@@ -1214,6 +1251,10 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         public FormValidation doCheckRetryOccurrences(@QueryParameter String value) {
 
             return validateHigherThanInt(value, "Number of attempts", 0, true);
+        }
+
+        public FormValidation doCheckTrendReportWaitTime(@QueryParameter String value) {
+            return validateHigherThanInt(value, "Wait before downloading trend report", 0, false);
         }
 
         // if autoTestInstanceID is selected we don't need to check the validation of the test instance

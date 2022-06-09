@@ -29,9 +29,9 @@ public class MockPcTestRunModel extends PcTestRunModel {
 
     public MockPcTestRunModel(String serverAndPort, String pcServerName, String credential, String almDomain,
                               String almProject, String testToRun, String testId, String testContentToCreate, String autoTestInstanceID, String testInstanceId, String timeslotDurationHours,
-                              String timeslotDurationMinutes, PostRunAction postRunAction, boolean vudsMode, String description, boolean webProtocol, String retry, String retryDelay, String retryOccurrences, boolean authenticateWithToken) {
+                              String timeslotDurationMinutes, PostRunAction postRunAction, boolean vudsMode, String description, boolean webProtocol, String retry, String retryDelay, String retryOccurrences, String trendReportWaitTime, boolean authenticateWithToken) {
         super(serverAndPort, pcServerName, credential, almDomain, almProject, testToRun, testId, testContentToCreate, autoTestInstanceID, testInstanceId, timeslotDurationHours,
-                timeslotDurationMinutes, postRunAction, vudsMode, description, "NO_TREND", null,false,null,null, retry, retryDelay, retryOccurrences, authenticateWithToken
+                timeslotDurationMinutes, postRunAction, vudsMode, description, "NO_TREND", null,false,null,null, retry, retryDelay, retryOccurrences, trendReportWaitTime, authenticateWithToken
         );
     }
 

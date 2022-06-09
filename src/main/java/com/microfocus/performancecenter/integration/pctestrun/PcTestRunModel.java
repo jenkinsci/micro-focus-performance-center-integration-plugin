@@ -61,6 +61,7 @@ public class PcTestRunModel {
     private String                 retry;
     private String                 retryDelay;
     private String                 retryOccurrences;
+    private String                 trendReportWaitTime;
     private final boolean          authenticateWithToken;
 
 
@@ -68,7 +69,7 @@ public class PcTestRunModel {
     public PcTestRunModel(String serverAndPort, String pcServerName, String credentialsId, String almDomain, String almProject, String testToRun,
                           String testId, String testContentToCreate, String autoTestInstanceID, String testInstanceId, String timeslotDurationHours, String timeslotDurationMinutes,
                           PostRunAction postRunAction, boolean vudsMode, String description, String addRunToTrendReport, String trendReportId, boolean HTTPSProtocol,
-                          String proxyOutURL, String credentialsProxyId, String retry, String retryDelay, String retryOccurrences, boolean authenticateWithToken) {
+                          String proxyOutURL, String credentialsProxyId, String retry, String retryDelay, String retryOccurrences, String trendReportWaitTime, boolean authenticateWithToken) {
 
         this.serverAndPort = serverAndPort;
         this.pcServerName = pcServerName;
@@ -93,6 +94,7 @@ public class PcTestRunModel {
         this.retry = retry;
         this.retryDelay = verifyStringValueIsIntAndPositive(retryDelay, 5);
         this.retryOccurrences = verifyStringValueIsIntAndPositive(retryOccurrences, 3);
+        this.trendReportWaitTime = verifyStringValueIsIntAndPositive(trendReportWaitTime, 0);
         this.authenticateWithToken = authenticateWithToken;
 
     }
@@ -136,6 +138,11 @@ public class PcTestRunModel {
     public String getRetryOccurrences() {
 
         return this.retryOccurrences;
+    }
+
+    public String getTrendReportWaitTime() {
+
+        return this.trendReportWaitTime;
     }
 
     public String getServerAndPort(){
