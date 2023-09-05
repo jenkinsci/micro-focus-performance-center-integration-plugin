@@ -2,6 +2,9 @@
 # OpenText LoadRunner Enterprise Integration with Git
 This plugin integrates OpenText LoadRunner Enterprise with Git via Jenkins.
 
+Project status:
+[![Build status](https://ci.jenkins.io/buildStatus/icon?job=Plugins/micro-focus-performance-center-integration-plugin/master)](https://ci.jenkins.io/job/Plugins/job/micro-focus-performance-center-integration-plugin/job/master/)
+
 ---
 **Table of Content**
 
