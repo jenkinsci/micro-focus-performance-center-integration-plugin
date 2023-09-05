@@ -212,6 +212,7 @@
                     </signature>
                 </configuration>
             </plugin>
+			<!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -228,6 +229,7 @@
                     </execution>
                 </executions>
             </plugin>
+			-->
         </plugins>
     </build>
     <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
