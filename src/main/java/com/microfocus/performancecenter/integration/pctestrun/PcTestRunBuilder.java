@@ -1,25 +1,25 @@
 /*
- * © Copyright 2013 EntIT Software LLC
- *  Certain versions of software and/or documents ("Material") accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
+ *  Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+ *  This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+ *  Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
  *
- * © Copyright 2012-2018 Micro Focus or one of its affiliates.
+ * Copyright 2012-2023 Open Text
  *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors ("Micro Focus") are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
+ * The only warranties for products and services of Open Text and
+ * its affiliates and licensors (“Open Text”) are as may be set forth
+ * in the express warranty statements accompanying such products and services.
+ * Nothing herein should be construed as constituting an additional warranty.
+ * Open Text shall not be liable for technical or editorial errors or
+ * omissions contained herein. The information contained herein is subject
+ * to change without notice.
  *
+ * Except as specifically indicated otherwise, this document contains
+ * confidential information and a valid license is required for possession,
+ * use or copying. If this work is provided to the U.S. Government,
+ * consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+ * Computer Software Documentation, and Technical Data for Commercial Items are
+ * licensed to the U.S. Government under vendor's standard commercial license.
  */
-
 
 /*
  * Create the PCModel and the PCClient and allows the connection between the job and PC\LRE
@@ -33,11 +33,11 @@ import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
-import com.microfocus.adm.performancecenter.plugins.common.pcentities.pcsubentities.test.Test;
 import com.microfocus.performancecenter.integration.common.helpers.configuration.ConfigurationService;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.Error;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.Failure;
 import com.microfocus.performancecenter.integration.common.helpers.result.model.junit.*;
+import com.microfocus.performancecenter.integration.common.helpers.utils.BuildParametersAndEnvironmentVariables;
 import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 import com.microfocus.performancecenter.integration.pctestrun.helper.AdditionalParametersAction;
 import com.thoughtworks.xstream.XStream;
@@ -52,6 +52,7 @@ import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.tasks.SimpleBuildStep;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.jenkinsci.Symbol;
@@ -74,11 +75,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.FilenameUtils;
-import java.util.HashMap;
-import hudson.util.LogTaskListener;
-import java.util.logging.Level;
-import com.microfocus.performancecenter.integration.common.helpers.utils.BuildParametersAndEnvironmentVariables;
 
 import static com.microfocus.adm.performancecenter.plugins.common.pcentities.RunState.FINISHED;
 import static com.microfocus.adm.performancecenter.plugins.common.pcentities.RunState.RUN_FAILURE;
@@ -87,7 +83,6 @@ import static com.microfocus.performancecenter.integration.common.helpers.utils.
 
 public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
-    private static final String artifactsDirectoryName = "archive";
     public static final String artifactsResourceName = "artifact";
     public static final String runReportStructure = "%s/%s/performanceTestsReports/pcRun";
     public static final String runNVInsightsReportStructure = "%s/%s/performanceTestsNVInsights/pcRun";
@@ -96,22 +91,20 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     public static final String pcNVInsightsReportArchiveName = "NVInsights.zip";
     public static final String pcReportFileName = "Report.html";
     public static final String pcNVInsightsReportFileName = "index.html";
+    public static final String TRENDED = "Trended";
+    public static final String PENDING = "Pending";
+    public static final String PUBLISHING = "Publishing";
+    public static final String ERROR = "Error";
+    private static final String artifactsDirectoryName = "archive";
     private static final String RUNID_BUILD_VARIABLE = "PC_RUN_ID";
-
-    public static final String    TRENDED         = "Trended";
-    public static final String    PENDING         = "Pending";
-    public static final String    PUBLISHING      = "Publishing";
-    public static final String    ERROR           = "Error";
-
-    private PcTestRunModel pcTestRunModel;
     public static UsernamePasswordCredentials usernamePCPasswordCredentials;
     public static UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy;
     private transient static Run<?, ?> _run;
-
+    private static PrintStream logger;
     private final String timeslotDurationHours;
     private final String timeslotDurationMinutes;
     private final boolean statusBySLA;
-
+    private PcTestRunModel pcTestRunModel;
     private String serverAndPort;
     private String pcServerName;
     private String credentialsId;
@@ -135,13 +128,12 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     private String retryOccurrences;
     private String trendReportWaitTime;
     private boolean authenticateWithToken;
-
+    private boolean searchTimeslot;
     private int runId;
     private String testName;
     private FilePath pcReportFile;
     private FilePath pcNVInsgithsFile;
     private String junitResultsFileName;
-    private static PrintStream logger;
     private File WorkspacePath;
     private FilePath Workspace;
     private TaskListener listener;
@@ -174,7 +166,8 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             String retryDelay,
             String retryOccurrences,
             String trendReportWaitTime,
-            boolean authenticateWithToken) {
+            boolean authenticateWithToken,
+            boolean searchTimeslot) {
 
         this.serverAndPort = serverAndPort;
         this.pcServerName = pcServerName;
@@ -196,84 +189,26 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         this.trendReportId = trendReportId;
         this.HTTPSProtocol = HTTPSProtocol;
         this.proxyOutURL = proxyOutURL;
-        this.credentialsProxyId  = credentialsProxyId;
-        this.retry = (retry == null || retry.isEmpty())? "NO_RETRY" : retry;
+        this.credentialsProxyId = credentialsProxyId;
+        this.retry = (retry == null || retry.isEmpty()) ? "NO_RETRY" : retry;
         this.retryDelay = ("NO_RETRY".equals(this.retry)) ? "0" : (retryDelay == null || retryDelay.isEmpty()) ? "5" : retryDelay;
         this.retryOccurrences = ("NO_RETRY".equals(this.retry)) ? "0" : (retryOccurrences == null || retryOccurrences.isEmpty()) ? "3" : retryOccurrences;
         this.trendReportWaitTime = (trendReportWaitTime != null && !retryDelay.isEmpty() && isInteger(trendReportWaitTime)) ? trendReportWaitTime : "0";
         this.authenticateWithToken = authenticateWithToken;
+        this.searchTimeslot = searchTimeslot;
         configureSystemSection = ConfigureSystemSection.get();
     }
 
-    @Override
-    public DescriptorImpl getDescriptor() {
-
-        return (DescriptorImpl) super.getDescriptor();
-    }
-
-    @Override
-    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
-            throws InterruptedException, IOException {
-        if(build.getWorkspace() != null)
-            WorkspacePath =  new File(build.getWorkspace().toURI());
-        else
-            WorkspacePath =  null;
-        if((getPcTestRunModel() != null) && (build != null) && (build instanceof AbstractBuild))
-            setPcTestRunModelBuildParameters(build, listener);
-        if(build.getWorkspace() != null)
-            perform(build, build.getWorkspace(), launcher, listener);
-        else
-            return false;
-        return true;
-    }
-
-    private void setPcTestRunModelBuildParameters(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
-        BuildParametersAndEnvironmentVariables buildParametersAndEnvironmentVariables = new BuildParametersAndEnvironmentVariables(build, listener).invoke();
-        String buildParametersAndEnvars = buildParametersAndEnvironmentVariables.getBuildParametersAndEnvars();
-        if (!buildParametersAndEnvars.isEmpty())
-            getPcTestRunModel().setBuildParameters(buildParametersAndEnvars);
-    }
-
-    public File getWorkspacePath(){
-        return WorkspacePath;
-    }
-
-
-    public String getCredentialsId() {
-        return credentialsId;
-    }
-
-    public String getCredentialsProxyId() {
-        return credentialsProxyId;
-    }
-
-    public static UsernamePasswordCredentials getCredentialsId(String credentialsId)
-    {
-        if(credentialsId!=null && _run != null )
+    public static UsernamePasswordCredentials getCredentialsId(String credentialsId) {
+        if (credentialsId != null && _run != null)
             return getCredentialsById(credentialsId, _run, logger);
         return null;
     }
 
-    public static UsernamePasswordCredentials getCredentialsProxyId(String credentialsProxyId)
-    {
-        if(credentialsProxyId!=null && _run != null )
+    public static UsernamePasswordCredentials getCredentialsProxyId(String credentialsProxyId) {
+        if (credentialsProxyId != null && _run != null)
             return getCredentialsById(credentialsProxyId, _run, logger);
         return null;
-    }
-
-
-    public  void setCredentialsId(String newCredentialsId)
-    {
-        credentialsId = newCredentialsId;
-        pcTestRunModel = null;
-        getPcTestRunModel();
-    }
-
-    public  void setCredentialsProxyId(String newCredentialsProxyId)
-    {
-        credentialsProxyId = newCredentialsProxyId;
-        pcTestRunModel = null;
-        getPcTestRunModel();
     }
 
     private static UsernamePasswordCredentials getCredentialsById(String credentialsId, Run<?, ?> run, PrintStream logger) {
@@ -292,46 +227,6 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         }
 
         return usernamePCPasswordCredentials;
-    }
-
-    //pcTestRunModel is intialized here.
-    public PcTestRunModel getPcTestRunModel() {
-        if(pcTestRunModel == null)
-        {
-            pcTestRunModel =
-                    new PcTestRunModel(
-                            serverAndPort.trim(),
-                            pcServerName.trim(),
-                            credentialsId,
-                            almDomain.trim(),
-                            almProject.trim(),
-                            testToRun,
-                            testId.trim(),
-                            testContentToCreate,
-                            autoTestInstanceID,
-                            testInstanceId.trim(),
-                            timeslotDurationHours.trim(),
-                            timeslotDurationMinutes.trim(),
-                            postRunAction,
-                            vudsMode,
-                            description,
-                            addRunToTrendReport,
-                            trendReportId,
-                            HTTPSProtocol,
-                            proxyOutURL,
-                            credentialsProxyId,
-                            retry,
-                            retryDelay,
-                            retryOccurrences,
-                            trendReportWaitTime,
-                            authenticateWithToken);
-        }
-        return pcTestRunModel;
-    }
-
-    public String getRunResultsFileName() {
-
-        return junitResultsFileName;
     }
 
     public static String getArtifactsDirectoryName() {
@@ -373,33 +268,140 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         return pcNVInsightsReportArchiveName;
     }
 
-    private void setBuildParameters (AbstractBuild<?, ?> build)
-    {
+    public static boolean isInteger(String s) {
+        return isInteger(s, 10);
+    }
+
+    public static boolean isInteger(String s, int radix) {
+        if (s.isEmpty()) return false;
+        for (int i = 0; i < s.length(); i++) {
+            if (i == 0 && s.charAt(i) == '-') {
+                if (s.length() == 1) return false;
+                else continue;
+            }
+            if (Character.digit(s.charAt(i), radix) < 0) return false;
+        }
+        return true;
+    }
+
+    @Override
+    public DescriptorImpl getDescriptor() {
+
+        return (DescriptorImpl) super.getDescriptor();
+    }
+
+    @Override
+    public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
+            throws InterruptedException, IOException {
+        if (build.getWorkspace() != null)
+            WorkspacePath = new File(build.getWorkspace().toURI());
+        else
+            WorkspacePath = null;
+        if ((getPcTestRunModel() != null) && (build != null) && (build instanceof AbstractBuild))
+            setPcTestRunModelBuildParameters(build, listener);
+        if (build.getWorkspace() != null)
+            perform(build, build.getWorkspace(), launcher, listener);
+        else
+            return false;
+        return true;
+    }
+
+    private void setPcTestRunModelBuildParameters(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
+        BuildParametersAndEnvironmentVariables buildParametersAndEnvironmentVariables = new BuildParametersAndEnvironmentVariables(build, listener).invoke();
+        String buildParametersAndEnvars = buildParametersAndEnvironmentVariables.getBuildParametersAndEnvars();
+        if (!buildParametersAndEnvars.isEmpty())
+            getPcTestRunModel().setBuildParameters(buildParametersAndEnvars);
+    }
+
+    public File getWorkspacePath() {
+        return WorkspacePath;
+    }
+
+    public String getCredentialsId() {
+        return credentialsId;
+    }
+
+    public void setCredentialsId(String newCredentialsId) {
+        credentialsId = newCredentialsId;
+        pcTestRunModel = null;
+        getPcTestRunModel();
+    }
+
+    public String getCredentialsProxyId() {
+        return credentialsProxyId;
+    }
+
+    public void setCredentialsProxyId(String newCredentialsProxyId) {
+        credentialsProxyId = newCredentialsProxyId;
+        pcTestRunModel = null;
+        getPcTestRunModel();
+    }
+
+    //pcTestRunModel is intialized here.
+    public PcTestRunModel getPcTestRunModel() {
+        if (pcTestRunModel == null) {
+            pcTestRunModel =
+                    new PcTestRunModel(
+                            serverAndPort.trim(),
+                            pcServerName.trim(),
+                            credentialsId,
+                            almDomain.trim(),
+                            almProject.trim(),
+                            testToRun,
+                            testId.trim(),
+                            testContentToCreate,
+                            autoTestInstanceID,
+                            testInstanceId.trim(),
+                            timeslotDurationHours.trim(),
+                            timeslotDurationMinutes.trim(),
+                            postRunAction,
+                            vudsMode,
+                            description,
+                            addRunToTrendReport,
+                            trendReportId,
+                            HTTPSProtocol,
+                            proxyOutURL,
+                            credentialsProxyId,
+                            retry,
+                            retryDelay,
+                            retryOccurrences,
+                            trendReportWaitTime,
+                            authenticateWithToken,
+                            searchTimeslot
+                    );
+        }
+        return pcTestRunModel;
+    }
+
+    public String getRunResultsFileName() {
+
+        return junitResultsFileName;
+    }
+
+    private void setBuildParameters(AbstractBuild<?, ?> build) {
         try {
             if (build != null && build.getBuildVariables() != null)
                 getPcTestRunModel().setBuildParameters(build.getBuildVariables().toString());
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             logger.println(String.format("%s: %s",
                     Messages.BuildParameterNotConsidered(),
                     ex.getMessage()));
         }
     }
 
-
     private Testsuites execute(TaskListener listener, PcTestRunClient pcTestRunClient, Run<?, ?> build)
-            throws InterruptedException,NullPointerException {
+            throws InterruptedException {
         _run = build;
         this.listener = listener;
         try {
             try {
                 String version = ConfigurationService.getVersion();
-                if(!(version == null || version.equals("unknown")))
+                if (!(version == null || version.equals("unknown")))
                     log(listener, "%s '%s'", true, Messages.PluginVersionIs(), version);
-            } catch(IllegalStateException ex) {
+            } catch (IllegalStateException ex) {
                 log(listener, "Error: IllegalStateException '%s'", true, ex.getMessage());
             }
-            if((getPcTestRunModel() !=null) && (build != null) && (build instanceof AbstractBuild))
+            if ((getPcTestRunModel() != null) && (build != null) && (build instanceof AbstractBuild))
                 setPcTestRunModelBuildParameters((AbstractBuild) build, null);
             if (!StringUtils.isBlank(getPcTestRunModel().getDescription()))
                 log(listener, "%s: %s", true, Messages.TestDescription(), getPcTestRunModel().getDescription());
@@ -412,8 +414,6 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             build.setResult(Result.ABORTED);
             pcTestRunClient.stopRun(runId);
             throw e;
-        } catch (NullPointerException e) {
-            log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
         } catch (Exception e) {
             log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
         } finally {
@@ -425,7 +425,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     private Testsuites run(PcTestRunClient pcTestRunClient, Run<?, ?> build, TaskListener listener)
             throws InterruptedException, ClientProtocolException,
             IOException, PcException {
-        if((getPcTestRunModel() !=null) && (build != null) && (build instanceof AbstractBuild))
+        if ((getPcTestRunModel() != null) && (build != null) && (build instanceof AbstractBuild))
             setPcTestRunModelBuildParameters((AbstractBuild) build, null);
         PcRunResponse response = null;
         String errorMessage = "";
@@ -435,8 +435,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             runId = pcTestRunClient.startRun();
             if (runId == 0)
                 return null;
-        }
-        catch (NumberFormatException|PcException|IOException ex) {
+        } catch (NumberFormatException | PcException | IOException ex) {
             log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
             logStackTrace(listener, configureSystemSection, ex);
             throw ex;
@@ -445,14 +444,12 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         //getTestName failure should not fail test execution.
         try {
             testName = pcTestRunClient.getTestName();
-            if(testName == null) {
+            if (testName == null) {
                 testName = String.format("TestId_%s", getPcTestRunModel().getTestId());
                 log(listener, "getTestName failed. Using '%s' as testname.", true, testName);
-            }
-            else
+            } else
                 log(listener, "%s '%s'.", true, Messages.TestNameIs(), testName);
-        }
-        catch (PcException|IOException ex) {
+        } catch (PcException | IOException ex) {
             testName = String.format("TestId_%s", getPcTestRunModel().getTestId());
             log(listener, "getTestName failed. Using '%s' as testname. Error: %s \n", true, testName, ex.getMessage());
             logStackTrace(listener, configureSystemSection, ex);
@@ -472,12 +469,12 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 pcNVInsgithsFile = pcTestRunClient.publishRunNVInsightsReport(runId, getNVInsightsReportDirectory(build));
 
                 // Adding the trend report section if ID has been set or if the Associated Trend report is selected.
-                if(((("USE_ID").equals(getPcTestRunModel().getAddRunToTrendReport()) && getPcTestRunModel().getTrendReportId(true) != null) || ("ASSOCIATED").equals(getPcTestRunModel().getAddRunToTrendReport())) && RunState.get(response.getRunState()) != RUN_FAILURE){
+                if (((("USE_ID").equals(getPcTestRunModel().getAddRunToTrendReport()) && getPcTestRunModel().getTrendReportId(true) != null) || ("ASSOCIATED").equals(getPcTestRunModel().getAddRunToTrendReport())) && RunState.get(response.getRunState()) != RUN_FAILURE) {
                     Thread.sleep(5000);
                     pcTestRunClient.addRunToTrendReport(this.runId, getPcTestRunModel().getTrendReportId(true));
                     pcTestRunClient.waitForRunToPublishOnTrendReport(this.runId, getPcTestRunModel().getTrendReportId(true));
                     int waitTimeInSecondsBeforeRequestingTrendReport = getWaitTimeInSecondsBeforeRequestingTrendReport();
-                    if(waitTimeInSecondsBeforeRequestingTrendReport > 0) {
+                    if (waitTimeInSecondsBeforeRequestingTrendReport > 0) {
                         String waitTimeBeforeRequestingTrendReportMessage = String.format("Waiting %s seconds before downloading trend report", waitTimeInSecondsBeforeRequestingTrendReport);
                         log(listener, "%s", true, waitTimeBeforeRequestingTrendReportMessage);
                         Thread.sleep(waitTimeInSecondsBeforeRequestingTrendReport * 1000);
@@ -497,10 +494,10 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         }
 
         Testsuites ret = new Testsuites();
-        parsePcRunResponse(ret,response, build, errorMessage, eventLogString);
+        parsePcRunResponse(ret, response, build, errorMessage, eventLogString);
         try {
-            parsePcTrendResponse(ret,build, pcTestRunClient,trendReportReady, getPcTestRunModel().getTrendReportId(true),runId);
-        } catch (IntrospectionException|NoSuchMethodException e) {
+            parsePcTrendResponse(ret, build, pcTestRunClient, trendReportReady, getPcTestRunModel().getTrendReportId(true), runId);
+        } catch (IntrospectionException | NoSuchMethodException e) {
             logStackTrace(listener, configureSystemSection, e);
         }
 
@@ -517,7 +514,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     private String buildEventLogString(PcRunEventLog eventLog) {
 
         String logFormat = "%-5s | %-7s | %-19s | %s\n";
-        StringBuilder eventLogStr = new StringBuilder("Event Log:\n\n" + String.format(logFormat, "ID", "TYPE", "TIME","DESCRIPTION"));
+        StringBuilder eventLogStr = new StringBuilder("Event Log:\n\n" + String.format(logFormat, "ID", "TYPE", "TIME", "DESCRIPTION"));
         for (PcRunEventLogRecord record : eventLog.getRecordsList()) {
             eventLogStr.append(String.format(logFormat, record.getID(), record.getType(), record.getTime(), record.getDescription()));
         }
@@ -549,7 +546,6 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 artifactsDirectoryName);
     }
 
-
     @Override
     @Deprecated
     public boolean perform(Build<?, ?> build, Launcher launcher, BuildListener listener) throws InterruptedException, IOException {
@@ -569,7 +565,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 name = name.replace(prefix, "").toLowerCase();
                 for (Method modelMethod : modelMethods) {
                     String modelMethodName = modelMethod.getName();
-                    if (modelMethodName.equalsIgnoreCase("get" + name) && modelMethod.getParameterTypes().length==0) {
+                    if (modelMethodName.equalsIgnoreCase("get" + name) && modelMethod.getParameterTypes().length == 0) {
                         try {
                             Object obj = FormValidation.ok();
                             if (!("testinstanceid".equals(name) && "AUTO".equals(getPcTestRunModel().getAutoTestInstanceID()))
@@ -578,11 +574,11 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                                     && !"testcontenttocreate".equals(name)
                                     && !"testid".equals(name)
                                     && !"testtorun".equals(name)
-                                    ) {
-                                if("doCheckCredentialsId".equals(method.getName()) && "credentialsid".equals(name) && "getCredentialsId".equals(modelMethodName)
+                            ) {
+                                if ("doCheckCredentialsId".equals(method.getName()) && "credentialsid".equals(name) && "getCredentialsId".equals(modelMethodName)
                                         || "doCheckCredentialsProxyId".equals(method.getName()) && "credentialsproxyid".equals(name) && "getCredentialsProxyId".equals(modelMethodName)
-                                        )
-                                    obj = method.invoke(getDescriptor(), null,null, modelMethod.invoke(getPcTestRunModel()));
+                                )
+                                    obj = method.invoke(getDescriptor(), null, null, modelMethod.invoke(getPcTestRunModel()));
                                 else
                                     obj = method.invoke(getDescriptor(), modelMethod.invoke(getPcTestRunModel()));
                             }
@@ -600,31 +596,27 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        boolean isTrendReportIdValid = validateTrendReportIdIsNumeric(getPcTestRunModel().getTrendReportId(true),("USE_ID").equals(getPcTestRunModel().getAddRunToTrendReport()));
+        boolean isTrendReportIdValid = validateTrendReportIdIsNumeric(getPcTestRunModel().getTrendReportId(true), ("USE_ID").equals(getPcTestRunModel().getAddRunToTrendReport()));
 
         ret &= isTrendReportIdValid;
         return ret;
 
     }
 
-
-
-    private boolean validateTrendReportIdIsNumeric(String trendReportId, boolean addRunToTrendReport){
+    private boolean validateTrendReportIdIsNumeric(String trendReportId, boolean addRunToTrendReport) {
 
         FormValidation res = FormValidation.ok();
-        if(addRunToTrendReport){
-            if(trendReportId.isEmpty()){
+        if (addRunToTrendReport) {
+            if (trendReportId.isEmpty()) {
                 res = FormValidation.error(String.format("%s: %s.",
                         Messages.ParameterIsMissing(),
                         Messages.TrendReportIDIsMissing()));
-            }
-            else{
+            } else {
 
-                try{
+                try {
 
                     Integer.parseInt(trendReportId);
-                }
-                catch(NumberFormatException e) {
+                } catch (NumberFormatException e) {
 
                     res = FormValidation.error(Messages.IllegalParameter());
                 }
@@ -632,25 +624,9 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             }
         }
 
-        logger.println(String.format("%s", res.toString().replace(": <div/>","")));
+        logger.println(String.format("%s", res.toString().replace(": <div/>", "")));
 
         return res.equals(FormValidation.ok());
-    }
-
-    public static boolean isInteger(String s) {
-        return isInteger(s,10);
-    }
-
-    public static boolean isInteger(String s, int radix) {
-        if(s.isEmpty()) return false;
-        for(int i = 0; i < s.length(); i++) {
-            if(i == 0 && s.charAt(i) == '-') {
-                if(s.length() == 1) return false;
-                else continue;
-            }
-            if(Character.digit(s.charAt(i),radix) < 0) return false;
-        }
-        return true;
     }
 
     private Testsuites parsePcRunResponse(Testsuites ret,
@@ -681,10 +657,10 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         return ret;
     }
 
-    private Testsuites parsePcTrendResponse(Testsuites ret, Run<?, ?> build, PcTestRunClient pcTestRunClient, boolean trendReportReady, String TrendReportID, int runID) throws PcException,IntrospectionException,IOException, InterruptedException ,NoSuchMethodException{
+    private Testsuites parsePcTrendResponse(Testsuites ret, Run<?, ?> build, PcTestRunClient pcTestRunClient, boolean trendReportReady, String TrendReportID, int runID) throws PcException, IntrospectionException, IOException, InterruptedException, NoSuchMethodException {
 
 
-        if(trendReportReady){
+        if (trendReportReady) {
             String reportUrlTemp = trendReportStructure.replaceFirst("%s/", "") + "/trendReport%s.pdf";
             String reportUrl = String.format(reportUrlTemp, artifactsResourceName, getPcTestRunModel().getTrendReportId(true));
             pcTestRunClient.publishTrendReport(reportUrl, getPcTestRunModel().getTrendReportId(true));
@@ -696,7 +672,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 updateCSVFilesForPlot(pcTestRunClient, runID);
                 String plotUrlPath = "/job/" + build.getParent().getName() + "/plot";
                 logger.println(String.format("%s", HyperlinkNote.encodeTo(plotUrlPath, Messages.TrendingCharts()))); // + HyperlinkNote.encodeTo("https://wiki.jenkins-ci.org/display/JENKINS/HP+Application+Automation+Tools#HPApplicationAutomationTools-RunningPerformanceTestsusingHPPerformanceCenter","More Info"));
-            }else{
+            } else {
                 logger.println(String.format("%s %s (%s).",
                         Messages.YouCanViewTrendCharts(),
                         HyperlinkNote.encodeTo("https://wiki.jenkins.io/display/JENKINS/MICRO+FOCUS+Application+Automation+Tools#MicroFocusApplicationAutomationTools-RunningPerformanceTestsusingPerformanceCenter", Messages.Documentation()),
@@ -706,7 +682,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         return ret;
     }
 
-    private boolean isPluginActive(String pluginDisplayName){
+    private boolean isPluginActive(String pluginDisplayName) {
         List<PluginWrapper> allPlugin = Jenkins.getInstance().pluginManager.getPlugins();
         for (PluginWrapper pw :
                 allPlugin) {
@@ -716,31 +692,6 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             }
         }
         return false;
-    }
-
-    private class TriTrendReportTypes {
-
-        private TrendReportTypes.DataType dataType;
-        private TrendReportTypes.PctType pctType;
-        private TrendReportTypes.Measurement measurement;
-
-        public TrendReportTypes.DataType getDataType() {
-            return dataType;
-        }
-
-        public TrendReportTypes.PctType getPctType() {
-            return pctType;
-        }
-
-        public TrendReportTypes.Measurement getMeasurement() {
-            return measurement;
-        }
-
-        TriTrendReportTypes (TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType, TrendReportTypes.Measurement measurement) {
-            this.dataType = dataType;
-            this.pctType = pctType;
-            this.measurement = measurement;
-        }
     }
 
     private void updateCSVFilesForPlot(PcTestRunClient pcTestRunClient, int runId) throws IOException, PcException, IntrospectionException, NoSuchMethodException {
@@ -782,21 +733,20 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 new TriTrendReportTypes(TrendReportTypes.DataType.Regular, TrendReportTypes.PctType.WEB, TrendReportTypes.Measurement.PCT_SUM1)
         };
 
-        for (TriTrendReportTypes triTrendReportType : triTrendReportTypes
-                ) {
+        for (TriTrendReportTypes triTrendReportType : triTrendReportTypes) {
             saveFileToWorkspacePath(pcTestRunClient, getPcTestRunModel().getTrendReportId(true), runId, triTrendReportType.getDataType(), triTrendReportType.getPctType(), triTrendReportType.getMeasurement());
         }
 
     }
 
-    private boolean saveFileToWorkspacePath(PcTestRunClient pcTestRunClient, String trendReportID, int runId, TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType, TrendReportTypes.Measurement measurement)throws IOException, PcException, IntrospectionException, NoSuchMethodException{
-        String fileName = measurement.toString().toLowerCase()  + "_" +  pctType.toString().toLowerCase() + ".csv";
+    private boolean saveFileToWorkspacePath(PcTestRunClient pcTestRunClient, String trendReportID, int runId, TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType, TrendReportTypes.Measurement measurement) throws IOException, PcException, IntrospectionException, NoSuchMethodException {
+        String fileName = measurement.toString().toLowerCase() + "_" + pctType.toString().toLowerCase() + ".csv";
 
 
         try {
             Map<String, String> measurementMap = pcTestRunClient.getTrendReportByXML(trendReportID, runId, dataType, pctType, measurement);
             FilePath filePath = new FilePath(Workspace.getChannel(), getWorkspacePath().getPath() + "/" + fileName);
-            String filepathContent="";
+            String filepathContent = "";
             for (String key : measurementMap.keySet()) {
                 filepathContent += key + ",";
             }
@@ -830,8 +780,6 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
     }
 
-
-
     private void updateTestStatus(Testcase testCase, PcRunResponse response, String errorMessage, String eventLog) {
         RunState runState = RunState.get(response.getRunState());
         if (runState == RUN_FAILURE) {
@@ -849,14 +797,13 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                             runState,
                             errorMessage),
                     eventLog);
-        } else if(errorMessage != null && !errorMessage.isEmpty()){
+        } else if (errorMessage != null && !errorMessage.isEmpty()) {
             setFailure(testCase,
                     String.format("%s. %s",
                             runState,
                             errorMessage),
                     eventLog);
-        }
-        else{
+        } else {
             testCase.setStatus(JUnitTestCaseStatus.PASS);
         }
     }
@@ -881,7 +828,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         testCase.getFailure().add(failure);
         testCase.setStatus(JUnitTestCaseStatus.FAILURE);
         logger.println(String.format("Failure: %s %s",
-                message ,
+                message,
                 eventLog));
     }
 
@@ -895,7 +842,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                         "\n\n%s:\n%s" +
                         "\n\n%s:\n%s",
                 Messages.LoadTestRunID(), runId,
-                Messages.ViewAnalysisReport(), getPcTestRunModel().getServerAndPort() +  "/" +  build.getUrl() + viewUrl,
+                Messages.ViewAnalysisReport(), getPcTestRunModel().getServerAndPort() + "/" + build.getUrl() + viewUrl,
                 Messages.DownloadReport(), getPcTestRunModel().getServerAndPort() + "/" + build.getUrl() + downloadUrl);
     }
 
@@ -909,7 +856,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                         "\n\n%s:\n%s" +
                         "\n\n%s:\n%s",
                 Messages.LoadTestRunID(), runId,
-                Messages.ViewAnalysisReport(), getPcTestRunModel().getServerAndPort() +  "/" +  build.getUrl() + viewUrl,
+                Messages.ViewAnalysisReport(), getPcTestRunModel().getServerAndPort() + "/" + build.getUrl() + viewUrl,
                 Messages.DownloadReport(), getPcTestRunModel().getServerAndPort() + "/" + build.getUrl() + downloadUrl);
     }
 
@@ -943,9 +890,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                     Marshaller marshaller = context.createMarshaller();
                     marshaller.marshal(testsuites, writer);
                     filePath.write(writer.toString(), null);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     StringWriter writer = new StringWriter();
                     XStream xstream = new XStream();
                     xstream.autodetectAnnotations(true);
@@ -1001,25 +946,24 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         Result resultStatus = Result.FAILURE;
         //trendReportReady = false;
         logger = listener.getLogger();
-        if(credentialsId != null)
+        if (credentialsId != null)
             usernamePCPasswordCredentials = getCredentialsById(credentialsId, build, logger);
-        if(credentialsProxyId != null && !credentialsProxyId.isEmpty())
+        if (credentialsProxyId != null && !credentialsProxyId.isEmpty())
             usernamePCPasswordCredentialsForProxy = getCredentialsById(credentialsProxyId, build, logger);
         String testToCreate = "";
-        String testName ="";
+        String testName = "";
         String testFolderPath = "";
         String fileExtension = "";
-        if("CREATE_TEST".equals(getPcTestRunModel().getTestToRun())) {
-            log(listener,"",true);
-            if(verifyStringIsPath(getPcTestRunModel().getTestContentToCreate(true))) {
+        if ("CREATE_TEST".equals(getPcTestRunModel().getTestToRun())) {
+            log(listener, "", true);
+            if (verifyStringIsPath(getPcTestRunModel().getTestContentToCreate(true))) {
                 testName = fileNameWithoutExtension(getPcTestRunModel().getTestContentToCreate(true));
                 testFolderPath = filePath(getPcTestRunModel().getTestContentToCreate(true));
                 testToCreate = fileContenToString(getPcTestRunModel().getTestContentToCreate(true));
                 fileExtension = retreiveFileExtension(getPcTestRunModel().getTestContentToCreate(true));
-            }
-            else
+            } else
                 testToCreate = getPcTestRunModel().getTestContentToCreate(true);
-            log(listener,"",true);
+            log(listener, "", true);
         }
 
         PcTestRunClient pcTestRunClient = new PcTestRunClient(getPcTestRunModel(), testToCreate, testName, testFolderPath, fileExtension, listener, configureSystemSection);
@@ -1047,8 +991,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
     }
 
-
-    private boolean verifyStringIsPath (String strPossiblePath) throws InterruptedException, IOException {
+    private boolean verifyStringIsPath(String strPossiblePath) throws InterruptedException, IOException {
         FilePath filePath = new FilePath(Workspace.getChannel(), getWorkspacePath().getPath() + "/" + strPossiblePath);
         return filePath.exists();
     }
@@ -1058,117 +1001,111 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         return ".".concat(FilenameUtils.getExtension(filePath.getName()).toLowerCase());
     }
 
-    private String fileNameWithoutExtension (String strPossiblePath) throws InterruptedException, IOException {
+    private String fileNameWithoutExtension(String strPossiblePath) throws InterruptedException, IOException {
         FilePath filePath = new FilePath(Workspace.getChannel(), getWorkspacePath().getPath() + "/" + strPossiblePath);
         return FilenameUtils.removeExtension(filePath.getName());
     }
 
-    private String filePath (String strPossiblePath) throws InterruptedException, IOException {
+    private String filePath(String strPossiblePath) throws InterruptedException, IOException {
         File file = new File(strPossiblePath);
         File fileParent = file.getParentFile();
-        return (fileParent.getPath()==null || fileParent.getPath().isEmpty()) ? "default_folder" : fileParent.getPath();
+        return (fileParent.getPath() == null || fileParent.getPath().isEmpty()) ? "default_folder" : fileParent.getPath();
     }
 
-    private String fileContenToString (String filePath) throws InterruptedException, IOException {
+    private String fileContenToString(String filePath) throws InterruptedException, IOException {
         FilePath filePath2 = new FilePath(Workspace.getChannel(), getWorkspacePath().getPath() + "/" + filePath);
         return filePath2.readToString();
     }
 
-    public String getServerAndPort()
-    {
+    public String getServerAndPort() {
         return getPcTestRunModel().getServerAndPort();
     }
-    public String getPcServerName()
-    {
+
+    public String getPcServerName() {
         return getPcTestRunModel().getPcServerName();
     }
 
-    public String getAlmProject()
-    {
+    public String getAlmProject() {
         return getPcTestRunModel().getAlmProject();
     }
+
     public String getTestToRun() {
         return getPcTestRunModel().getTestToRun();
     }
-    public String getTestId()
-    {
+
+    public String getTestId() {
         return getPcTestRunModel().getTestId();
     }
-    public String getTestContentToCreate()
-    {
+
+    public String getTestContentToCreate() {
         return getPcTestRunModel().getTestContentToCreate();
     }
-    public String getAlmDomain()
-    {
+
+    public String getAlmDomain() {
         return getPcTestRunModel().getAlmDomain();
     }
-    public String getTimeslotDurationHours()
-    {
+
+    public String getTimeslotDurationHours() {
         return timeslotDurationHours;
     }
-    public String getTimeslotDurationMinutes()
-    {
+
+    public String getTimeslotDurationMinutes() {
         return timeslotDurationMinutes;
     }
-    public PostRunAction getPostRunAction()
-    {
+
+    public PostRunAction getPostRunAction() {
         return getPcTestRunModel().getPostRunAction();
     }
 
-    public String getTrendReportId()
-    {
+    public String getTrendReportId() {
         return getPcTestRunModel().getTrendReportId(true);
     }
 
-    public String getAutoTestInstanceID()
-    {
+    public String getAutoTestInstanceID() {
         return getPcTestRunModel().getAutoTestInstanceID();
     }
-    public String getTestInstanceId()
-    {
+
+    public String getTestInstanceId() {
         return getPcTestRunModel().getTestInstanceId();
     }
 
-
-    public String getAddRunToTrendReport()
-    {
+    public String getAddRunToTrendReport() {
         return getPcTestRunModel().getAddRunToTrendReport();
     }
 
-
-    public boolean isVudsMode()
-    {
+    public boolean isVudsMode() {
         return getPcTestRunModel().isVudsMode();
     }
 
-    public boolean isAuthenticateWithToken()
-    {
+    public boolean isAuthenticateWithToken() {
         return getPcTestRunModel().isAuthenticateWithToken();
     }
 
-    public String getRetry () {
+    public boolean isSearchTimeslot() {
+        return getPcTestRunModel().isSearchTimeslot();
+    }
+
+    public String getRetry() {
         return getPcTestRunModel().getRetry();
     }
 
-    public String getRetryOccurrences () {
+    public String getRetryOccurrences() {
         return getPcTestRunModel().getRetryOccurrences();
     }
 
-    public String getTrendReportWaitTime () {
+    public String getTrendReportWaitTime() {
         return getPcTestRunModel().getTrendReportWaitTime();
     }
 
-    public String getRetryDelay () {
+    public String getRetryDelay() {
         return getPcTestRunModel().getRetryDelay();
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return getPcTestRunModel().getDescription();
     }
 
-    public boolean isHTTPSProtocol()
-    {
+    public boolean isHTTPSProtocol() {
         return getPcTestRunModel().httpsProtocol();
     }
 
@@ -1176,8 +1113,9 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         return statusBySLA;
     }
 
-    public String getProxyOutURL(){ return getPcTestRunModel().getProxyOutURL();}
-
+    public String getProxyOutURL() {
+        return getPcTestRunModel().getProxyOutURL();
+    }
 
     // This indicates to Jenkins that this is an implementation of an extension
     // point
@@ -1225,19 +1163,19 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
         }
 
         public FormValidation doCheckTestId(@QueryParameter String value, @QueryParameter String testToRun, @QueryParameter String testContentToCreate, @AncestorInPath AbstractProject project) {
-            FormValidation formValidation =  verifyTestToRun(testToRun, value, testContentToCreate);
+            FormValidation formValidation = verifyTestToRun(testToRun, value, testContentToCreate);
             return FormValidation.ok();
         }
 
         public FormValidation doCheckTestContentToCreate(@QueryParameter String value, @QueryParameter String testToRun, @QueryParameter String testId, @AncestorInPath AbstractProject project) {
-            FormValidation formValidation =  verifyTestToRun(testToRun, testId, value);
+            FormValidation formValidation = verifyTestToRun(testToRun, testId, value);
             return FormValidation.ok();
         }
 
         private FormValidation verifyTestToRun(String testToRun, String testId, String testContentToCreate) {
-            if(testToRun == null || testToRun.isEmpty() || "EXISTING_TEST".equals(testToRun))
+            if (testToRun == null || testToRun.isEmpty() || "EXISTING_TEST".equals(testToRun))
                 return validateHigherThanInt(testId, "Test ID", 0, true);
-            else if("CREATE_TEST".equals(testToRun) && testContentToCreate != null && !testContentToCreate.isEmpty())
+            else if ("CREATE_TEST".equals(testToRun) && testContentToCreate != null && !testContentToCreate.isEmpty())
                 return FormValidation.ok();
             else
                 return FormValidation.error("Provide existing test ID or test Content to create.");
@@ -1266,8 +1204,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 //        }
 
 
-
-        public FormValidation doCheckTestInstanceId(@QueryParameter String value){
+        public FormValidation doCheckTestInstanceId(@QueryParameter String value) {
             return validateHigherThanInt(value, "Test Instance ID", 0, true);
         }
 
@@ -1342,9 +1279,8 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
 
         /**
-         * @param limitIncluded
-         *            if true, value must be higher than limit. if false, value must be equal to or
-         *            higher than limit.
+         * @param limitIncluded if true, value must be higher than limit. if false, value must be equal to or
+         *                      higher than limit.
          */
         private FormValidation validateHigherThanInt(
                 String value,
@@ -1353,7 +1289,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                 boolean limitIncluded) {
             FormValidation ret = FormValidation.ok();
             String messagePrefix = field + " must be ";
-            if(value == null || value.isEmpty())
+            if (value == null || value.isEmpty())
                 return FormValidation.error("value is null or empty");
             value = value.trim();
             if (StringUtils.isBlank(value)) {
@@ -1368,12 +1304,11 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
                         if (limitIncluded && Integer.parseInt(value) <= limit)
                             ret = FormValidation.error(messagePrefix + " " + Messages.MustBeHigherThan() + " " + limit);
                         else if (Integer.parseInt(value) < limit)
-                            ret = FormValidation.error(messagePrefix +" " + Messages.MustBeAtLeast() + " " + limit);
-                    }
-                    else
+                            ret = FormValidation.error(messagePrefix + " " + Messages.MustBeAtLeast() + " " + limit);
+                    } else
                         ret = FormValidation.error(messagePrefix + " " + Messages.MustBeAWholeNumberOrAParameter() + ", " + Messages.ForExample() + ": 23, $TESTID or ${TEST_ID}.");
                 } catch (Exception e) {
-                    ret = FormValidation.error(messagePrefix + " " + Messages.MustBeAWholeNumberOrAParameter() + " (" + Messages.ForExample() +": $TESTID or ${TestID})");
+                    ret = FormValidation.error(messagePrefix + " " + Messages.MustBeAWholeNumberOrAParameter() + " (" + Messages.ForExample() + ": $TESTID or ${TestID})");
                 }
             }
 
@@ -1426,8 +1361,30 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
 
             return doFillCredentialsIdItems(project, credentialsId);
         }
-
     }
 
+    private class TriTrendReportTypes {
 
+        private TrendReportTypes.DataType dataType;
+        private TrendReportTypes.PctType pctType;
+        private TrendReportTypes.Measurement measurement;
+
+        TriTrendReportTypes(TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType, TrendReportTypes.Measurement measurement) {
+            this.dataType = dataType;
+            this.pctType = pctType;
+            this.measurement = measurement;
+        }
+
+        public TrendReportTypes.DataType getDataType() {
+            return dataType;
+        }
+
+        public TrendReportTypes.PctType getPctType() {
+            return pctType;
+        }
+
+        public TrendReportTypes.Measurement getMeasurement() {
+            return measurement;
+        }
+    }
 }

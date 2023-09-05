@@ -1,23 +1,24 @@
 /*
- * © Copyright 2013 EntIT Software LLC
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
+ *  Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+ *  This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+ *  Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
  *
- * © Copyright 2012-2018 Micro Focus or one of its affiliates.
+ * Copyright 2012-2023 Open Text
  *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
+ * The only warranties for products and services of Open Text and
+ * its affiliates and licensors (“Open Text”) are as may be set forth
+ * in the express warranty statements accompanying such products and services.
+ * Nothing herein should be construed as constituting an additional warranty.
+ * Open Text shall not be liable for technical or editorial errors or
+ * omissions contained herein. The information contained herein is subject
+ * to change without notice.
  *
+ * Except as specifically indicated otherwise, this document contains
+ * confidential information and a valid license is required for possession,
+ * use or copying. If this work is provided to the U.S. Government,
+ * consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+ * Computer Software Documentation, and Technical Data for Commercial Items are
+ * licensed to the U.S. Government under vendor's standard commercial license.
  */
 
 //
@@ -34,20 +35,15 @@ import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import com.thoughtworks.xstream.converters.extended.ToAttributedValueConverter;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+import javax.xml.bind.annotation.*;
 
 /**
  * <p>
  * Java class for anonymous complex type.
- * 
+ *
  * <p>
  * The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -58,16 +54,14 @@ import javax.xml.bind.annotation.XmlValue;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = { "content" })
+@XmlType(name = "", propOrder = {"content"})
 @XmlRootElement(name = "error")
 @XStreamAlias("error")
-@XStreamConverter(value= ToAttributedValueConverter.class, strings={"content"})
+@XStreamConverter(value = ToAttributedValueConverter.class, strings = {"content"})
 public class Error {
-    
+
     @XmlValue
     protected String content;
     @XmlAttribute
@@ -76,68 +70,59 @@ public class Error {
     @XmlAttribute
     @XStreamAsAttribute
     protected String message;
-    
+
     /**
      * Gets the value of the content property.
-     * 
+     *
      * @return possible object is {@link String }
-     * 
      */
     public String getContent() {
         return content;
     }
-    
+
     /**
      * Sets the value of the content property.
-     * 
-     * @param value
-     *            allowed object is {@link String }
-     * 
+     *
+     * @param value allowed object is {@link String }
      */
     public void setContent(String value) {
         this.content = value;
     }
-    
+
     /**
      * Gets the value of the type property.
-     * 
+     *
      * @return possible object is {@link String }
-     * 
      */
     public String getType() {
         return type;
     }
-    
+
     /**
      * Sets the value of the type property.
-     * 
-     * @param value
-     *            allowed object is {@link String }
-     * 
+     *
+     * @param value allowed object is {@link String }
      */
     public void setType(String value) {
         this.type = value;
     }
-    
+
     /**
      * Gets the value of the message property.
-     * 
+     *
      * @return possible object is {@link String }
-     * 
      */
     public String getMessage() {
         return message;
     }
-    
+
     /**
      * Sets the value of the message property.
-     * 
-     * @param value
-     *            allowed object is {@link String }
-     * 
+     *
+     * @param value allowed object is {@link String }
      */
     public void setMessage(String value) {
         this.message = value;
     }
-    
+
 }

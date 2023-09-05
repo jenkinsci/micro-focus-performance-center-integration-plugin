@@ -1,3 +1,26 @@
+/*
+ *  Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+ *  This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+ *  Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
+ *
+ * Copyright 2012-2023 Open Text
+ *
+ * The only warranties for products and services of Open Text and
+ * its affiliates and licensors (“Open Text”) are as may be set forth
+ * in the express warranty statements accompanying such products and services.
+ * Nothing herein should be construed as constituting an additional warranty.
+ * Open Text shall not be liable for technical or editorial errors or
+ * omissions contained herein. The information contained herein is subject
+ * to change without notice.
+ *
+ * Except as specifically indicated otherwise, this document contains
+ * confidential information and a valid license is required for possession,
+ * use or copying. If this work is provided to the U.S. Government,
+ * consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+ * Computer Software Documentation, and Technical Data for Commercial Items are
+ * licensed to the U.S. Government under vendor's standard commercial license.
+ */
+
 package com.microfocus.performancecenter.integration.common.helpers.services;
 
 
@@ -13,70 +36,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 @Extension
 public class WorkspaceTests {
 
-    public SortedSet<AffectedFile> getAllAffectedFiles(Set<ModifiedFile> allModifiedFiles, Path workspace) {
-        SortedSet<AffectedFile> result = new TreeSet<>();
-
-        allModifiedFiles.stream()
-                .map(file -> file.getFullPath())
-                .filter(file -> WorkspaceTests.isNotDirectlyUnderRootWorkspace(file, workspace))
-                .map(file -> new AffectedFile(file, workspace))
-                .forEachOrdered(result::add);
-
-        return result;
-    }
-
-    public SortedSet<AffectedFile> getAllTestsToCreateOrUpdate(Path workspace, boolean considerXML) throws IOException {
-        SortedSet<AffectedFile> result = new TreeSet<>();
-
-        try ( Stream<Path> stream = Files.walk(workspace)) {
-            stream
-                    .filter(file -> !Files.isDirectory(file))
-                    .filter(file -> WorkspaceTests.verifyFileIsTest(file, workspace, considerXML))
-                    .map(file -> new AffectedFile(file, workspace))
-                    .forEachOrdered(result::add);
-        }
-
-        return result;
-    }
-
-    public SortedSet<AffectedFile> getAllTestsToCreateOrUpdate(Set<AffectedFile> allAffectedFiles, Path workspace, boolean considerXML) {
-        SortedSet<AffectedFile> result = new TreeSet<>();
-
-        allAffectedFiles.stream()
-                .map(affectedFile -> getOptionalPathIfFileIsTest(affectedFile.getFullPath(), workspace, considerXML))
-                .filter(Optional::isPresent)
-                .map(testFile -> new AffectedFile(testFile.get(), workspace))
-                .forEachOrdered(result::add);
-        return result;
-    }
-
-
-    private Optional<Path> getOptionalPathIfFileIsTest(Path fileFullPath, Path workspace, boolean considerXML) {
-        if (fileFullPath == null || fileFullPath.getParent().equals(workspace) ) {
-            return Optional.empty();
-        }
-
-        Optional<Path> testToReturn = Optional.empty();
-        Path test = Paths.get(fileFullPath.toString());
-        if (isNotDirectlyUnderRootWorkspace(test, workspace) && isParentsNotScript(test, workspace) && isPossiblyTest(test, considerXML)) {
-            testToReturn = Optional.of(test);
-        }
-
-        if (testToReturn.isPresent()) {
-            return Optional.of(fileFullPath);
-        }
-
-        return testToReturn;
-    }
-
     private static boolean verifyFileIsTest(Path fileFullPath, Path workspace, boolean considerXML) {
-        if (fileFullPath == null || fileFullPath.getParent().equals(workspace) ) {
+        if (fileFullPath == null || fileFullPath.getParent().equals(workspace)) {
             return false;
         }
 
@@ -94,10 +64,10 @@ public class WorkspaceTests {
 
         boolean isParentsNotScript = false;
 
-        if(fullPath == null || workspace == null || !isChild(fullPath, workspace))
+        if (fullPath == null || workspace == null || !isChild(fullPath, workspace))
             return false;
 
-        if( (Files.isDirectory(fullPath) && fullPath.equals(workspace)))
+        if ((Files.isDirectory(fullPath) && fullPath.equals(workspace)))
             return true;
 
         isParentsNotScript = isParentsNotScript(fullPath, workspace, isParentsNotScript);
@@ -127,7 +97,7 @@ public class WorkspaceTests {
     //verify fullpath is not a file right under the workspace
     private static boolean isNotDirectlyUnderRootWorkspace(Path fullPath, Path workspace) {
         //workspace itself not verified
-        if(fullPath == null || workspace == null || (Files.isDirectory(fullPath) && fullPath.equals(workspace)))
+        if (fullPath == null || workspace == null || (Files.isDirectory(fullPath) && fullPath.equals(workspace)))
             return false;
 
         Path parentPath = Helper.getParent(fullPath);
@@ -138,26 +108,26 @@ public class WorkspaceTests {
     }
 
     //get files ending with usr or jmx extension under specific directory
-    private static File[] lrSupportedScriptSignatureFinder(String dirName){
+    private static File[] lrSupportedScriptSignatureFinder(String dirName) {
         File dir = new File(dirName);
 
         return dir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String filename) {
-                return (filename.endsWith(PcTestRunConstants.USR_EXTENSION)
-                    || filename.endsWith(PcTestRunConstants.JMX_EXTENSION)
-                    || filename.endsWith(PcTestRunConstants.GATLING_EXTENSION)
-                    || ((filename.equalsIgnoreCase(PcTestRunConstants.DEVWEB_MAIN_FILE)) && rstFinder(dir.toString()).length> 0)
-                    || (filename.endsWith(PcTestRunConstants.SELENIUM_EXTENSION))
+                return (filename.toLowerCase().endsWith(PcTestRunConstants.USR_EXTENSION)
+                        || filename.toLowerCase().endsWith(PcTestRunConstants.JMX_EXTENSION)
+                        || filename.toLowerCase().endsWith(PcTestRunConstants.GATLING_EXTENSION)
+                        || ((PcTestRunConstants.DEVWEB_MAIN_FILE.equalsIgnoreCase(filename)) && rstFinder(dir.toString()).length > 0)
+                        || (filename.toLowerCase().endsWith(PcTestRunConstants.SELENIUM_EXTENSION))
                 );
             }
         });
     }
 
-    private static File[] rstFinder(String dirName){
+    private static File[] rstFinder(String dirName) {
         File dir = new File(dirName);
         return dir.listFiles(new FilenameFilter() {
             public boolean accept(File dir, String filename) {
-                return (filename.equalsIgnoreCase(PcTestRunConstants.DEVWEB_RTS_FILE));
+                return (PcTestRunConstants.DEVWEB_RTS_FILE.equalsIgnoreCase(filename));
             }
         });
     }
@@ -165,5 +135,60 @@ public class WorkspaceTests {
     //verify child path is subdirectory of parent
     private static boolean isChild(Path child, Path parent) {
         return child.toAbsolutePath().startsWith(parent.toAbsolutePath());
+    }
+
+    public SortedSet<AffectedFile> getAllAffectedFiles(Set<ModifiedFile> allModifiedFiles, Path workspace) {
+        SortedSet<AffectedFile> result = new TreeSet<>();
+
+        allModifiedFiles.stream()
+                .map(file -> file.getFullPath())
+                .filter(file -> WorkspaceTests.isNotDirectlyUnderRootWorkspace(file, workspace))
+                .map(file -> new AffectedFile(file, workspace))
+                .forEachOrdered(result::add);
+
+        return result;
+    }
+
+    public SortedSet<AffectedFile> getAllTestsToCreateOrUpdate(Path workspace, boolean considerXML) throws IOException {
+        SortedSet<AffectedFile> result = new TreeSet<>();
+
+        try (Stream<Path> stream = Files.walk(workspace)) {
+            stream
+                    .filter(file -> !Files.isDirectory(file))
+                    .filter(file -> WorkspaceTests.verifyFileIsTest(file, workspace, considerXML))
+                    .map(file -> new AffectedFile(file, workspace))
+                    .forEachOrdered(result::add);
+        }
+
+        return result;
+    }
+
+    public SortedSet<AffectedFile> getAllTestsToCreateOrUpdate(Set<AffectedFile> allAffectedFiles, Path workspace, boolean considerXML) {
+        SortedSet<AffectedFile> result = new TreeSet<>();
+
+        allAffectedFiles.stream()
+                .map(affectedFile -> getOptionalPathIfFileIsTest(affectedFile.getFullPath(), workspace, considerXML))
+                .filter(Optional::isPresent)
+                .map(testFile -> new AffectedFile(testFile.get(), workspace))
+                .forEachOrdered(result::add);
+        return result;
+    }
+
+    private Optional<Path> getOptionalPathIfFileIsTest(Path fileFullPath, Path workspace, boolean considerXML) {
+        if (fileFullPath == null || fileFullPath.getParent().equals(workspace)) {
+            return Optional.empty();
+        }
+
+        Optional<Path> testToReturn = Optional.empty();
+        Path test = Paths.get(fileFullPath.toString());
+        if (isNotDirectlyUnderRootWorkspace(test, workspace) && isParentsNotScript(test, workspace) && isPossiblyTest(test, considerXML)) {
+            testToReturn = Optional.of(test);
+        }
+
+        if (testToReturn.isPresent()) {
+            return Optional.of(fileFullPath);
+        }
+
+        return testToReturn;
     }
 }

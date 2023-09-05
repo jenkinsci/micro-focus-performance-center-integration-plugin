@@ -1,24 +1,26 @@
 <!--
-  ~ © Copyright 2013 EntIT Software LLC
-  ~  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
-  ~  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
-  ~  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
-  ~  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
-  ~  marks are the property of their respective owners.
-  ~ __________________________________________________________________
-  ~ MIT License
-  ~
-  ~ © Copyright 2012-2018 Micro Focus or one of its affiliates.
-  ~
-  ~ The only warranties for products and services of Micro Focus and its affiliates
-  ~ and licensors (“Micro Focus”) are set forth in the express warranty statements
-  ~ accompanying such products and services. Nothing herein should be construed as
-  ~ constituting an additional warranty. Micro Focus shall not be liable for technical
-  ~ or editorial errors or omissions contained herein.
-  ~ The information contained herein is subject to change without notice.
-  ~ ___________________________________________________________________
-  ~
+~  Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+~  This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+~  Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
+~
+~ Copyright 2012-2023 Open Text
+~
+~ The only warranties for products and services of Open Text and
+~ its affiliates and licensors (“Open Text”) are as may be set forth
+~ in the express warranty statements accompanying such products and services.
+~ Nothing herein should be construed as constituting an additional warranty.
+~ Open Text shall not be liable for technical or editorial errors or
+~ omissions contained herein. The information contained herein is subject
+~ to change without notice.
+~
+~ Except as specifically indicated otherwise, this document contains
+~ confidential information and a valid license is required for possession,
+~ use or copying. If this work is provided to the U.S. Government,
+~ consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+~ Computer Software Documentation, and Technical Data for Commercial Items are
+~ licensed to the U.S. Government under vendor's standard commercial license.
   -->
+
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -29,7 +31,7 @@
     <artifactId>micro-focus-performance-center-integration</artifactId>
     <version>1.1.6-SNAPSHOT</version>
     <packaging>hpi</packaging>
-    <name>Micro Focus LoadRunner Enterprise integration With Git</name>
+    <name>OpenText LoadRunner Enterprise integration With Git</name>
     <description>The plugin integrates LoadRunner Enterprise with Git.</description>
     <url>https://github.com/jenkinsci/micro-focus-performance-center-integration-plugin/blob/master/DocForJenkinsPluginsWebSite.md</url>
     <licenses>
@@ -43,8 +45,10 @@
         <concurrency>1</concurrency>
         <jenkins.version>2.60.3</jenkins.version>
         <maven.exec.skip>false</maven.exec.skip>
+        <!--
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        -->
         <java.level>8</java.level>
     </properties>
     <distributionManagement>
@@ -70,14 +74,14 @@
         </url>
     </issueManagement>
     <organization>
-        <name>Micro Focus</name>
-        <url>http://www.microfocus.com</url>
+        <name>OpenText</name>
+        <url>http://www.opentext.com</url>
     </organization>
     <developers>
         <developer>
             <id>danieldanan</id>
             <name>Daniel Danan</name>
-            <email>daniel.danan@microfocus.com</email>
+            <email>ddanan@opentext.com</email>
             <roles>
                 <role>Global Owner</role>
             </roles>
@@ -194,6 +198,8 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <!--
+            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -205,6 +211,22 @@
                         <version>1.0</version>
                     </signature>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <id>analyze-dep</id>
+                        <goals>
+                            <goal>analyze-only</goal>
+                        </goals>
+                        <configuration>
+                            <failOnWarning>true</failOnWarning>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
@@ -252,66 +274,9 @@
     </dependencyManagement>
     <dependencies>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.4</version>
-        </dependency>
-        <dependency>
-            <groupId>com.jayway.jsonpath</groupId>
-            <artifactId>json-path</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <!--WORKFLOW (PIPELINE-AS-A-CODE) integration-->
-        <dependency>
-            <artifactId>workflow-aggregator</artifactId>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <version>2.5</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>workflow-api</artifactId>
-                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>workflow-step-api</artifactId>
-                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>workflow-scm-step</artifactId>
-                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>workflow-support</artifactId>
-                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>*</artifactId>
-                    <groupId>com.fasterxml.jackson.core</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>*</artifactId>
-                    <groupId>com.fasterxml.jackson.datatype</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <artifactId>workflow-cps</artifactId>
-            <groupId>org.jenkins-ci.plugins.workflow</groupId>
-            <version>2.42</version>
-        </dependency>
-        <dependency>
             <groupId>org.jenkins-ci</groupId>
             <artifactId>symbol-annotation</artifactId>
             <version>1.4</version>
-        </dependency>
-        <dependency>
-            <artifactId>ssh-credentials</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <version>1.13</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -319,152 +284,20 @@
             <version>2.1.13</version>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-            <version>1.19</version>
-        </dependency>
-        <!--BUILDER providers integration-->
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>parameterized-trigger</artifactId>
-            <version>2.25</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <artifactId>maven-plugin</artifactId>
-            <groupId>org.jenkins-ci.main</groupId>
-            <version>2.15.1</version>
-            <optional>true</optional>
-            <exclusions>
-                <exclusion>
-                    <artifactId>mailer</artifactId>
-                    <groupId>org.jenkins-ci.plugins</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <artifactId>matrix-project</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <version>1.7.1</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <artifactId>jenkins-multijob-plugin</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <version>1.15</version>
-            <optional>true</optional>
-        </dependency>
-        <!--SCM providers integration-->
-        <dependency>
-            <artifactId>git</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>subversion</artifactId>
-            <version>2.7.1</version>
-            <optional>true</optional>
-        </dependency>
-        <!--PARAMETERS providers integration-->
-        <dependency>
-            <artifactId>extended-choice-parameter</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <version>0.64</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <artifactId>random-string-parameter</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <version>1.0</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <artifactId>nodelabelparameter</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <version>1.5.0</version>
-            <optional>true</optional>
-        </dependency>
-        <!--COMPATIBILITY issues of plugins' inter-dependencies-->
-        <dependency>
-            <artifactId>token-macro</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <version>1.12.1</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>jquery</artifactId>
-            <version>1.11.2-0</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup</groupId>
-            <artifactId>tape</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-        <!--sonar plugin for compile phase only-->
-        <dependency>
-            <artifactId>sonar</artifactId>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <version>2.6.1</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.core</groupId>
-            <artifactId>jersey-common</artifactId>
-            <version>2.9</version>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-sse</artifactId>
-            <version>2.9</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>javax.validation</groupId>
-                    <artifactId>validation-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>com.microfocus.adm.performancecenter</groupId>
             <artifactId>plugins-common</artifactId>
-            <version>1.1.9</version>
+            <version>1.1.11</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.thoughtworks.xstream</groupId>
                     <artifactId>xstream</artifactId>
                 </exclusion>
                 <exclusion>
-                    <groupId>commons-io</groupId>
-                    <artifactId>commons-io</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpclient</artifactId>
+                    <groupId>org.glassfish.jaxb</groupId>
+                    <artifactId>jaxb-runtime</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--Test-->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-server</artifactId>
-            <version>9.2.6.v20141205</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>jenkins-test-harness-tools</artifactId>
-            <version>2.2</version>
-            <scope>test</scope>
-        </dependency>
-        <!-- /added for git integration -->
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>changes-since-last-success</artifactId>
@@ -477,28 +310,75 @@
             <version>1.18.12</version>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
+
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-core</artifactId>
-            <version>5.1.2.RELEASE</version>
+            <groupId>org.kohsuke.stapler</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4-jenkins-2</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.xml.bind/jaxb-api -->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>org.acegisecurity</groupId>
+            <artifactId>acegi-security</artifactId>
+            <version>1.0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet.hudson</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.7-jenkins-1</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.hk2.external</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>2.3.0-b05</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet.localizer</groupId>
+            <artifactId>localizer</artifactId>
+            <version>1.24</version>
+        </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>2.3.1</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/javax.activation/activation -->
         <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>1.1</version>
+            <groupId>org.kohsuke.stapler</groupId>
+            <artifactId>stapler</artifactId>
+            <version>1.250</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
         <dependency>
-            <groupId>org.glassfish.jaxb</groupId>
-            <artifactId>jaxb-runtime</artifactId>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-job</artifactId>
+            <version>2.9</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>remoting</artifactId>
+            <version>3.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
             <version>2.3.3</version>
         </dependency>
     </dependencies>

@@ -1,32 +1,31 @@
 /*
- * © Copyright 2013 EntIT Software LLC
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
+ *  Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+ *  This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+ *  Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
  *
- * © Copyright 2012-2018 Micro Focus or one of its affiliates.
+ * Copyright 2012-2023 Open Text
  *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
+ * The only warranties for products and services of Open Text and
+ * its affiliates and licensors (“Open Text”) are as may be set forth
+ * in the express warranty statements accompanying such products and services.
+ * Nothing herein should be construed as constituting an additional warranty.
+ * Open Text shall not be liable for technical or editorial errors or
+ * omissions contained herein. The information contained herein is subject
+ * to change without notice.
  *
+ * Except as specifically indicated otherwise, this document contains
+ * confidential information and a valid license is required for possession,
+ * use or copying. If this work is provided to the U.S. Government,
+ * consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+ * Computer Software Documentation, and Technical Data for Commercial Items are
+ * licensed to the U.S. Government under vendor's standard commercial license.
  */
 
 package com.microfocus.performancecenter.integration.pctestrun;
 
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.Iterator;
-
+import com.microfocus.adm.performancecenter.plugins.common.pcentities.PcException;
+import com.microfocus.adm.performancecenter.plugins.common.pcentities.RunState;
+import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.HttpVersion;
@@ -35,16 +34,24 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHttpResponse;
 
-import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
-import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.Iterator;
+
 import static com.microfocus.adm.performancecenter.plugins.common.pcentities.RunState.*;
 
 public class MockPcRestProxyBadResponses extends PcRestProxy {
 
     private static Iterator<RunState> runState = initializeRunStateIterator();
 
-    public MockPcRestProxyBadResponses(String webProtocol, String pcServerName, boolean authenticateWithToken, String almDomain, String almProject,PrintStream logger) throws PcException {
-        super(webProtocol, pcServerName, authenticateWithToken, almDomain, almProject,null,null,null);
+    public MockPcRestProxyBadResponses(String webProtocol, String pcServerName, boolean authenticateWithToken, String almDomain, String almProject, PrintStream logger) throws PcException {
+        super(webProtocol, pcServerName, authenticateWithToken, almDomain, almProject, null, null, null);
+    }
+
+    private static Iterator<RunState> initializeRunStateIterator() {
+
+        return Arrays.asList(INITIALIZING, RUNNING, RUN_FAILURE).iterator();
     }
 
     @Override
@@ -54,7 +61,7 @@ public class MockPcRestProxyBadResponses extends PcRestProxy {
         String requestUrl = request.getURI().toString();
         if (requestUrl.equals(String.format(AUTHENTICATION_LOGIN_URL, PcTestBase.WEB_PROTOCOL, PcTestBase.PC_SERVER_NAME))) {
             throw new PcException(PcTestBase.pcAuthenticationFailureMessage);
-        } else if (requestUrl.equals(String.format(getBaseURL() + "/%s", RUNS_RESOURCE_NAME))){
+        } else if (requestUrl.equals(String.format(getBaseURL() + "/%s", RUNS_RESOURCE_NAME))) {
             throw new PcException(PcTestBase.pcNoTimeslotExceptionMessage);
         } else if (requestUrl.equals(String.format(getBaseURL() + "/%s/%s", RUNS_RESOURCE_NAME, PcTestBase.RUN_ID_WAIT))) {
             response = getOkResponse();
@@ -73,13 +80,8 @@ public class MockPcRestProxyBadResponses extends PcRestProxy {
         return response;
     }
 
-    private HttpResponse getOkResponse(){
+    private HttpResponse getOkResponse() {
 
         return new BasicHttpResponse(HttpVersion.HTTP_1_1, HttpStatus.SC_OK, "OK");
-    }
-
-    private static Iterator<RunState> initializeRunStateIterator() {
-
-        return Arrays.asList(INITIALIZING, RUNNING, RUN_FAILURE).iterator();
     }
 }

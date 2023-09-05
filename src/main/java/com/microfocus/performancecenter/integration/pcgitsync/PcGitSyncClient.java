@@ -1,23 +1,24 @@
 /*
- * © Copyright 2013 EntIT Software LLC
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
+ *  Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+ *  This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+ *  Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
  *
- * © Copyright 2012-2018 Micro Focus or one of its affiliates.
+ * Copyright 2012-2023 Open Text
  *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
+ * The only warranties for products and services of Open Text and
+ * its affiliates and licensors (“Open Text”) are as may be set forth
+ * in the express warranty statements accompanying such products and services.
+ * Nothing herein should be construed as constituting an additional warranty.
+ * Open Text shall not be liable for technical or editorial errors or
+ * omissions contained herein. The information contained herein is subject
+ * to change without notice.
  *
+ * Except as specifically indicated otherwise, this document contains
+ * confidential information and a valid license is required for possession,
+ * use or copying. If this work is provided to the U.S. Government,
+ * consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+ * Computer Software Documentation, and Technical Data for Commercial Items are
+ * licensed to the U.S. Government under vendor's standard commercial license.
  */
 
 package com.microfocus.performancecenter.integration.pcgitsync;
@@ -25,7 +26,6 @@ package com.microfocus.performancecenter.integration.pcgitsync;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.PcException;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.PcScript;
-import com.microfocus.adm.performancecenter.plugins.common.pcentities.PcScripts;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.PcTestPlanFolders;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.pcsubentities.test.Test;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.pcsubentities.test.content.common.Common;
@@ -47,8 +47,6 @@ import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.security.Roles;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.remoting.RoleChecker;
 
@@ -61,24 +59,30 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
+import static com.microfocus.performancecenter.integration.common.helpers.services.ModifiedFiles.initMessage;
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.log;
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.logStackTrace;
-import static com.microfocus.performancecenter.integration.common.helpers.services.ModifiedFiles.initMessage;
 
-@Getter
-@RequiredArgsConstructor
 public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializable {
-
     private final TaskListener listener;
     private final ConfigureSystemSection configureSystemSection;
-
     @Nullable
     private final Set<ModifiedFile> modifiedFiles;
-    
     private final PcGitSyncModel pcGitSyncModel;
     private final UsernamePasswordCredentials usernamePCPasswordCredentials;
     private final UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy;
 
+    public PcGitSyncClient(TaskListener listener, ConfigureSystemSection configureSystemSection,
+                           @Nullable Set<ModifiedFile> modifiedFiles, PcGitSyncModel pcGitSyncModel,
+                           UsernamePasswordCredentials usernamePCPasswordCredentials,
+                           UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy) {
+        this.listener = listener;
+        this.configureSystemSection = configureSystemSection;
+        this.modifiedFiles = modifiedFiles;
+        this.pcGitSyncModel = pcGitSyncModel;
+        this.usernamePCPasswordCredentials = usernamePCPasswordCredentials;
+        this.usernamePCPasswordCredentialsForProxy = usernamePCPasswordCredentialsForProxy;
+    }
 
     @Override
     public void checkRoles(RoleChecker rc) throws SecurityException {
@@ -91,20 +95,21 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     }
 
     //main function
-    public Result start(File workspace) throws IOException, InterruptedException {
-        
-        boolean deleteScripts = (this.pcGitSyncModel.getRemoveScriptFromPC() == YesOrNo.YES) ? true: false;
+    public Result start(File workspace)
+            throws IOException, InterruptedException {
+
+        boolean deleteScripts = (this.pcGitSyncModel.getRemoveScriptFromPC() == YesOrNo.YES) ? true : false;
 
         Result result = Result.SUCCESS;
         PcRestProxy restProxy = defineRestProxy();
-        if(restProxy == null)
+        if (restProxy == null)
             return Result.FAILURE;
 
         boolean loggedIn = false;
 
         boolean allowFolderCreation = false;
 
-        try  {
+        try {
             if (!validateParameters(listener)) {
                 return Result.FAILURE;
             }
@@ -119,7 +124,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             if (modifiedFiles == null) { // upload all scripts and all tests:
 
                 scriptsForUpload = wss.getAllScriptsForUpload(workspace.toPath());
-                if(pcGitSyncModel.getImportTests()!=null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES))
+                if (pcGitSyncModel.getImportTests() != null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES))
                     testsToCreateOrUpdate = wst.getAllTestsToCreateOrUpdate(workspace.toPath(), configureSystemSection.getDebug());
             } else { // upload/delete only deltas taken from the changelog:
 
@@ -138,7 +143,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     scriptsForUpload = wss.getAllScriptsForUpload(affectedFolders, workspace.toPath());
                     logSetOfAffectedScripts("List of scripts added to Git that will be uploaded to LoadRunner Enterprise:", scriptsForUpload);
 
-                    if(pcGitSyncModel.getImportTests()!=null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES)) {
+                    if (pcGitSyncModel.getImportTests() != null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES)) {
                         Set<AffectedFile> affectedFiles = wst.getAllAffectedFiles(modifiedFiles, workspace.toPath());
                         testsToCreateOrUpdate = wst.getAllTestsToCreateOrUpdate(affectedFiles, workspace.toPath(), configureSystemSection.getDebug());
                         logSetOfAffectedTests("List of tests added to Git that will be uploaded to LoadRunner Enterprise:", testsToCreateOrUpdate);
@@ -150,30 +155,36 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             }
             log(listener, "", true);
 
-            initMessage(listener,"Beginning to sync between GIT repository and LoadRunner Enterprise", true);
+            initMessage(listener, "Beginning to sync between GIT repository and LoadRunner Enterprise", true);
 
             loggedIn = login(restProxy);
             if (!loggedIn) {
                 log(listener, "Login failed.", true);
                 return Result.FAILURE;
             }
+            Thread.sleep(50);
             log(listener, "The synchronization will be performed with LoadRunner Enterprise project '%s' on domain '%s'.",
                     true,
                     pcGitSyncModel.getAlmProject(),
                     pcGitSyncModel.getAlmDomain()
-                    );
+            );
             log(listener, "", false);
 
             allowFolderCreation = isAllowFolderCreation(restProxy);
-
+            Thread.sleep(50);
             result = result.combine(deleteScriptsFromPerformanceCenter(scriptsForDelete, restProxy, allowFolderCreation));
+            Thread.sleep(50);
             result = result.combine(uploadScriptsToPerformanceCenter(scriptsForUpload, restProxy, allowFolderCreation));
-            if(pcGitSyncModel.getImportTests()!=null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES))
+            if (pcGitSyncModel.getImportTests() != null && pcGitSyncModel.getImportTests().equals(YesOrNo.YES)) {
+                Thread.sleep(50);
                 result = result.combine(createOrUpdateTestsInPerformanceCenter(testsToCreateOrUpdate, restProxy, allowFolderCreation));
-
-
+            }
         } catch (PcException ex) {
             log(listener, "Error PcException: %s.", true, ex.getMessage());
+            logStackTrace(listener, configureSystemSection, ex);
+            result = result.combine(Result.FAILURE);
+        } catch (InterruptedException ex) {
+            log(listener, "Job interruption exception: %s.", true, ex.getMessage());
             logStackTrace(listener, configureSystemSection, ex);
             result = result.combine(Result.FAILURE);
         } catch (Exception ex) {
@@ -187,15 +198,15 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         return result;
     }
 
-    private PcRestProxy defineRestProxy () {
+    private PcRestProxy defineRestProxy() {
 
         String proxyOutUser = (usernamePCPasswordCredentialsForProxy == null || pcGitSyncModel.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getUsername();
-        String proxyOutPassword= (usernamePCPasswordCredentialsForProxy == null || pcGitSyncModel.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
+        String proxyOutPassword = (usernamePCPasswordCredentialsForProxy == null || pcGitSyncModel.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
         PcRestProxy restProxy = null;
         try {
             restProxy = new PcRestProxy(pcGitSyncModel.getProtocol(), pcGitSyncModel.getPcServerName(true), pcGitSyncModel.isAuthenticateWithToken(), pcGitSyncModel.getAlmDomain(true), pcGitSyncModel.getAlmProject(true), pcGitSyncModel.getProxyOutURL(true), proxyOutUser, proxyOutPassword);
-        }catch (PcException e){
-            log(listener,  String.format("Connection to PC server failed. Error: %s", e.getMessage()), true);
+        } catch (PcException e) {
+            log(listener, String.format("Connection to PC server failed. Error: %s", e.getMessage()), true);
             logStackTrace(listener, configureSystemSection, e);
         }
         return restProxy;
@@ -203,12 +214,12 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
 
     private boolean login(PcRestProxy restProxy) {
-        String pcUser =(usernamePCPasswordCredentials == null) ? "" : usernamePCPasswordCredentials.getUsername();
-        String pcPassword= (usernamePCPasswordCredentials == null ) ? "" : usernamePCPasswordCredentials.getPassword().getPlainText();
+        String pcUser = (usernamePCPasswordCredentials == null) ? "" : usernamePCPasswordCredentials.getUsername();
+        String pcPassword = (usernamePCPasswordCredentials == null) ? "" : usernamePCPasswordCredentials.getPassword().getPlainText();
 
         boolean loggedIn = false;
         try {
-            initMessage(listener,"Login to LoadRunner Enterprise Server", false);
+            initMessage(listener, "Login to LoadRunner Enterprise Server", false);
 
             if (pcGitSyncModel == null) {
                 log(listener, String.format("pcGitSyncModel is null"), true);
@@ -239,7 +250,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         return loggedIn;
     }
 
-    private boolean isAllowFolderCreation (PcRestProxy restProxy) {
+    private boolean isAllowFolderCreation(PcRestProxy restProxy) {
         boolean allowFolderCreation = false;
         try {
             PcTestPlanFolders pcTestPlanFolders = restProxy.getTestPlanFolders();
@@ -248,7 +259,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 log(listener, "", false);
                 allowFolderCreation = true;
             }
-        } catch (PcException|IOException ex) {
+        } catch (PcException | IOException ex) {
             log(listener, "Cannot retrieve Test Plan folder tree which means one of the following: ", true);
             log(listener, "- Performance Center version 12.57 or below is used and this means that folders in Test Plan tree are required to be created manually.", true);
             log(listener, "- Domain and Project details are wrong.", true);
@@ -266,7 +277,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             logoutSucceeded = restProxy.logout();
             log(listener, String.format("Logout: %s", logoutSucceeded ? "succeeded" : "failed"), true);
         } catch (PcException e) {
-            log(listener,String.format("logout error PcException: %s. \n%s", e.getMessage(), e.getStackTrace()), true);
+            log(listener, String.format("logout error PcException: %s. \n%s", e.getMessage(), e.getStackTrace()), true);
             logStackTrace(listener, configureSystemSection, e);
         } catch (Exception e) {
             log(listener, String.format("logout error Exception: %s. \n%s", e.getMessage(), e.getStackTrace()), true);
@@ -277,36 +288,47 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     }
 
 
-    private Result deleteScriptsFromPerformanceCenter(Set<AffectedFolder> scriptsForDelete, PcRestProxy restProxy, boolean allowFolderCreation) throws IOException, PcException {
-
-        String subjectTestPlan = this.pcGitSyncModel.getSubjectTestPlan(true);
-
-        if (scriptsForDelete == null || scriptsForDelete.isEmpty()) {
-            return Result.SUCCESS;
-        }
-
-        initMessage(listener,"Deleting scripts", false);
+    private Result deleteScriptsFromPerformanceCenter(Set<AffectedFolder> scriptsForDelete, PcRestProxy restProxy,
+                                                      boolean allowFolderCreation)
+            throws IOException, PcException, InterruptedException {
         try {
-            Objects.requireNonNull(restProxy.getScripts());
-        } catch (PcException|NullPointerException ex) {
-            log(
-                    listener, "An error occurred while getting the list of scripts from LoadRunner Enterprise. Error: %s.",
-                    true,
-                    ex.toString()
-            );
-            logStackTrace(listener, configureSystemSection, ex);
+            String subjectTestPlan = this.pcGitSyncModel.getSubjectTestPlan(true);
+
+            if (scriptsForDelete == null || scriptsForDelete.isEmpty()) {
+                return Result.SUCCESS;
+            }
+
+            initMessage(listener, "Deleting scripts", false);
+            try {
+                Objects.requireNonNull(restProxy.getScripts());
+            } catch (PcException | NullPointerException ex) {
+                log(
+                        listener, "An error occurred while getting the list of scripts from LoadRunner Enterprise. Error: %s.",
+                        true,
+                        ex.toString()
+                );
+                logStackTrace(listener, configureSystemSection, ex);
+                return Result.SUCCESS;
+            }
+
+            //for every script to delete
+//            scriptsForDelete.forEach(localScript -> {
+//                scriptToDelete(restProxy, allowFolderCreation, subjectTestPlan, localScript);
+//            });
+
+            for (AffectedFolder scriptForDelete : scriptsForDelete) {
+                Thread.sleep(50);
+                scriptToDelete(restProxy, allowFolderCreation, subjectTestPlan, scriptForDelete);
+            }
+
+
+            log(listener, "Finished deleting scripts", true);
+            log(listener, "", true);
             return Result.SUCCESS;
+        } catch (InterruptedException ex) {
+            log(listener, "job interrupted while deleting scripts", true);
+            throw ex;
         }
-
-        //for every script to delete
-        scriptsForDelete.forEach(localScript -> {
-            scriptToDelete(restProxy, allowFolderCreation, subjectTestPlan, localScript);
-        });
-
-
-        log(listener, "Finished deleting scripts", true);
-        log(listener, "", true);
-        return Result.SUCCESS;
     }
 
     private void scriptToDelete(PcRestProxy restProxy, boolean allowFolderCreation, String subjectTestPlan, AffectedFolder localScript) {
@@ -314,7 +336,6 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         Path localScriptRelativePath = localScript.getRelativePath();
         String localScriptName = localScriptRelativePath.getName(localScriptRelativePath.getNameCount() - 1).toString();
         try {
-
             log(
                     listener,
                     "Deleting script '%s\\%s' from LoadRunner Enterprise...",
@@ -323,8 +344,8 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     localScriptName
             );
 
-            PcScript pcScriptToDelete = getScript(targetSubject , localScriptName, restProxy);
-            if (pcScriptToDelete instanceof  PcScript && pcScriptToDelete.getName().equalsIgnoreCase(localScriptName)) {
+            PcScript pcScriptToDelete = getScript(targetSubject, localScriptName, restProxy);
+            if (pcScriptToDelete instanceof PcScript && pcScriptToDelete.getName().equalsIgnoreCase(localScriptName)) {
                 deleteScript(restProxy, pcScriptToDelete);
             } else {
                 log(
@@ -369,7 +390,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                     "++++ Script deleted successfully.",
                     false
             );
-        } catch (PcException|IOException ex) {
+        } catch (PcException | IOException ex) {
             log(
                     listener,
                     "**** Could not delete script. Error: %s",
@@ -381,73 +402,88 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         }
     }
 
-    public PcScript getScript(String testFolderPath, String scriptName, PcRestProxy restProxy) throws IOException,PcException{
+    public PcScript getScript(String testFolderPath, String scriptName, PcRestProxy restProxy) throws IOException, PcException {
         List<PcScript> pcScriptList = restProxy.getScripts().getPcScriptList();
         if (pcScriptList == null)
             return null;
-        for (PcScript pcScript:pcScriptList
-                ) {
-            if(pcScript.getTestFolderPath().equalsIgnoreCase(testFolderPath.toLowerCase()) && pcScript.getName().equalsIgnoreCase(scriptName.toLowerCase())) {
+        for (PcScript pcScript : pcScriptList
+        ) {
+            if (pcScript.getTestFolderPath().equalsIgnoreCase(testFolderPath.toLowerCase()) && pcScript.getName().equalsIgnoreCase(scriptName.toLowerCase())) {
                 return pcScript;
             }
         }
         return null;
     }
 
-    private Result createOrUpdateTestsInPerformanceCenter(Set<AffectedFile> testsToCreateOrUpdate, PcRestProxy restProxy, boolean allowFolderCreation) throws PcException, IOException {
-        Result result = Result.SUCCESS;
-
-        String subjectTestPlan = this.pcGitSyncModel.getSubjectTestPlan(true);
-
-        if (testsToCreateOrUpdate == null || testsToCreateOrUpdate.isEmpty()) {
+    private Result createOrUpdateTestsInPerformanceCenter(Set<AffectedFile> testsToCreateOrUpdate,
+                                                          PcRestProxy restProxy, boolean allowFolderCreation)
+            throws PcException, IOException, InterruptedException {
+        try {
+            Result result = Result.SUCCESS;
+            String subjectTestPlan = this.pcGitSyncModel.getSubjectTestPlan(true);
+            if (testsToCreateOrUpdate == null || testsToCreateOrUpdate.isEmpty()) {
+                return result;
+            }
+            uploadTestsInitialMessage();
+            //for every script to add
+            for (AffectedFile test : testsToCreateOrUpdate) {
+                Thread.sleep(50);
+                result = result.combine(createOrUpdateTest(restProxy, allowFolderCreation, result, subjectTestPlan, test));
+            }
+            log(listener, "Finished creating or updating tests step.", true);
+            log(listener, "", false);
             return result;
+        } catch (InterruptedException ex) {
+            log(listener, "Job interrupted during createOrUpdateTestsInPerformanceCenter.", true);
+            throw ex;
         }
-
-        uploadTestsInitialMessage();
-
-        //for every script to add
-        for(AffectedFile test : testsToCreateOrUpdate){
-            result = result.combine(createOrUpdateTest(restProxy, allowFolderCreation, result, subjectTestPlan, test));
-        }
-
-        log(listener, "Finished creating or updating tests step.", true);
-        log(listener, "", false);
-        return result;
     }
 
-    private Result uploadScriptsToPerformanceCenter(Set<AffectedFolder> scriptsForUpload, PcRestProxy restProxy, boolean allowFolderCreation) throws PcException, IOException {
-        Result result = Result.SUCCESS;
+    private Result uploadScriptsToPerformanceCenter(Set<AffectedFolder> scriptsForUpload, PcRestProxy restProxy, boolean allowFolderCreation)
+            throws PcException, InterruptedException {
+        try {
+            Result result = Result.SUCCESS;
 
-        String subjectTestPlan = this.pcGitSyncModel.getSubjectTestPlan(true);
-        boolean uploadRunTimeFiles = (this.pcGitSyncModel.getUploadScriptMode() == UploadScriptMode.RUNTIME_FILES)?true:false;
-        
-        if (scriptsForUpload == null || scriptsForUpload.isEmpty()) {
+            String subjectTestPlan = this.pcGitSyncModel.getSubjectTestPlan(true);
+            boolean uploadRunTimeFiles = (this.pcGitSyncModel.getUploadScriptMode() == UploadScriptMode.RUNTIME_FILES) ? true : false;
+
+            if (scriptsForUpload == null || scriptsForUpload.isEmpty()) {
+                return result;
+            }
+
+            uploadScriptsInitialMessage();
+            ICompressor compressor = new Compressor();
+
+            //for every script to add
+
+            for (AffectedFolder script : scriptsForUpload) {
+                Thread.sleep(50);
+                result = result.combine(uploadScript(restProxy, allowFolderCreation, result, subjectTestPlan, uploadRunTimeFiles, compressor, script));
+            }
+
+            log(listener, "Finished uploading scripts step.", true);
+            log(listener, "", false);
             return result;
+        } catch (InterruptedException exception) {
+            throw exception;
         }
-
-        uploadScriptsInitialMessage();
-        ICompressor compressor = new Compressor();
-
-        //for every script to add
-        for(AffectedFolder script : scriptsForUpload){
-            result = result.combine(uploadScript(restProxy, allowFolderCreation, result, subjectTestPlan, uploadRunTimeFiles, compressor, script));
-        }
-
-        log(listener, "Finished uploading scripts step.", true);
-        log(listener, "", false);
-        return result;
     }
 
-    private Result uploadScript(PcRestProxy restProxy, boolean allowFolderCreation, Result result, String subjectTestPlan, boolean uploadRunTimeFiles, ICompressor compressor, AffectedFolder script) {
+    private Result uploadScript(PcRestProxy restProxy, boolean allowFolderCreation,
+                                Result result, String subjectTestPlan, boolean uploadRunTimeFiles,
+                                ICompressor compressor, AffectedFolder script)
+            throws InterruptedException {
         Result resultToReturn = result;
         String scriptFullPath = script.getFullPath().toString();
         try {
+            Thread.sleep(50);
             String archive = scriptFullPath + ".zip";
             compressor.compressDirectoryToFile(scriptFullPath, archive, true, "JENKINS PLUGIN");
             String scriptRelativePath = script.getRelativePath().toString();
             String targetSubject = allowFolderCreation ? script.getSubjectPath() : subjectTestPlan;
+            Thread.sleep(50);
             try {
-                int scriptId =restProxy.uploadScript(targetSubject, true, uploadRunTimeFiles, true, archive);
+                int scriptId = restProxy.uploadScript(targetSubject, true, uploadRunTimeFiles, true, archive);
                 if (scriptId != 0) {
                     log(
                             listener,
@@ -472,9 +508,12 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             } catch (PcException ex) {
                 resultToReturn = reportFailureOnUploadScript(resultToReturn, scriptFullPath, ex);
             }
+            Thread.sleep(50);
         } catch (IOException ex) {
             resultToReturn = reportFailureOnUploadScript(resultToReturn, scriptFullPath, ex);
-        }  finally {
+        } catch (InterruptedException ex) {
+            throw ex;
+        } finally {
             log(
                     listener,
                     "",
@@ -485,14 +524,14 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     }
 
     private Result reportFailureOnUploadScript(Result resultToReturn, String scriptFullPath, Exception ex) {
-        if(Helper.isUsrScript(scriptFullPath)) {
+        if (Helper.isUsrScript(scriptFullPath)) {
             resultToReturn = Result.FAILURE;
             log(
                     listener,
                     "***** Failed to upload the script.",
                     false
             );
-            if(ex != null) {
+            if (ex != null) {
                 log(
                         listener,
                         "***** Error: %s.",
@@ -500,15 +539,14 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                         ex.getMessage()
                 );
             }
-        }
-        else {
+        } else {
             log(
                     listener,
                     "----- Failed to upload the script but since this is a custom script (possibly introduced in latest versions of LRE), the build will not fail.",
                     false,
                     ex.getMessage()
             );
-            if(ex != null) {
+            if (ex != null) {
                 log(
                         listener,
                         "-----  Error: %s.",
@@ -518,18 +556,21 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
 
             }
         }
-        if(ex != null) {
+        if (ex != null) {
             logStackTrace(listener, configureSystemSection, ex);
         }
         return resultToReturn;
     }
 
-    private Result createOrUpdateTest(PcRestProxy restProxy, boolean allowFolderCreation, Result result, String subjectTestPlan, AffectedFile test) {
+    private Result createOrUpdateTest(PcRestProxy restProxy, boolean allowFolderCreation, Result result,
+                                      String subjectTestPlan, AffectedFile test)
+            throws InterruptedException {
         Result resultToReturn = result;
         String testFullPath = test.getFullPath().toString();
         String ext = FilenameUtils.getExtension(testFullPath);
         boolean isXmlFile = PcTestRunConstants.XML_EXTENSION.substring(1).equalsIgnoreCase(ext);
         try {
+            Thread.sleep(50);
             String targetSubject = allowFolderCreation ? test.getSubjectPath() : subjectTestPlan;
             String testFileContent = test.getTestContent();
             if (isXmlFile && (!testFileContent.toLowerCase().contains("<Test xmlns=\"http://www.hp.com/PC/REST/API".toLowerCase()) || !configureSystemSection.getDebug()))
@@ -542,13 +583,14 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                         test.getRelativePath().toString().replace("/", "\\").concat("\\").concat(test.getFullPath().getFileName().toString())
                 );
                 Test createdTest = doCreateOrUpdateTest(restProxy, test, ext, isXmlFile, targetSubject, testFileContent);
-                if(createdTest == null) {
+                Thread.sleep(50);
+                if (createdTest == null) {
                     log(
                             listener,
                             "----- Test was not created/updated",
                             false
                     );
-                    return isXmlFile ? Result.SUCCESS: Result.FAILURE;
+                    return isXmlFile ? Result.SUCCESS : Result.FAILURE;
                 }
                 if (Common.stringToInteger(createdTest.getID()) > 0) {
                     log(
@@ -560,16 +602,16 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                             createdTest.getID()
                     );
                 } else {
-                    resultToReturn = isXmlFile ? Result.SUCCESS: Result.FAILURE;
+                    resultToReturn = isXmlFile ? Result.SUCCESS : Result.FAILURE;
                     log(
                             listener,
                             "----- Failed to create/update the test.",
                             false
                     );
                 }
-
+                Thread.sleep(50);
             } catch (PcException ex) {
-                resultToReturn = isXmlFile ? Result.SUCCESS: Result.FAILURE;
+                resultToReturn = isXmlFile ? Result.SUCCESS : Result.FAILURE;
                 log(
                         listener,
                         "***** Failed to create/update the test. Error: %s.",
@@ -579,7 +621,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
                 logStackTrace(listener, configureSystemSection, ex);
             }
         } catch (IOException ex) {
-            resultToReturn = isXmlFile ? Result.SUCCESS: Result.FAILURE;
+            resultToReturn = isXmlFile ? Result.SUCCESS : Result.FAILURE;
             log(
                     listener,
                     "***** Failed to create/update the script. Error: %s.",
@@ -600,25 +642,25 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     private Test doCreateOrUpdateTest(PcRestProxy restProxy, AffectedFile test, String ext, boolean isXmlFile, String targetSubject, String testFileContent) throws IOException, PcException {
         Test createdTest = null;
 
-        if(isXmlFile) {
+        if (isXmlFile) {
             createdTest = restProxy.createOrUpdateTest(test.getTestName(), targetSubject, testFileContent);
-        } else if(PcTestRunConstants.YAML_EXTENSION.substring(1).equalsIgnoreCase(ext) || PcTestRunConstants.YML_EXTENSION.substring(1).equalsIgnoreCase(ext))
+        } else if (PcTestRunConstants.YAML_EXTENSION.substring(1).equalsIgnoreCase(ext) || PcTestRunConstants.YML_EXTENSION.substring(1).equalsIgnoreCase(ext))
             createdTest = restProxy.createOrUpdateTestFromYamlContent(test.getTestName(), targetSubject, testFileContent);
         return createdTest;
     }
 
 
     private void uploadScriptsInitialMessage() {
-        initMessage(listener,"Uploading scripts", false);
+        initMessage(listener, "Uploading scripts", false);
 
         log(listener, "Each script folder will be automatically compressed in the workspace and then uploaded to the LoadRunner Enterprise project:", false);
         log(listener, "", false);
     }
 
     private void uploadTestsInitialMessage() {
-        initMessage(listener,"Creating or updating Tests", false);
+        initMessage(listener, "Creating or updating Tests", false);
 
-        log(listener, String.format("Each test file (yaml%s) will be created or updated to the LoadRunner Enterprise project:",  configureSystemSection.getDebug()? " or xml": ""), false);
+        log(listener, String.format("Each test file (yaml%s) will be created or updated to the LoadRunner Enterprise project:", configureSystemSection.getDebug() ? " or xml" : ""), false);
         log(listener, "", false);
     }
 
@@ -695,7 +737,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             message = message.concat("No credentials specified. ");
         }
 
-        if(!message.isEmpty()) {
+        if (!message.isEmpty()) {
             listener.error(message);
             return false;
         }
@@ -703,4 +745,28 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         return true;
     }
 
+    public TaskListener getListener() {
+        return this.listener;
+    }
+
+    public ConfigureSystemSection getConfigureSystemSection() {
+        return this.configureSystemSection;
+    }
+
+    @Nullable
+    public Set<ModifiedFile> getModifiedFiles() {
+        return this.modifiedFiles;
+    }
+
+    public PcGitSyncModel getPcGitSyncModel() {
+        return this.pcGitSyncModel;
+    }
+
+    public UsernamePasswordCredentials getUsernamePCPasswordCredentials() {
+        return this.usernamePCPasswordCredentials;
+    }
+
+    public UsernamePasswordCredentials getUsernamePCPasswordCredentialsForProxy() {
+        return this.usernamePCPasswordCredentialsForProxy;
+    }
 }

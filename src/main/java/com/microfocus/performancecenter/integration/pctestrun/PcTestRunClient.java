@@ -1,25 +1,25 @@
 /*
- * © Copyright 2013 EntIT Software LLC
- *  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
- *  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
- *  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
- *  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
- *  marks are the property of their respective owners.
- * __________________________________________________________________
- * MIT License
+ *  Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+ *  This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+ *  Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
  *
- * © Copyright 2012-2018 Micro Focus or one of its affiliates.
+ * Copyright 2012-2023 Open Text
  *
- * The only warranties for products and services of Micro Focus and its affiliates
- * and licensors (“Micro Focus”) are set forth in the express warranty statements
- * accompanying such products and services. Nothing herein should be construed as
- * constituting an additional warranty. Micro Focus shall not be liable for technical
- * or editorial errors or omissions contained herein.
- * The information contained herein is subject to change without notice.
- * ___________________________________________________________________
+ * The only warranties for products and services of Open Text and
+ * its affiliates and licensors (“Open Text”) are as may be set forth
+ * in the express warranty statements accompanying such products and services.
+ * Nothing herein should be construed as constituting an additional warranty.
+ * Open Text shall not be liable for technical or editorial errors or
+ * omissions contained herein. The information contained herein is subject
+ * to change without notice.
  *
+ * Except as specifically indicated otherwise, this document contains
+ * confidential information and a valid license is required for possession,
+ * use or copying. If this work is provided to the U.S. Government,
+ * consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+ * Computer Software Documentation, and Technical Data for Commercial Items are
+ * licensed to the U.S. Government under vendor's standard commercial license.
  */
-
 
 /*
  *  Implements the main method of loadtest
@@ -49,12 +49,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.log;
 import static com.microfocus.performancecenter.integration.common.helpers.utils.LogHelper.logStackTrace;
 
 public class PcTestRunClient {
-
     private PcTestRunModel model;
     private String testToCreate;
     private String testName;
@@ -64,8 +65,12 @@ public class PcTestRunClient {
     private boolean loggedIn;
     private TaskListener listener;
     private ConfigureSystemSection configureSystemSection;
+    private int testInstanceID = 0;
+    private int timeslotId = -1;
 
-    public PcTestRunClient(PcTestRunModel pcTestRunModel, String testToCreate, String testName, String testFolderPath, String fileExtension, TaskListener listener, ConfigureSystemSection configureSystemSection) {
+    public PcTestRunClient(PcTestRunModel pcTestRunModel, String testToCreate,
+                           String testName, String testFolderPath, String fileExtension,
+                           TaskListener listener, ConfigureSystemSection configureSystemSection) {
         try {
             this.listener = listener;
             this.model = pcTestRunModel;
@@ -77,18 +82,18 @@ public class PcTestRunClient {
             String credentialsProxyId = model.getCredentialsProxyId(true);
             UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy = PcTestRunBuilder.getCredentialsId(credentialsProxyId);
             String proxyOutUser = (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getUsername();
-            String proxyOutPassword= (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
-            if(model.getProxyOutURL(true) != null && !model.getProxyOutURL(true).isEmpty()) {
-                log(listener, "%s: %s", true,  Messages.UsingProxy(),  model.getProxyOutURL(true));
-                if(!proxyOutUser.isEmpty()) {
+            String proxyOutPassword = (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
+            if (model.getProxyOutURL(true) != null && !model.getProxyOutURL(true).isEmpty()) {
+                log(listener, "%s: %s", true, Messages.UsingProxy(), model.getProxyOutURL(true));
+                if (!proxyOutUser.isEmpty()) {
                     if (model.getCredentialsProxyId().startsWith("$"))
-                        log(listener, "%s  %s.", true,  Messages.UsingProxyCredentialsBuildParameters(),proxyOutUser);
+                        log(listener, "%s  %s.", true, Messages.UsingProxyCredentialsBuildParameters(), proxyOutUser);
                     else
-                        log(listener, "%s  %s.", true,  Messages.UsingProxyCredentialsConfiguration(), proxyOutUser);
+                        log(listener, "%s  %s.", true, Messages.UsingProxyCredentialsConfiguration(), proxyOutUser);
                 }
             }
-            restProxy = new PcRestProxy(model.isHTTPSProtocol(), model.getPcServerName(true), model.isAuthenticateWithToken(), model.getAlmDomain(true), model.getAlmProject(true), model.getProxyOutURL(true),proxyOutUser,proxyOutPassword);
-        }catch (PcException e){
+            restProxy = new PcRestProxy(model.isHTTPSProtocol(), model.getPcServerName(true), model.isAuthenticateWithToken(), model.getAlmDomain(true), model.getAlmProject(true), model.getProxyOutURL(true), proxyOutUser, proxyOutPassword);
+        } catch (PcException e) {
             log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
         }
     }
@@ -96,7 +101,6 @@ public class PcTestRunClient {
     public <T extends PcRestProxy> PcTestRunClient(PcTestRunModel pcTestRunModel, /*PrintStream logger,*/ T proxy) {
         model = pcTestRunModel;
         restProxy = proxy;
-        //this.logger = logger;
     }
 
     public boolean login(TaskListener listener) {
@@ -104,20 +108,19 @@ public class PcTestRunClient {
             this.listener = listener;
             String credentialsId = model.getCredentialsId(true);
             UsernamePasswordCredentials usernamePCPasswordCredentials = PcTestRunBuilder.getCredentialsId(credentialsId);
-            log(listener,"",true);
-            if(usernamePCPasswordCredentials != null) {
-                if(model.getCredentialsId().startsWith("$"))
+            log(listener, "", true);
+            if (usernamePCPasswordCredentials != null) {
+                if (model.getCredentialsId().startsWith("$"))
                     log(listener, "%s", true, Messages.UsingPCCredentialsBuildParameters());
                 else
                     log(listener, "%s", true, Messages.UsingPCCredentialsConfiguration());
                 log(listener, "%s\n[Login: Attempting to login to LoadRunner Enterprise server '%s://%s/LoadTest/%s' with credentials of %s '%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), restProxy.GetPcServer(), restProxy.GetTenant(), model.isAuthenticateWithToken() ? "ClientIdKey" : "User", usernamePCPasswordCredentials.getUsername());
                 loggedIn = restProxy.authenticate(usernamePCPasswordCredentials.getUsername(), usernamePCPasswordCredentials.getPassword().getPlainText());
-            }
-            else {
+            } else {
                 log(listener, "LoadRunner Enterprise credentials are missing.", true);
                 loggedIn = false;
             }
-        } catch (NullPointerException|PcException|IOException e) {
+        } catch (NullPointerException | PcException | IOException e) {
             log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
             logStackTrace(listener, configureSystemSection, e);
         }
@@ -125,18 +128,19 @@ public class PcTestRunClient {
         return loggedIn;
     }
 
-    public boolean isLoggedIn() { return loggedIn; }
+    public boolean isLoggedIn() {
+        return loggedIn;
+    }
 
     public int startRun() throws NumberFormatException, ClientProtocolException, PcException, IOException {
 
         int testID;
-        log(listener,"",true);
-        if("EXISTING_TEST".equals(model.getTestToRun())) {
+        log(listener, "", true);
+        if ("EXISTING_TEST".equals(model.getTestToRun())) {
             testID = getTestForExistingTestId();
-        }
-        else {
+        } else {
             Test test = createTestFromYamlOrXml();
-            if(test == null) {
+            if (test == null) {
                 log(listener, "Could not create test from yaml.", true);
                 return 0;
             }
@@ -144,21 +148,26 @@ public class PcTestRunClient {
             model.setTestId(test.getID());
             log(listener, "Running YAML test: Test ID %s, Name: %s, Path: %s", true, test.getID(), test.getName(), test.getTestFolderPath());
         }
-        log(listener,"",true);
-        int testInstance = getCorrectTestInstanceID(testID);
+        log(listener, "", true);
+        getOpenedTimeslot(testID);
+        if (testInstanceID <= 0)
+            getCorrectTestInstanceID(testID);
+        else
+            log(listener, "Testinstance already found in the timeslot.", true);
         setCorrectTrendReportID();
-        printInitMessage(testInstance);
+        printInitMessage();
         PcRunResponse response = null;
         try {
             response = restProxy.startRun(testID,
-                    testInstance,
+                    testInstanceID,
                     model.getTimeslotDuration(),
                     model.getPostRunAction().getValue(),
-                    model.isVudsMode());
+                    model.isVudsMode(),
+                    timeslotId);
             log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s)", true, Messages.RunStarted(), response.getTestID(), response.getID(), response.getTimeslotID());
 
             return response.getID();
-        } catch (NumberFormatException|ClientProtocolException|PcException ex) {
+        } catch (NumberFormatException | ClientProtocolException | PcException ex) {
             log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
             logStackTrace(listener, configureSystemSection, ex);
         } catch (IOException ex) {
@@ -167,18 +176,17 @@ public class PcTestRunClient {
         }
         if (!("RETRY".equals(model.getRetry()))) {
             return 0;
-        }
-        else {
+        } else {
             //counter
             int retryCount = 0;
             //values
             int retryDelay = Integer.parseInt(model.getRetryDelay());
             int retryOccurrences = Integer.parseInt(model.getRetryOccurrences());
 
-            while (retryCount<=retryOccurrences) {
+            while (retryCount <= retryOccurrences) {
                 retryCount++;
                 try {
-                    if(retryCount <= retryOccurrences) {
+                    if (retryCount <= retryOccurrences) {
                         log(listener, "%s. %s (%s %s). %s: %s.", true,
                                 Messages.StartRunRetryFailed(),
                                 Messages.AttemptingStartAgainSoon(),
@@ -194,8 +202,8 @@ public class PcTestRunClient {
                     return 0;
                 }
 
-                response = startRunAgain(testID, testInstance, response);
-                int ret = (response !=null) ? response.getID() : 0;
+                response = startRunAgain(testID, testInstanceID, response);
+                int ret = (response != null) ? response.getID() : 0;
                 if (ret != 0) {
                     log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s))", true,
                             Messages.RunStarted(),
@@ -215,8 +223,9 @@ public class PcTestRunClient {
                     testInstance,
                     model.getTimeslotDuration(),
                     model.getPostRunAction().getValue(),
-                    model.isVudsMode());
-        } catch (NumberFormatException| ClientProtocolException | PcException ex) {
+                    model.isVudsMode(),
+                    -1);
+        } catch (NumberFormatException | ClientProtocolException | PcException ex) {
             log(listener, "%s. %s: %s", true,
                     Messages.StartRunRetryFailed(),
                     Messages.Error(),
@@ -232,9 +241,10 @@ public class PcTestRunClient {
         return response;
     }
 
-    private void printInitMessage(int testInstance) {
+    private void printInitMessage() {
         log(listener, "\n%s \n" +
                         "====================\n" +
+                        "%s: %s \n" +
                         "%s: %s \n" +
                         "%s: %s \n" +
                         "%s: %s \n" +
@@ -248,7 +258,8 @@ public class PcTestRunClient {
                 Messages.Domain(), model.getAlmDomain(true),
                 Messages.Project(), model.getAlmProject(true),
                 Messages.TestID(), Integer.parseInt(model.getTestId(true)),
-                Messages.TestInstanceID(), testInstance,
+                Messages.TestInstanceID(), testInstanceID,
+                "Timeslot ID", (timeslotId > 0 ? timeslotId : "Will be created"),
                 Messages.TimeslotDuration(), model.getTimeslotDuration(),
                 Messages.PostRunAction(), model.getPostRunAction().getValue(),
                 Messages.UseVUDS(), model.isVudsMode());
@@ -282,11 +293,73 @@ public class PcTestRunClient {
         return testID;
     }
 
-    private int getCorrectTestInstanceID(int testID) throws IOException, PcException {
-        if("AUTO".equals(model.getAutoTestInstanceID())){
+    private void getOpenedTimeslot(int testID) throws IOException, PcException {
+        timeslotId = -1;
+        if (model.isSearchTimeslot()) {
             try {
+                log(listener, "Searching timeslot", true);
+                Timeslots openedTimeslots = restProxy.GetOpenTimeslotsByTestId(testID);
+                List<Timeslot> timeslots = openedTimeslots.getTimeslotsList();
+                String timeslotIds = timeslots.stream().map(i -> Integer.toString(i.getID())).collect(Collectors.joining(", "));
+                String timeslotNames = timeslots.stream().map(i -> i.getName()).collect(Collectors.joining(", "));
+                String timeslotTestInstanceIDs = timeslots.stream().map(i -> Integer.toString(i.getLoadTestInstanceID())).collect(Collectors.joining(", "));
+                log(listener,
+                        "Timeslots related to test ID %s are: timeslot Ids '%s', timeslot names '%s', timeslot TestInstance IDs '%s'.",
+                        true,
+                        testID,
+                        timeslotIds,
+                        timeslotNames,
+                        timeslotTestInstanceIDs);
+                Stream<Timeslot> timeslotsStream = openedTimeslots.getTimeslotsList().stream().filter((p) -> IsTimeslotPostRunActionValidComparedToRequestedPostRunAction(p.getPostRunAction()));
+                ArrayList<Timeslot> timeslotsList = timeslotsStream.collect(Collectors.toCollection(ArrayList::new));
+                long timeslotsListCount = timeslotsList.stream().count();
+                log(listener,
+                        "%s matching timeslot(s) found.",
+                        true,
+                        timeslotsListCount);
+                if (timeslotsListCount > 0) {
+                    Timeslot timeslot = timeslotsList.stream().findFirst().get();
+                    timeslotId = timeslot.getID();
+                    log(listener, "Found timeslot ID: %s",
+                            true,
+                            timeslotId);
+                    if (timeslot.getLoadTestInstanceID() > 0) {
+                        testInstanceID = timeslot.getLoadTestInstanceID();
+                        log(listener, "Using timeslot %s defined to run TestInstance Id %s.",
+                                true,
+                                timeslotId,
+                                testInstanceID);
+                    }
+                }
+            } catch (Exception e) {
+                log(listener, "getOpenedTimeslot %s. %s: %s", true,
+                        Messages.Failure(),
+                        Messages.Error(),
+                        e.getMessage());
+                logStackTrace(listener, configureSystemSection, e);
+            }
+        }
+    }
 
+    private boolean IsTimeslotPostRunActionValidComparedToRequestedPostRunAction(String postRunAction) {
+        try {
+            TimeslotPostRunAction timeslotPostRUnAction = TimeslotPostRunAction.valueOf(postRunAction);
+            PostRunAction requestedPostRunAction = model.getPostRunAction();
 
+            if (requestedPostRunAction == PostRunAction.DO_NOTHING
+                    || (requestedPostRunAction == PostRunAction.COLLATE && timeslotPostRUnAction == TimeslotPostRunAction.CollateOnly)
+                    || (requestedPostRunAction == PostRunAction.COLLATE && timeslotPostRUnAction == TimeslotPostRunAction.CollateAnalyze)
+                    || (requestedPostRunAction == PostRunAction.COLLATE_AND_ANALYZE && timeslotPostRUnAction == TimeslotPostRunAction.CollateAnalyze))
+                return true;
+            return false;
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    private void getCorrectTestInstanceID(int testID) throws IOException, PcException {
+        if ("AUTO".equals(model.getAutoTestInstanceID())) {
+            try {
                 log(listener, Messages.SearchingTestInstance(), true);
                 PcTestInstances pcTestInstances = null;
                 try {
@@ -298,26 +371,25 @@ public class PcTestRunClient {
                             ex.getMessage());
                 }
 
-                int testInstanceID;
-                if (pcTestInstances != null && pcTestInstances.getTestInstancesList() != null){
-                    PcTestInstance pcTestInstance = pcTestInstances.getTestInstancesList().get(pcTestInstances.getTestInstancesList().size()-1);
+                if (pcTestInstances != null && pcTestInstances.getTestInstancesList() != null) {
+                    PcTestInstance pcTestInstance = pcTestInstances.getTestInstancesList().get(pcTestInstances.getTestInstancesList().size() - 1);
                     testInstanceID = pcTestInstance.getInstanceId();
                     log(listener, "%s: %s", true,
                             Messages.FoundTestInstanceID(),
                             testInstanceID);
-                }else{
+                } else {
                     log(listener, Messages.NotFoundTestInstanceID(), true);
                     log(listener, Messages.SearchingAvailableTestSet(), true);
                     // Get a random TestSet
                     PcTestSets pcTestSets = restProxy.GetAllTestSets();
-                    if (pcTestSets !=null && pcTestSets.getPcTestSetsList() !=null){
-                        PcTestSet pcTestSet = pcTestSets.getPcTestSetsList().get(pcTestSets.getPcTestSetsList().size()-1);
+                    if (pcTestSets != null && pcTestSets.getPcTestSetsList() != null) {
+                        PcTestSet pcTestSet = pcTestSets.getPcTestSetsList().get(pcTestSets.getPcTestSetsList().size() - 1);
                         int testSetID = pcTestSet.getTestSetID();
                         log(listener, "%s (Test ID: %s, TestSet ID: %s", true,
                                 Messages.CreatingNewTestInstance(),
                                 testID,
                                 testSetID);
-                        testInstanceID = restProxy.createTestInstance(testID,testSetID);
+                        testInstanceID = restProxy.createTestInstance(testID, testSetID);
                         log(listener, "%s: %s", true,
                                 Messages.TestInstanceCreatedSuccessfully(),
                                 testInstanceID);
@@ -329,17 +401,17 @@ public class PcTestRunClient {
                         throw new PcException(msg);
                     }
                 }
-                return testInstanceID;
-            } catch (Exception e){
+            } catch (Exception e) {
                 log(listener, "getCorrectTestInstanceID %s. %s: %s", true,
                         Messages.Failure(),
                         Messages.Error(),
                         e.getMessage());
                 logStackTrace(listener, configureSystemSection, e);
-                return Integer.parseInt(null);
+                testInstanceID = Integer.parseInt(null);
+                throw e;
             }
-        }
-        return Integer.parseInt(model.getTestInstanceId(true));
+        } else
+            testInstanceID = Integer.parseInt(model.getTestInstanceId(true));
     }
 
     private void setCorrectTrendReportID() throws IOException, PcException {
@@ -350,22 +422,20 @@ public class PcTestRunClient {
         if (("ASSOCIATED").equals(model.getAddRunToTrendReport()) && model.getPostRunAction() != PostRunAction.DO_NOTHING) {
             PcTest pcTest = restProxy.getTestData(Integer.parseInt(model.getTestId(true)));
             //if the trend report ID is parametrized
-            if(!model.getTrendReportId().startsWith("$")) {
+            if (!model.getTrendReportId().startsWith("$")) {
                 if (pcTest.getTrendReportId() > -1)
                     model.setTrendReportId(String.valueOf(pcTest.getTrendReportId()));
                 else {
                     throw new PcException(msg);
                 }
-            }
-            else {
+            } else {
                 try {
                     if (Integer.parseInt(model.getTrendReportId(true)) > -1)
                         model.setTrendReportId(String.valueOf(model.getTrendReportId(true)));
                     else {
                         throw new PcException(msg);
                     }
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     logStackTrace(listener, configureSystemSection, ex);
                     throw new PcException(msg + System.getProperty("line.separator") + ex);
                 }
@@ -373,13 +443,12 @@ public class PcTestRunClient {
         }
     }
 
-    public String getTestName()  throws IOException, PcException{
+    public String getTestName() throws IOException, PcException {
 
         try {
             PcTest pcTest = restProxy.getTestData(Integer.parseInt(model.getTestId(true)));
             return pcTest.getTestName();
-        }
-        catch (PcException|IOException ex) {
+        } catch (PcException | IOException ex) {
             log(listener, "getTestData failed for testId : %s", true, model.getTestId(true));
             logStackTrace(listener, configureSystemSection, ex);
             throw ex;
@@ -415,7 +484,7 @@ public class PcTestRunClient {
             ClientProtocolException, PcException, IOException {
 
         int counter = 0;
-        RunState[] states = {RunState.BEFORE_COLLATING_RESULTS,RunState.BEFORE_CREATING_ANALYSIS_DATA};
+        RunState[] states = {RunState.BEFORE_COLLATING_RESULTS, RunState.BEFORE_CREATING_ANALYSIS_DATA};
         PcRunResponse response = null;
         RunState lastState = RunState.UNDEFINED;
         int threeStrikes = 3;
@@ -426,7 +495,7 @@ public class PcTestRunClient {
                     log(listener, "Cannot get response from PC about the state of RunID: %s %s time(s) consecutively", true,
                             runId,
                             (3 - threeStrikes));
-                    if(threeStrikes==0) {
+                    if (threeStrikes == 0) {
                         log(listener, "%s: %s", true,
                                 Messages.StoppingMonitoringOnRun(),
                                 runId);
@@ -461,15 +530,13 @@ public class PcTestRunClient {
                     Thread.sleep(interval);
                 }
                 threeStrikes = 3;
-            }catch(PcException e) {
+            } catch (PcException e) {
                 threeStrikes--;
-            }
-            catch(InterruptedException e)
-            {
+            } catch (InterruptedException e) {
                 log(listener, "Job execution interrupted: %s", true,
                         runId,
                         e.getMessage());
-                break;
+                throw e;
             }
         } while (lastState.ordinal() < completionState.ordinal());
         return response;
@@ -477,7 +544,7 @@ public class PcTestRunClient {
 
     public FilePath publishRunReport(int runId, String reportDirectory) throws IOException, PcException, InterruptedException {
         PcRunResults runResultsList = restProxy.getRunResults(runId);
-        if (runResultsList.getResultsList() != null){
+        if (runResultsList.getResultsList() != null) {
             for (PcRunResult result : runResultsList.getResultsList()) {
                 if (result.getName().equals(PcTestRunBuilder.pcReportArchiveName)) {
                     FilePath reportFile = getFilePath(runId, reportDirectory, result, false);
@@ -491,7 +558,7 @@ public class PcTestRunClient {
 
     public FilePath publishRunNVInsightsReport(int runId, String reportDirectory) throws IOException, PcException, InterruptedException {
         PcRunResults runResultsList = restProxy.getRunResults(runId);
-        if (runResultsList.getResultsList() != null){
+        if (runResultsList.getResultsList() != null) {
             for (PcRunResult result : runResultsList.getResultsList()) {
                 if (result.getName().equals(PcTestRunBuilder.pcNVInsightsReportArchiveName)) {
                     FilePath reportFile = getFilePath(runId, reportDirectory, result, true);
@@ -509,9 +576,8 @@ public class PcTestRunClient {
         String reportArchiveFullPath = dir.getCanonicalPath() + IOUtils.DIR_SEPARATOR + (nvInsights ? PcTestRunBuilder.pcNVInsightsReportArchiveName : PcTestRunBuilder.pcReportArchiveName);
         try {
             restProxy.GetRunResultData(runId, result.getID(), reportArchiveFullPath);
-        } catch (PcException ex)
-        {
-            if(!nvInsights)
+        } catch (PcException ex) {
+            if (!nvInsights)
                 throw ex;
             else
                 return null;
@@ -521,7 +587,7 @@ public class PcTestRunClient {
         fp.delete();
         FilePath reportFile = fp.sibling(nvInsights ? PcTestRunBuilder.pcNVInsightsReportFileName : PcTestRunBuilder.pcReportFileName);
         if (reportFile.exists()) {
-            log(listener, (nvInsights ?  Messages.PublishingNVInsightsReport() : Messages.PublishingAnalysisReport()), true);
+            log(listener, (nvInsights ? Messages.PublishingNVInsightsReport() : Messages.PublishingAnalysisReport()), true);
             return reportFile;
         }
         return null;
@@ -535,7 +601,7 @@ public class PcTestRunClient {
         try {
             logoutSucceeded = restProxy.logout();
             loggedIn = !logoutSucceeded;
-        } catch (PcException|IOException e) {
+        } catch (PcException | IOException e) {
             log(listener, "%s: %s", true,
                     Messages.Error(),
                     e.getMessage());
@@ -552,7 +618,7 @@ public class PcTestRunClient {
             log(listener, "%s", true,
                     Messages.StoppingRun());
             stopRunSucceeded = restProxy.stopRun(runId, "stop");
-        } catch (PcException|IOException e) {
+        } catch (PcException | IOException e) {
             log(listener, "%s: %s", true,
                     Messages.Error(),
                     e.getMessage());
@@ -563,10 +629,10 @@ public class PcTestRunClient {
         return stopRunSucceeded;
     }
 
-    public PcRunEventLog getRunEventLog(int runId){
+    public PcRunEventLog getRunEventLog(int runId) {
         try {
             return restProxy.getRunEventLog(runId);
-        } catch (PcException|IOException e) {
+        } catch (PcException | IOException e) {
             log(listener, "%s: %s", true,
                     Messages.Error(),
                     e.getMessage());
@@ -575,8 +641,7 @@ public class PcTestRunClient {
         return null;
     }
 
-    public void addRunToTrendReport(int runId, String trendReportId)
-    {
+    public void addRunToTrendReport(int runId, String trendReportId) {
 
         TrendReportRequest trRequest = new TrendReportRequest(model.getAlmProject(true), runId, null);
         log(listener, "Adding run: %s to trend report: %s", true,
@@ -602,7 +667,7 @@ public class PcTestRunClient {
         }
     }
 
-    public void waitForRunToPublishOnTrendReport(int runId, String trendReportId) throws PcException,IOException,InterruptedException{
+    public void waitForRunToPublishOnTrendReport(int runId, String trendReportId) throws PcException, IOException, InterruptedException {
 
         ArrayList<PcTrendedRun> trendReportMetaDataResultsList;
         boolean publishEnded = false;
@@ -613,13 +678,13 @@ public class PcTestRunClient {
         do {
             trendReportMetaDataResultsList = restProxy.getTrendReportMetaData(trendReportId);
 
-            if (trendReportMetaDataResultsList.isEmpty())  break;
+            if (trendReportMetaDataResultsList.isEmpty()) break;
 
             for (PcTrendedRun result : trendReportMetaDataResultsList) {
                 resultNotFound = result.getRunID() != runId;
                 if (resultNotFound) continue;
 
-                if (result.getState().equals(PcTestRunBuilder.TRENDED) || result.getState().equals(PcTestRunBuilder.ERROR)){
+                if (result.getState().equals(PcTestRunBuilder.TRENDED) || result.getState().equals(PcTestRunBuilder.ERROR)) {
                     publishEnded = true;
                     log(listener, "Run: %s %s: %s", true,
                             runId,
@@ -629,7 +694,7 @@ public class PcTestRunClient {
                 } else {
                     Thread.sleep(5000);
                     counterPublishStarted++;
-                    if(counterPublishStarted >= 360){
+                    if (counterPublishStarted >= 360) {
                         String msg = String.format("%s: %s",
                                 Messages.Error(),
                                 Messages.PublishingEndTimeout());
@@ -640,7 +705,7 @@ public class PcTestRunClient {
             if (!publishEnded && resultNotFound) {
                 Thread.sleep(5000);
                 counterPublishNotStarted++;
-                if(counterPublishNotStarted >= 180){
+                if (counterPublishNotStarted >= 180) {
                     String msg = String.format("%s: %s",
                             Messages.Error(),
                             Messages.PublishingStartTimeout());
@@ -660,7 +725,7 @@ public class PcTestRunClient {
                     Messages.InPDFFormat());
             InputStream in = restProxy.getTrendingPDF(trendReportId);
             File dir = new File(directory);
-            if(!dir.exists()){
+            if (!dir.exists()) {
                 dir.mkdirs();
             }
             String filePath = directory + IOUtils.DIR_SEPARATOR + "trendReport" + trendReportId + ".pdf";
@@ -670,8 +735,7 @@ public class PcTestRunClient {
                     Messages.TrendReport(),
                     trendReportId,
                     Messages.SuccessfullyDownloaded());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log(listener, "%s: %s", true,
                     Messages.FailedToDownloadTrendReport(),
                     e.getMessage());
@@ -683,9 +747,11 @@ public class PcTestRunClient {
 
     }
 
-    public void publishTrendReport(String filePath, String trendReportId){
+    public void publishTrendReport(String filePath, String trendReportId) {
 
-        if (filePath == null){return;}
+        if (filePath == null) {
+            return;
+        }
         //     return String.format( HyperlinkNote.encodeTo(filePath, "View trend report " + trendReportId));
         log(listener, "%s", false, HyperlinkNote.encodeTo(filePath, Messages.ViewTrendReport() + " " + trendReportId));
 
@@ -697,13 +763,13 @@ public class PcTestRunClient {
     // <Action_Transaction:0.001>
     // <Virtual transaction 2:0.51>
     // This function uses reflection since we know only at runtime which transactions data will be reposed from the rest request.
-    public Map<String, String>  getTrendReportByXML(String trendReportId, int runId, TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType,TrendReportTypes.Measurement measurement) throws IOException, PcException, IntrospectionException, NoSuchMethodException {
+    public Map<String, String> getTrendReportByXML(String trendReportId, int runId, TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType, TrendReportTypes.Measurement measurement) throws IOException, PcException, IntrospectionException, NoSuchMethodException {
         Map<String, String> measurmentsMap = new LinkedHashMap<String, String>();
-        measurmentsMap.put("RunId","_" + runId + "_");
-        measurmentsMap.put("Trend Measurement Type",measurement.toString() + "_" + pctType.toString());
+        measurmentsMap.put("RunId", "_" + runId + "_");
+        measurmentsMap.put("Trend Measurement Type", measurement.toString() + "_" + pctType.toString());
         TrendReportTransactionDataRoot res = restProxy.getTrendReportByXML(trendReportId, runId);
         List<Object> RowsListObj = res.getTrendReportRoot();
-        if(RowsListObj != null) {
+        if (RowsListObj != null) {
             for (int i = 0; i < RowsListObj.size(); i++) {
                 try {
                     java.lang.reflect.Method rowListMethod = RowsListObj.get(i).getClass().getMethod("getTrendReport" + dataType.toString() + "DataRowList");

@@ -1,23 +1,24 @@
 <!--
-  ~ © Copyright 2013 EntIT Software LLC
-  ~  Certain versions of software and/or documents (“Material”) accessible here may contain branding from
-  ~  Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.  As of September 1, 2017,
-  ~  the Material is now offered by Micro Focus, a separately owned and operated company.  Any reference to the HP
-  ~  and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE
-  ~  marks are the property of their respective owners.
-  ~ __________________________________________________________________
-  ~ MIT License
-  ~
-  ~ © Copyright 2012-2018 Micro Focus or one of its affiliates.
-  ~
-  ~ The only warranties for products and services of Micro Focus and its affiliates
-  ~ and licensors (“Micro Focus”) are set forth in the express warranty statements
-  ~ accompanying such products and services. Nothing herein should be construed as
-  ~ constituting an additional warranty. Micro Focus shall not be liable for technical
-  ~ or editorial errors or omissions contained herein.
-  ~ The information contained herein is subject to change without notice.
-  ~ ___________________________________________________________________
-  ~
+~  Certain versions of software accessible here may contain branding from Hewlett-Packard Company (now HP Inc.) and Hewlett Packard Enterprise Company.
+~  This software was acquired by Micro Focus on September 1, 2017, and is now offered by OpenText.
+~  Any reference to the HP and Hewlett Packard Enterprise/HPE marks is historical in nature, and the HP and Hewlett Packard Enterprise/HPE marks are the property of their respective owners.
+~
+~ Copyright 2012-2023 Open Text
+~
+~ The only warranties for products and services of Open Text and
+~ its affiliates and licensors (“Open Text”) are as may be set forth
+~ in the express warranty statements accompanying such products and services.
+~ Nothing herein should be construed as constituting an additional warranty.
+~ Open Text shall not be liable for technical or editorial errors or
+~ omissions contained herein. The information contained herein is subject
+~ to change without notice.
+~
+~ Except as specifically indicated otherwise, this document contains
+~ confidential information and a valid license is required for possession,
+~ use or copying. If this work is provided to the U.S. Government,
+~ consistent with FAR 12.211 and 12.212, Commercial Computer Software,
+~ Computer Software Documentation, and Technical Data for Commercial Items are
+~ licensed to the U.S. Government under vendor's standard commercial license.
   -->
 <?jelly escape-by-default='true'?>
 <j:jelly  xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define"
@@ -131,25 +132,62 @@
 
 		function verifyURLAvailable(){
 
-            var pcServer = document.getElementsByName("pc.pcServerName")[0].value;
+            var pcServerAndTenant = getLreServer(document.getElementsByName("pc.pcServerName")[0].value);
             var scheme = "http";
             if(document.getElementsByName("pc.HTTPSProtocol")[0].checked){
                 scheme = "https"
             }
-            if(pcServer){
-                var popup = window.open(scheme + "://" + pcServer + "/loadtest/");
+            if (pcServerAndTenant.length == 2 &amp;&amp; pcServerAndTenant[0]) {
+                var popup = window.open(scheme + "://" + pcServerAndTenant[0] + "/loadtest/"  + pcServerAndTenant[1]);
                 popup.opener = null;
-            }else{
+            } else {
                 alert("LoadRunner Enterprise Server name is missing.");
             }
             return false;
-		}
+            }
 
-
-
+            function getLreServer(lreServer){
+                var delimiterSlash = "/";
+                var delimiterQuestionMark = "?";
+                var useDelimiter = delimiterSlash;
+                var strServerAndTenant = [lreServer, ""];
+                var theLreServer = lreServer;
+                if (lreServer != null &amp;&amp; !(lreServer.length === 0)) {
+                    theLreServer = /* replace */ lreServer.toLowerCase().split("http://").join("");
+                    theLreServer = /* replace */ theLreServer.split("https://").join("");
+                    theLreServer = /* replace */ theLreServer.split("/lre").join("");
+                    theLreServer = /* replace */ theLreServer.split("/site").join("");
+                    theLreServer = /* replace */ theLreServer.split("/loadtest").join("");
+                    theLreServer = /* replace */ theLreServer.split("/pcx").join("");
+                    theLreServer = /* replace */ theLreServer.split("/adminx").join("");
+                    theLreServer = /* replace */ theLreServer.split("/admin").join("");
+                    theLreServer = /* replace */ theLreServer.split("/login").join("");
+                }
+                if (theLreServer != null &amp;&amp; !(theLreServer.length === 0)) {
+                    if ( /* contains */(theLreServer.indexOf("/") != -1)) {
+                        useDelimiter = delimiterSlash;
+                    }
+                    else if ( /* contains */(theLreServer.indexOf("?") != -1)) {
+                        useDelimiter = delimiterQuestionMark;
+                    }
+                    var severTenantArray = theLreServer.split(useDelimiter);
+                    if (severTenantArray.length &gt; 0) {
+                        strServerAndTenant[0] = severTenantArray[0];
+                        if (severTenantArray.length &gt; 1) {
+                            if (useDelimiter === delimiterQuestionMark) {
+                                strServerAndTenant[1] = delimiterQuestionMark + severTenantArray[1];
+                            }
+                            else {
+                                strServerAndTenant[1] = severTenantArray[1];
+                            }
+                        }
+                    }
+                }
+                return strServerAndTenant;
+            }
 		</script>
 	</f:block>
-	
+
 	<tr>
 		<td />
 		<td colspan="2">
@@ -224,11 +262,13 @@
          </f:radioBlock>
         </table>
     </td>
-
-	<f:block>
-		<br />
-	</f:block>
-
+    <f:block>
+        <br />
+    </f:block>
+    <f:optionalBlock title="Search timeslot" field="searchTimeslot" name="pc.searchTimeslot" checked="${instance.pcTestRunModel.searchTimeslot}" inline="true" />
+    <f:block>
+        <br />
+    </f:block>
     <f:entry title="Local Proxy" field="proxyOutURL">
         <f:textbox name="pc.proxyOutURL" value="${instance.pcTestRunModel.proxyOutURL}" />
     </f:entry>
@@ -250,11 +290,9 @@
 			</j:forEach>
 		</select>
 	</f:entry>
-
 	<f:block>
 		<br />
 	</f:block>
-
 	    <td class="setting-leftspace">&#160;</td>
         <td>Trending</td>
         <td colspan="2">
@@ -270,13 +308,7 @@
             </f:radioBlock>
             </table>
         </td>
-
-
 		<script>onPostRunActionLoad();</script>
-
-
-
-
 	<f:block>
 		<j:set var="h_id" value="${h.generateId()}" />
 		<j:set var="m_id" value="${h.generateId()}" />
@@ -295,7 +327,7 @@
 					<f:textbox name="timeslotDurationHours" id="${h_id}"
 						value="${instance.pcTestRunModel.timeslotDuration.hours}" default="0"
 						style="width:40px;height:24px;text-align:center"
-						onchange="var hours = parseInt(value); 
+						onchange="var hours = parseInt(value);
 										value = (isNaN(hours) || (hours &lt; 0)) ? 0 : ((hours &gt; 480) ? 480 : hours);
 										var minutes = document.getElementById('${m_id}');
 										if (value == 0 &amp;&amp; minutes.value &lt; 30) minutes.value = 30;
@@ -305,8 +337,8 @@
 					<input type="button" value=" /\ "
 						style="font-size:4px;margin:0;padding:0;width:20px;height:15px;vertical-align:top"
 						onclick="var hours = document.getElementById('${h_id}');
-										var v = parseInt(hours.value); 
-										v = (isNaN(v) || v &lt; 0) ? 0 : v + 1; 
+										var v = parseInt(hours.value);
+										v = (isNaN(v) || v &lt; 0) ? 0 : v + 1;
 										hours.value = (v &gt; 480) ? 480 : v;" />
 				</td>
 				<td rowspan="2" style="vertical-align:middle">
@@ -317,18 +349,18 @@
 					<f:textbox name="timeslotDurationMinutes" id="${m_id}"
 						value="${instance.pcTestRunModel.timeslotDuration.minutes}" default="30"
 						style="width:40px;height:24px;text-align:center"
-						onchange="var v = parseInt(value); 
-										v = isNaN(v) || (v &lt; 0) || (v &gt; 59) ? 0 : v ;										
+						onchange="var v = parseInt(value);
+										v = isNaN(v) || (v &lt; 0) || (v &gt; 59) ? 0 : v ;
 										value = (v &lt; 30 &amp;&amp; document.getElementById('${h_id}').value == 0) ? 30 : v;" />
 				</td>
 				<td>
 					<input type="button" value=" /\ "
 						style="font-size:4px;margin:0;padding:0;width:20px;height:15px;vertical-align:top"
 						onclick="var minutes = document.getElementById('${m_id}');
-										var v = parseInt(minutes.value); 
+										var v = parseInt(minutes.value);
 										v = (v + 15) % 60; minutes.value = v - v % 15;
 										var hours = document.getElementById('${h_id}');
-										if (hours.value == 0 &amp;&amp; minutes.value &lt; 30) 
+										if (hours.value == 0 &amp;&amp; minutes.value &lt; 30)
 											minutes.value = 30;" />
 				</td>
 				<td rowspan="2" style="vertical-align:middle;padding-left:2em">
@@ -340,10 +372,10 @@
 					<input type="button" value=" \/ "
 						style="font-size:4px;margin:0;padding:0;width:20px;height:14px;vertical-align:middle"
 						onclick="var hours = document.getElementById('${h_id}');
-										var v = parseInt(hours.value); 
+										var v = parseInt(hours.value);
 										v = isNaN(v) || v &lt; 1 ? 1 : hours.value = v - 1;
 										var minutes = document.getElementById('${m_id}');
-										if (hours.value == 0 &amp;&amp; minutes.value &lt; 30) 
+										if (hours.value == 0 &amp;&amp; minutes.value &lt; 30)
 											minutes.value = 30;" />
 				</td>
 				<td>
@@ -356,14 +388,12 @@
 											v = v + 15 - v % 15;
 										if (document.getElementById('${h_id}').value == 0 &amp;&amp; v &lt; 30)
 											v = 45;
-										minutes.value= v" /> 
+										minutes.value= v" />
 				</td>
 			</tr>
 		</table>
 		<br />
 	</f:block>
-	
-
     <f:block>
         <br />
     </f:block>
