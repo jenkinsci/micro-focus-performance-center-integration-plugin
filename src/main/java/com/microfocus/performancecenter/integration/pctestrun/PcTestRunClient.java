@@ -160,7 +160,7 @@ public class PcTestRunClient {
         try {
             response = restProxy.startRun(testID,
                     testInstanceID,
-                    model.getTimeslotDuration(),
+                    new TimeslotDuration(model.getTimeslotDurationHours(true), model.getTimeslotDurationMinutes(true)),
                     model.getPostRunAction().getValue(),
                     model.isVudsMode(),
                     timeslotId);
@@ -221,7 +221,7 @@ public class PcTestRunClient {
         try {
             response = restProxy.startRun(testID,
                     testInstance,
-                    model.getTimeslotDuration(),
+                    new TimeslotDuration(model.getTimeslotDurationHours(true),model.getTimeslotDurationMinutes(true)),
                     model.getPostRunAction().getValue(),
                     model.isVudsMode(),
                     -1);
@@ -260,7 +260,8 @@ public class PcTestRunClient {
                 Messages.TestID(), Integer.parseInt(model.getTestId(true)),
                 Messages.TestInstanceID(), testInstanceID,
                 "Timeslot ID", (timeslotId > 0 ? timeslotId : "Will be created"),
-                Messages.TimeslotDuration(), model.getTimeslotDuration(),
+                Messages.TimeslotDuration(),
+                new TimeslotDuration(model.getTimeslotDurationHours(true) ,model.getTimeslotDurationMinutes(true)),
                 Messages.PostRunAction(), model.getPostRunAction().getValue(),
                 Messages.UseVUDS(), model.isVudsMode());
     }

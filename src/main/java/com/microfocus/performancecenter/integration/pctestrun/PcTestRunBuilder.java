@@ -675,7 +675,7 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
             } else {
                 logger.println(String.format("%s %s (%s).",
                         Messages.YouCanViewTrendCharts(),
-                        HyperlinkNote.encodeTo("https://wiki.jenkins.io/display/JENKINS/MICRO+FOCUS+Application+Automation+Tools#MicroFocusApplicationAutomationTools-RunningPerformanceTestsusingPerformanceCenter", Messages.Documentation()),
+                        HyperlinkNote.encodeTo("https://admhelp.microfocus.com/lre/en/latest/online_help/Content/PC/Continuous-Integration-Jenkins.htm#mt-item-4", Messages.Documentation()),
                         Messages.PerformanceCenter1255AndLater()));
             }
         }
@@ -1046,11 +1046,11 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     }
 
     public String getTimeslotDurationHours() {
-        return timeslotDurationHours;
+        return getPcTestRunModel().getTimeslotDurationHours();
     }
 
     public String getTimeslotDurationMinutes() {
-        return timeslotDurationMinutes;
+        return getPcTestRunModel().getTimeslotDurationMinutes();
     }
 
     public PostRunAction getPostRunAction() {

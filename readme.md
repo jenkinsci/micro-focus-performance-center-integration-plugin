@@ -83,6 +83,7 @@ This version provides the following enhancements:
 - Possibility to associate a YAML defined test to a trend report.
 - Possibility to search for a timeslot defined for LRE test to execute and use it.
 - Possibility to add a wait time between generation of the trend report and the download of the trend report to the build artifact.
+- Timeslot duration can be parametrized via two parameters (Hours and Minutes).
 
 ### Downloads
 You can download the plugin from this link:
