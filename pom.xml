@@ -29,7 +29,7 @@
         <version>2.30</version>
     </parent>
     <artifactId>micro-focus-performance-center-integration</artifactId>
-    <version>1.1.6</version>
+    <version>1.1.7-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>OpenText LoadRunner Enterprise integration With Git</name>
     <description>The plugin integrates LoadRunner Enterprise with Git.</description>
@@ -65,7 +65,7 @@
         <connection>scm:git:ssh://github.com/jenkinsci/micro-focus-performance-center-integration-plugin.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/jenkinsci/micro-focus-performance-center-integration-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/micro-focus-performance-center-integration-plugin</url>
-        <tag>micro-focus-performance-center-integration-1.1.6</tag>
+        <tag>HEAD</tag>
     </scm>
     <issueManagement>
         <system>JIRA</system>
