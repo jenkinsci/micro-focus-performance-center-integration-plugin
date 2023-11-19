@@ -1,6 +1,6 @@
-![Micro Focus Logo](https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/Micro_Focus_logo.svg/220px-Micro_Focus_logo.svg.png)
-# Micro Focus LoadRunner Enterprise Integration with Git
-This plugin integrates Micro Focus LoadRunner Enterprise with Git via Jenkins.
+![OpenText Logo](https://upload.wikimedia.org/wikipedia/commons/1/1b/OpenText_logo.svg)
+# OpenText LoadRunner Enterprise Integration with Git
+This plugin integrates OpenText LoadRunner Enterprise with Git via Jenkins.
 
 ---
 **Table of Content**
@@ -13,6 +13,7 @@ This plugin integrates Micro Focus LoadRunner Enterprise with Git via Jenkins.
     + [Version 1.1.3](#version-113)
     + [Version 1.1.4](#version-114)
     + [Version 1.1.5](#version-115)
+    + [Version 1.1.6](#version-116)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
   * [Synchronize LoadRunner Enterprise With Git](#synchronize-loadrunner-enterprise-with-git)
@@ -25,7 +26,7 @@ Using this plugin, you can:
 - Create LoadRunner Enterprise tests from a YAML file.
 - Run a LoadRunner Enterprise test from its ID, or create it from a YAML file or YAML syntax and then run it.
 
-There is a separate plugin for running performance tests using LoadRunner Enterprise. For details, see [Micro Focus Application Automation Tools](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools) - [LoadRunner Enterprise Integration](https://wiki.jenkins.io/display/JENKINS/Performance+Center+Integration).
+There is a separate plugin for running performance tests using LoadRunner Enterprise. For details, see [OpenText Application Automation Tools](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools) - [LoadRunner Enterprise Integration](https://wiki.jenkins.io/display/JENKINS/Performance+Center+Integration).
 
 **Submit issues and feedback through [JIRA](https://issues.jenkins-ci.org/browse/JENKINS-36795?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20micro-focus-performance-center-integration)**
 
@@ -73,6 +74,14 @@ This version provides the following enhancements:
 - Added support for Selenium script (available from LoadRunner Enterprise 2021 R1 and later). A folder containing a file with ".java" extension and containing the expression "import org.openqa.selenium" is considered Selenium script.
 - Fixed a defect caused by the plugin trying to validate a Linux OS system path according to Windows OS criteria and vice versa, when the Jenkins server and the remote agent are on a different OS type.
 
+### Version 1.1.6 (not released, no commitment)
+This version provides the following enhancements:
+- Rebranding from Micro Focus to OpenText.
+- Possibility to associate a YAML defined test to a trend report.
+- Possibility to search for a timeslot defined for LRE test to execute and use it.
+- Possibility to add a wait time between generation of the trend report and the download of the trend report to the build artifact.
+- Timeslot duration can be parametrized via two parameters (Hours and Minutes).
+
 ### Downloads
 You can download the plugin from this link:
 
@@ -83,6 +92,7 @@ You can download the plugin from this link:
 - [Version 1.1.3](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.3/micro-focus-performance-center-integration-1.1.3.hpi).
 - [Version 1.1.4](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.4/micro-focus-performance-center-integration-1.1.4.hpi).
 - [Version 1.1.5](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.5/micro-focus-performance-center-integration-1.1.5.hpi).
+- [Version 1.1.6](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.6/micro-focus-performance-center-integration-1.1.6.hpi).
 
 ## Prerequisites
 1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
@@ -93,14 +103,14 @@ You can download the plugin from this link:
 6. LoadRunner Enterprise projects with Version Control enabled are not supported.
 
 ## Synchronize LoadRunner Enterprise With Git
-For details on how to perform this, see [Synchronize LoadRunner Enterprise with Git](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Sync_PC_with_Git.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
+For details on how to perform this, see [Synchronize LoadRunner Enterprise with Git](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Sync_PC_with_Git.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/lre).
 
 ## Run Performance Test Using LoadRunner Enterprise
-Available in version 1.1.0. For details on how to perform this, see [Run a performance test using LoadRunner Enterprise](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Run_test_using_PC.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
+Available in version 1.1.0. For details on how to perform this, see [Run a performance test using LoadRunner Enterprise](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Run_test_using_PC.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/lre).
 
 ---
 **NOTE** 
 
-For details on this and other LoadRunner Enterprise integrations, see the ["LoadRunner Enterprise and Git"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Git-integration.htm) and ["Plugins"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Performance-Center-Plugins.htm) topics in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/pc).
+For details on this and other LoadRunner Enterprise integrations, see the ["LoadRunner Enterprise and Git"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Git-integration.htm) and ["Plugins"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Performance-Center-Plugins.htm) topics in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/lre).
 
 ---
