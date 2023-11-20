@@ -16,7 +16,7 @@ Project status:
     + [Version 1.1.3](#version-113)
     + [Version 1.1.4](#version-114)
     + [Version 1.1.5](#version-115)
-    + [Version 1.1.6](#version-116) (not released, no commitment)
+    + [Version 1.1.6](#version-116)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
   * [Synchronize LoadRunner Enterprise With Git](#synchronize-loadrunner-enterprise-with-git)
@@ -77,7 +77,7 @@ This version provides the following enhancements:
 - Added support for Selenium script (available from LoadRunner Enterprise 2021 R1 and later). A folder containing a file with ".java" extension and containing the expression "import org.openqa.selenium" is considered Selenium script.
 - Fixed a defect caused by the plugin trying to validate a Linux OS system path according to Windows OS criteria and vice versa, when the Jenkins server and the remote agent are on a different OS type.
 
-### Version 1.1.6 (not released, no commitment)
+### Version 1.1.6
 This version provides the following enhancements:
 - Rebranding from Micro Focus to OpenText.
 - Possibility to associate a YAML defined test to a trend report.
@@ -95,7 +95,7 @@ You can download the plugin from this link:
 - [Version 1.1.3](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.3/micro-focus-performance-center-integration-1.1.3.hpi).
 - [Version 1.1.4](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.4/micro-focus-performance-center-integration-1.1.4.hpi).
 - [Version 1.1.5](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.5/micro-focus-performance-center-integration-1.1.5.hpi).
-- [Version 1.1.6](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.6/micro-focus-performance-center-integration-1.1.6.hpi). (not released, no commitment)
+- [Version 1.1.6](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.6/micro-focus-performance-center-integration-1.1.6.hpi).
 
 ## Prerequisites
 1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.

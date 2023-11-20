@@ -74,7 +74,7 @@ This version provides the following enhancements:
 - Added support for Selenium script (available from LoadRunner Enterprise 2021 R1 and later). A folder containing a file with ".java" extension and containing the expression "import org.openqa.selenium" is considered Selenium script.
 - Fixed a defect caused by the plugin trying to validate a Linux OS system path according to Windows OS criteria and vice versa, when the Jenkins server and the remote agent are on a different OS type.
 
-### Version 1.1.6 (not released, no commitment)
+### Version 1.1.6
 This version provides the following enhancements:
 - Rebranding from Micro Focus to OpenText.
 - Possibility to associate a YAML defined test to a trend report.
