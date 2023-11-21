@@ -17,6 +17,7 @@ Project status:
     + [Version 1.1.4](#version-114)
     + [Version 1.1.5](#version-115)
     + [Version 1.1.6](#version-116)
+    + [Version 1.1.7](#version-117)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
   * [Synchronize LoadRunner Enterprise With Git](#synchronize-loadrunner-enterprise-with-git)
@@ -85,6 +86,10 @@ This version provides the following enhancements:
 - Possibility to add a wait time between generation of the trend report and the download of the trend report to the build artifact.
 - Timeslot duration can be parametrized via two parameters (Hours and Minutes).
 
+### Version 1.1.7
+This version provides the following enhancements:
+- Removing unused dependency.
+
 ### Downloads
 You can download the plugin from this link:
 
@@ -96,6 +101,7 @@ You can download the plugin from this link:
 - [Version 1.1.4](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.4/micro-focus-performance-center-integration-1.1.4.hpi).
 - [Version 1.1.5](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.5/micro-focus-performance-center-integration-1.1.5.hpi).
 - [Version 1.1.6](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.6/micro-focus-performance-center-integration-1.1.6.hpi).
+- [Version 1.1.7](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.7/micro-focus-performance-center-integration-1.1.7.hpi).
 
 ## Prerequisites
 1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
