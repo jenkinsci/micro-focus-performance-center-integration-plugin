@@ -103,6 +103,21 @@ public class Compressor implements ICompressor {
     protected void putCompressEntriesForDirectory(ZipOutputStream target, File directory, int rootPathLength) throws IOException {
         for (File f : directory.listFiles()) {
             if (f.isDirectory()) {
+                /*
+                 * Create an 'directory entry' in the zip-file. It should not be neccessary according the 
+                 * zip specifications but Loadrunner enterprise uploaded seems to strip folder in a script 
+                 * if this is not here (eg. node_modules in a DevWeb script).
+                 */
+                String path = f.getAbsolutePath();
+                /*
+                 * Note: According to the zip specifications https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+                 * section 4.4.17.1 the path separator must be a forward slash.
+                 */
+                ZipEntry ze = new ZipEntry(path.substring(rootPathLength).replace("\\", "/") + "/");
+                target.putNextEntry(ze);
+                /*
+                 * Now recurse into the directory structure and continue.
+                 */
                 putCompressEntriesForDirectory(target, f, rootPathLength);
             } else {
                 putCompressEntriesForFile(target, f, rootPathLength);
@@ -112,7 +127,11 @@ public class Compressor implements ICompressor {
 
     protected void putCompressEntriesForFile(ZipOutputStream target, File file, int rootPathLength) throws IOException {
         String path = file.getAbsolutePath();
-        ZipEntry ze = new ZipEntry(path.substring(rootPathLength));
+        /*
+        * Note: According to the zip specifications https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+        * section 4.4.17.1 the path separator must be a forward slash.
+        */
+        ZipEntry ze = new ZipEntry(path.substring(rootPathLength).replace("\\", "/"));
         target.putNextEntry(ze);
         try (FileInputStream fis = new FileInputStream(file);
              BufferedInputStream bis = new BufferedInputStream(fis)) {
