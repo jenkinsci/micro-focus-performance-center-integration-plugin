@@ -26,5 +26,5 @@
 -->
 <?jelly escape-by-default='true'?>
 <div>
-  This plugin enables integration with LoadRunner Enterprise.
+  This plugin enables integration with OpenText Enterprise Performance Engineering.
 </div>

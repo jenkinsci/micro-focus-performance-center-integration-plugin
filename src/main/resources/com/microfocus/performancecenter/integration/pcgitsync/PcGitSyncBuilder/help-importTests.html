@@ -52,7 +52,7 @@
 <p>
 <h1>How to import tests from YAML files saved in the Git repository</h1>
 <div>Copy your YAML files to a folder in your Git repository (YAML files under the root of the Git repository will be
-    ignored). The plugin will create the test in the LoadRunner Enterprise project according to:
+    ignored). The plugin will create the test in the project according to:
     <ul>
         <li>The file name (without extension) which will be used as test name.</li>
         <li>The location of the file in the Git repository which will be the location of the test under the root folder
@@ -87,8 +87,8 @@
             <td>controller</td>
             <td>
                 <div>Defines the Controller to be used during the test run (it must be an available host in the
-                    LoadRunner Enterprise project). If not specified, a Controller will be chosen from the different
-                    controllers available in the LoadRunner Enterprise project.
+                    project). If not specified, a Controller will be chosen from the different
+                    controllers available in the project.
                 </div>
                 <div>From Performance Center 12.62 and plugin version 1.1.1, the option to provision a Controller as a
                     Docker image is available by specifying the value "Elastic" and providing a value for the
@@ -167,13 +167,13 @@
         </tr>
         <tr>
             <td>script_id</td>
-            <td>ID of the script in the LoadRunner Enterprise project.</td>
+            <td>ID of the script in the project.</td>
             <td>Not required if the 'script_path' parameter is specified.</td>
         </tr>
         <tr>
             <td>script_path</td>
             <td>Path and name of the script to be added to the group, separated by double backslashes (\\). For example
-                "MyMainFolder\\MySubFolder\\MyScriptName'. Do not include the LoadRunner Enterprise root folder (named
+                "MyMainFolder\\MySubFolder\\MyScriptName'. Do not include the root folder (named
                 "Subject").
             </td>
             <td>Not required if 'script_id' parameter is specified</td>
@@ -182,8 +182,7 @@
             <td>lg_name</td>
             <td>List of load generators to allocate to the group for running the script. The supported values are:
                 <ul>
-                    <li>The hostname, as defined in LoadRunner Enterprise, of an existing load generator in LoadRunner
-                        Enterprise allocated as a host.
+                    <li>The hostname, as defined in the application, of an existing load generator allocated as a host.
                     </li>
                     <li><strong>"LG"</strong> followed by a number, to use an automatically matched load generator
                         (recommended).
@@ -509,13 +508,13 @@
             <td>image_id</td>
             <td>This number can be retrieved from:
                 <ul>
-                    <li>The Administration page of LoadRunner Enterprise (you might need to turn to your LoadRunner
-                        Enterprise administrator as accessing this page requires admin privileges): select the <strong>Orchestration</strong>
+                    <li>The Administration page (you might need to turn to your OpenText Enterprise Performance Engineering
+                        administrator as accessing this page requires admin privileges): select the <strong>Orchestration</strong>
                         section -> switch to <strong>Docker Images</strong> tab -> you will have the list of all
                         available Docker images for Load Generator purposes with their ID. You can make sure the images
                         are available to your project from the <strong>Orchestrators</strong> tab.
                     </li>
-                    <li>A LoadRunner Enterprise Rest API command applied on the project (replace the bracketed values):
+                    <li>A OpenText Enterprise Performance Engineering Rest API command applied on the project (replace the bracketed values):
                         GET - <a href="#">http(s)://(PCServer):(PortNumber)/LoadTest/rest/domains/(DomainName)/projects/(ProjectName)/dockerimages/</a>
                         and select any valid image not having the value 'controller' for purpose.
                     </li>
@@ -525,7 +524,7 @@
         </tr>
         <tr>
             <td>memory_limit</td>
-            <td>This parameter can be retrieved from <strong>LoadRunner Enterprise Application</strong> -> <strong>Test
+            <td>This parameter can be retrieved from <strong>Application</strong> -> <strong>Test
                 Management</strong> -> edit a test -> Press <strong>Assign LG</strong> button -> in the
                 <strong>Elastic</strong> section, select <strong>DOCKER1</strong> -> select the relevant image (based on
                 the image name) -> use the values provided in the 'Memory(GB)' dropdown list (if not specified, this
@@ -535,7 +534,7 @@
         </tr>
         <tr>
             <td>cpu_limit</td>
-            <td>This parameter can be retrieved from <strong>LoadRunner Enterprise Application</strong> -> <strong>Test
+            <td>This parameter can be retrieved from <strong>Application</strong> -> <strong>Test
                 Management</strong> -> edit a test -> Press <strong>Assign LG</strong> button -> in the
                 <strong>Elastic</strong> section, select <strong>DOCKER1</strong> -> select the relevant image (based on
                 the image name) -> use the values provided in the 'CUPs' dropdown list (if not specified, this parameter
@@ -564,13 +563,13 @@
             <td>image_id</td>
             <td>This number can be retrieved from:
                 <ul>
-                    <li>The Administration page of LoadRunner Enterprise (you might need to turn to your LoadRunner
-                        Enterprise administrator as accessing this page requires admin privileges): select the <strong>Orchestration</strong>
+                    <li>The Administration page (you might need to turn to your OpenText Enterprise Performance Engineering
+                        administrator as accessing this page requires admin privileges): select the <strong>Orchestration</strong>
                         section -> switch to <strong>Docker Images</strong> tab -> you will have the list of all
                         available Docker images for Controller purposes with their ID. You can make sure the images are
                         available to your project from the <strong>Orchestrators</strong> tab.
                     </li>
-                    <li>A LoadRunner Enterprise Rest API command applied on the project (replace the bracketed values):
+                    <li>A OpenText Enterprise Performance Engineering Rest API command applied on the project (replace the bracketed values):
                         GET - <a href="#">http(s)://(PCServer):(PortNumber)/LoadTest/rest/domains/(DomainName)/projects/(ProjectName)/dockerimages/</a>
                         and select any valid image having the value 'controller' for purpose.
                     </li>
@@ -580,7 +579,7 @@
         </tr>
         <tr>
             <td>memory_limit</td>
-            <td>This parameter can be retrieved from <strong>LoadRunner Enterprise Application</strong> -> <strong>Test
+            <td>This parameter can be retrieved from <strong>Application</strong> -> <strong>Test
                 Management</strong> -> edit a test -> select the Controller -> choose <strong>Elastic</strong> option ->
                 select the relevant image -> Under the <strong>Resource Limits</strong> label, find and use the values
                 provided in the 'Memory(GB)' dropdown list (if not specified, this parameter should be ignored).
@@ -589,7 +588,7 @@
         </tr>
         <tr>
             <td>cpu_limit</td>
-            <td>This parameter can be retrieved from <strong>LoadRunner Enterprise Application</strong> -> <strong>Test
+            <td>This parameter can be retrieved from <strong>Application</strong> -> <strong>Test
                 Management</strong> -> edit a test -> select the Controller -> choose <strong>Elastic</strong> option ->
                 select the relevant image -> Under the <strong>Resource Limits</strong> label, find and use the values
                 provided in the 'CUPs' dropdown list (if not specified, this parameter should be ignored).
@@ -605,8 +604,7 @@
 <div>In the example below:
     <ul>
         <li>The plugin automatically assigns the file name as the test name, and the folder path of the file in the Git
-            repository is used to create the location of the test under the root folder ('Subject') in the LoadRunner
-            Enterprise project.
+            repository is used to create the location of the test under the root folder ('Subject') in the project.
         </li>
         <li>In the content:
             <ul>
@@ -666,8 +664,7 @@ scheduler:
 <div>In the example below:
     <ul>
         <li>The plugin automatically assigns the file name as the test name, and the folder path of the file in the Git
-            repository is used to create the location of the test under the root folder ('Subject') in the LoadRunner
-            Enterprise project.
+            repository is used to create the location of the test under the root folder ('Subject') in the project.
         </li>
         <li>Since the 'controller' and the 'lg_amount' parameters are specified, the specified Controller will be used
             to run the test and three automatch load generators will be used and shared by all groups.

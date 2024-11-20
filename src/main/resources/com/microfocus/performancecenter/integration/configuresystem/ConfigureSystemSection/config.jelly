@@ -36,7 +36,7 @@
         so it should be straightforward to find them.
     -->
     
-    <f:section title="OpenText LoadRunner Enterprise Integration">
+    <f:section title="OpenText Enterprise Performance Engineering Integration">
         <f:entry title="Debug" field="debug">
             <f:checkbox />
         </f:entry>

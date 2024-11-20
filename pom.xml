@@ -26,13 +26,13 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.30</version>
+        <version>4.83</version>
     </parent>
     <artifactId>micro-focus-performance-center-integration</artifactId>
     <version>1.1.8-SNAPSHOT</version>
     <packaging>hpi</packaging>
-    <name>OpenText LoadRunner Enterprise integration With Git</name>
-    <description>The plugin integrates LoadRunner Enterprise with Git.</description>
+    <name>OpenText Enterprise Performance Engineering integration With Git</name>
+    <!--<description>The plugin integrates OpenText Enterprise Performance Engineering with Git.</description>-->
     <url>https://github.com/jenkinsci/micro-focus-performance-center-integration-plugin/blob/master/DocForJenkinsPluginsWebSite.md</url>
     <licenses>
         <license>
@@ -43,13 +43,13 @@
     </licenses>
     <properties>
         <concurrency>1</concurrency>
-        <jenkins.version>2.60.3</jenkins.version>
+        <jenkins.version>2.452.3</jenkins.version>
         <maven.exec.skip>false</maven.exec.skip>
         <!--
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         -->
-        <java.level>8</java.level>
+        <java.level>21</java.level>
     </properties>
     <distributionManagement>
         <repository>
@@ -309,7 +309,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.12</version>
+            <version>1.18.36</version>
             <scope>provided</scope>
         </dependency>
 
@@ -363,11 +363,13 @@
             <artifactId>guice</artifactId>
             <version>4.0</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>remoting</artifactId>
             <version>3.7</version>
         </dependency>
+        -->
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
@@ -378,5 +380,12 @@
             <artifactId>jakarta.xml.bind-api</artifactId>
             <version>2.3.3</version>
         </dependency>
+	<!---->
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>remoting</artifactId>
+            <version>3206.vb_15dcf73f6a_9</version>
+        </dependency>
+        <!---->
     </dependencies>
 </project>

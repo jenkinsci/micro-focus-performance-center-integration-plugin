@@ -141,7 +141,7 @@
                 var popup = window.open(scheme + "://" + pcServer + "/loadtest/");
                 popup.opener = null;
             }else{
-                alert("LoadRunner Enterprise Server name is missing.");
+                alert("Server name is missing.");
             }
             return false;
 		}
@@ -208,9 +208,9 @@
     </f:entry>
 
 
-    <f:entry title="Test Plan folder" field="subjectTestPlan">
+    <f:invisibleEntry  title="Test Plan folder" field="subjectTestPlan">
         <f:textbox name="pcgit.subjectTestPlan" value="${instance.pcGitSyncModel.subjectTestPlan}" default="Subject\scripts"  />
-    </f:entry>
+    </f:invisibleEntry>
 
     <f:entry title="Upload script mode" field="uploadScriptMode">
         <select id="uploadScriptMode" name="pcGit.uploadScriptMode" >
