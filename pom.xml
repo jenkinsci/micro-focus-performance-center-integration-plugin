@@ -45,7 +45,6 @@
         <concurrency>1</concurrency>
         <jenkins.version>2.462.3</jenkins.version>
         <maven.exec.skip>false</maven.exec.skip>
-<!--        <jenkins-test-harness.version>2378.v58ce1c9466c7</jenkins-test-harness.version> &lt;!&ndash; TODO newer versions than 2.55 require debugging an issue with open file handles &ndash;&gt;-->
     </properties>
     <distributionManagement>
         <repository>
@@ -123,7 +122,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <additionalparam>-Xdoclint:none</additionalparam>
                     <skip>true</skip>
                 </configuration>
             </plugin>
