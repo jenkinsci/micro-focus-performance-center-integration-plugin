@@ -15,6 +15,7 @@ This plugin integrates OpenText OpenText Enterprise Performance Engineering with
     + [Version 1.1.5](#version-115)
     + [Version 1.1.6](#version-116)
     + [Version 1.1.7](#version-117)
+	+ [Version 1.1.8](#version-117)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
   * [Synchronize OpenText Enterprise Performance Engineering With Git](#synchronize-openText-enterprise-performance-engineering-with-git)
@@ -86,6 +87,12 @@ This version provides the following enhancements:
 This version provides the following enhancements:
 - Removing unused dependency.
 
+### Version 1.1.7
+This version provides the following enhancements:
+- rebranding product name.
+- updating components for security compliance.
+- new requirement: java 17.
+
 ### Downloads
 You can download the plugin from this link:
 
@@ -98,9 +105,10 @@ You can download the plugin from this link:
 - [Version 1.1.5](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.5/micro-focus-performance-center-integration-1.1.5.hpi).
 - [Version 1.1.6](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.6/micro-focus-performance-center-integration-1.1.6.hpi).
 - [Version 1.1.7](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.7/micro-focus-performance-center-integration-1.1.7.hpi).
+- [Version 1.1.8](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.8/micro-focus-performance-center-integration-1.1.8.hpi).
 
 ## Prerequisites
-1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
+1. Java version 11 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
 2. OpenText Enterprise Performance Engineering server.
 3. Git Repository on GitHub or GitLab server.
 4. Jenkins versions: This plugin supports only the latest five LTS versions of Jenkins (currently 2.60.3). This is a result of the Jenkins policy to no longer support older update centers. Jenkins 2.54 and higher requires you to have Java 8 installed on the machine.
