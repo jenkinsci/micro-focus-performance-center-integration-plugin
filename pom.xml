@@ -26,30 +26,26 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>2.30</version>
+        <version>4.83</version>
     </parent>
     <artifactId>micro-focus-performance-center-integration</artifactId>
     <version>1.1.8-SNAPSHOT</version>
     <packaging>hpi</packaging>
-    <name>OpenText LoadRunner Enterprise integration With Git</name>
-    <description>The plugin integrates LoadRunner Enterprise with Git.</description>
+    <name>OpenText Enterprise Performance Engineering integration With Git</name>
+    <!--<description>The plugin integrates OpenText Enterprise Performance Engineering with Git.</description>-->
     <url>https://github.com/jenkinsci/micro-focus-performance-center-integration-plugin/blob/master/DocForJenkinsPluginsWebSite.md</url>
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
+            <url>https://opensource.org/license/mit</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
     <properties>
         <concurrency>1</concurrency>
-        <jenkins.version>2.60.3</jenkins.version>
+        <jenkins.version>2.462.3</jenkins.version>
         <maven.exec.skip>false</maven.exec.skip>
-        <!--
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        -->
-        <java.level>8</java.level>
+<!--        <jenkins-test-harness.version>2378.v58ce1c9466c7</jenkins-test-harness.version> &lt;!&ndash; TODO newer versions than 2.55 require debugging an issue with open file handles &ndash;&gt;-->
     </properties>
     <distributionManagement>
         <repository>
@@ -63,7 +59,7 @@
     </distributionManagement>
     <scm>
         <connection>scm:git:ssh://github.com/jenkinsci/micro-focus-performance-center-integration-plugin.git</connection>
-        <developerConnection>scm:git:ssh://git@github.com/jenkinsci/micro-focus-performance-center-integration-plugin.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/micro-focus-performance-center-integration-plugin</url>
         <tag>HEAD</tag>
     </scm>
@@ -75,7 +71,7 @@
     </issueManagement>
     <organization>
         <name>OpenText</name>
-        <url>http://www.opentext.com</url>
+        <url>https://www.opentext.com</url>
     </organization>
     <developers>
         <developer>
@@ -132,8 +128,8 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
                 <executions>
                     <execution>
                         <phase>none</phase>
@@ -157,6 +153,11 @@
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.5</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.4.0</version>
                 <executions>
@@ -174,9 +175,8 @@
                                 <argument>${env.JENKINS_HOME}war\WEB-INF\jenkins-cli.jar</argument>
                                 <argument>-s</argument>
                                 <argument>http://localhost:8080</argument>
-                                <argumnet>install-plugin</argumnet>
-                                <argumnet>${project.build.directory}\${project.build.finalName}.${project.packaging}
-                                </argumnet>
+                                <argumnent>install-plugin</argumnent>
+                                <argument>${project.build.directory}\${project.build.finalName}.${project.packaging}</argument>
                                 <argument>-name</argument>
                                 <argument>"${project.artifactId}"</argument>
                                 <!-- <argument>-deploy</argument> -->
@@ -190,16 +190,13 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.19.1</version>
+                <version>${maven-surefire-plugin.version}</version>
                 <configuration>
                     <excludes>
-                        <exclude>**/GherkinResultsTest.java</exclude>
-                        <exclude>**/JUnitResultsTest.java</exclude>
+                        <exclude>**/InjectedTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
-            <!--
-            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>animal-sniffer-maven-plugin</artifactId>
@@ -212,24 +209,6 @@
                     </signature>
                 </configuration>
             </plugin>
-			<!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.6.0</version>
-                <executions>
-                    <execution>
-                        <id>analyze-dep</id>
-                        <goals>
-                            <goal>analyze-only</goal>
-                        </goals>
-                        <configuration>
-                            <failOnWarning>true</failOnWarning>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-			-->
         </plugins>
     </build>
     <!-- get every artifact through repo.jenkins-ci.org, which proxies all the artifacts that we need -->
@@ -303,20 +282,12 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>changes-since-last-success</artifactId>
-            <version>0.5</version>
+            <version>0.6</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.12</version>
-            <scope>provided</scope>
-        </dependency>
-
         <dependency>
             <groupId>org.kohsuke.stapler</groupId>
             <artifactId>json-lib</artifactId>
-            <version>2.4-jenkins-2</version>
+            <version>2.4-jenkins-8</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -324,24 +295,19 @@
             <version>2.6</version>
         </dependency>
         <dependency>
-            <groupId>org.jvnet.hudson</groupId>
-            <artifactId>xstream</artifactId>
-            <version>1.4.7-jenkins-1</version>
-        </dependency>
-        <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4</version>
+            <version>2.18.0</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.hk2.external</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>2.3.0-b05</version>
+            <version>2.5.0-b62</version>
         </dependency>
         <dependency>
             <groupId>org.jvnet.localizer</groupId>
             <artifactId>localizer</artifactId>
-            <version>1.24</version>
+            <version>1.28</version>
         </dependency>
         <dependency>
             <groupId>javax.xml.bind</groupId>
@@ -351,32 +317,68 @@
         <dependency>
             <groupId>org.kohsuke.stapler</groupId>
             <artifactId>stapler</artifactId>
-            <version>1.250</version>
+            <version>1.263</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
-            <version>2.9</version>
+            <version>1400.v7fd111b_ec82f</version>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>4.0</version>
+            <version>7.0.0</version>
+        </dependency>
+        <!--        test-->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13.2</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.main</groupId>
-            <artifactId>remoting</artifactId>
-            <version>3.7</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.4.16</version>
+            <scope>test</scope>
+        </dependency>
+        <!--        Compile-->
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs-annotations</artifactId>
+            <version>4.8.5</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
-            <version>2.0.1</version>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--        provided-->
+        <dependency>
+            <groupId>org.kohsuke</groupId>
+            <artifactId>access-modifier-annotation</artifactId>
+            <version>1.33</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>jakarta.xml.bind</groupId>
-            <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.3</version>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.21</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>remoting</artifactId>
+            <version>3248.3250.v3277a_8e88c9b_</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

@@ -141,7 +141,7 @@
                 var popup = window.open(scheme + "://" + pcServerAndTenant[0] + "/loadtest/"  + pcServerAndTenant[1]);
                 popup.opener = null;
             } else {
-                alert("LoadRunner Enterprise Server name is missing.");
+                alert("Server name is missing.");
             }
             return false;
             }

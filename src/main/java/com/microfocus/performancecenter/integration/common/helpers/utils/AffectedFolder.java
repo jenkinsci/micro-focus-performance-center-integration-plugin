@@ -91,18 +91,11 @@ public final class AffectedFolder implements Comparable<AffectedFolder> {
         if (o == this) return true;
         if (!(o instanceof AffectedFolder)) return false;
         final AffectedFolder other = (AffectedFolder) o;
-        final Object this$relativePath = this.getRelativePath();
-        final Object other$relativePath = other.getRelativePath();
-        if (this$relativePath == null ? other$relativePath != null : !this$relativePath.equals(other$relativePath))
-            return false;
-        return true;
+        return this.getRelativePath().equals(other.getRelativePath());
     }
 
     public int hashCode() {
         final int PRIME = 59;
-        int result = 1;
-        final Object $relativePath = this.getRelativePath();
-        result = result * PRIME + ($relativePath == null ? 43 : $relativePath.hashCode());
-        return result;
+        return PRIME + this.getRelativePath().hashCode();
     }
 }

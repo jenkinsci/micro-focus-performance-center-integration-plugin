@@ -1,6 +1,6 @@
 ![OpenText Logo](https://upload.wikimedia.org/wikipedia/commons/1/1b/OpenText_logo.svg)
-# OpenText LoadRunner Enterprise Integration with Git
-This plugin integrates OpenText LoadRunner Enterprise with Git via Jenkins.
+# OpenText OpenText Enterprise Performance Engineering Integration with Git
+This plugin integrates OpenText OpenText Enterprise Performance Engineering with Git via Jenkins.
 
 ---
 **Table of Content**
@@ -15,19 +15,20 @@ This plugin integrates OpenText LoadRunner Enterprise with Git via Jenkins.
     + [Version 1.1.5](#version-115)
     + [Version 1.1.6](#version-116)
     + [Version 1.1.7](#version-117)
+	+ [Version 1.1.8](#version-117)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
-  * [Synchronize LoadRunner Enterprise With Git](#synchronize-loadrunner-enterprise-with-git)
-  * [Run Performance Test Using LoadRunner Enterprise](#run-performance-test-using-loadrunner-enterprise)
+  * [Synchronize OpenText Enterprise Performance Engineering With Git](#synchronize-openText-enterprise-performance-engineering-with-git)
+  * [Run OpenText Enterprise Performance Engineering Test](#run-openText-enterprise-performance-engineering-test)
 
 ---
   
 Using this plugin, you can:
-- Upload LoadRunner and JMeter scripts from a GitHub repository or a GitLab project to a project on a LoadRunner Enterprise server.
-- Create LoadRunner Enterprise tests from a YAML file.
-- Run a LoadRunner Enterprise test from its ID, or create it from a YAML file or YAML syntax and then run it.
+- Upload performance scripts from a GitHub repository or a GitLab project to a project on an OpenText Enterprise Performance Engineering server.
+- Create performance tests from a YAML file.
+- Run a test from its ID, or create it from a YAML file or YAML syntax and then run it.
 
-There is a separate plugin for running performance tests using LoadRunner Enterprise. For details, see [OpenText Application Automation Tools](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools) - [LoadRunner Enterprise Integration](https://wiki.jenkins.io/display/JENKINS/Performance+Center+Integration).
+There is a separate plugin for running OpenText Enterprise Performance Engineering tests. For details, see [OpenText Application Automation Tools](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools) - [OpenText Enterprise Performance Engineering Integration](https://wiki.jenkins.io/display/JENKINS/Performance+Center+Integration).
 
 **Submit issues and feedback through [JIRA](https://issues.jenkins-ci.org/browse/JENKINS-36795?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20micro-focus-performance-center-integration)**
 
@@ -39,11 +40,11 @@ This version provides the following enhancements:
 
 **Git synchronization**
 
-- Ability to synchronize LoadRunner Enterprise with Git by uploading LoadRunner and JMeter scripts stored in a Git repository to a LoadRunner Enterprise project.
+- Ability to synchronize OpenText Enterprise Performance Engineering with Git by uploading performance scripts stored in a Git repository to a LoadRunner Enterprise project.
 
 ### Version 1.1.0
 This version provides the following enhancements:
-- Git Synchronization: Ability to create a LoadRunner Enterprise test from YAML files stored in Git.
+- Git Synchronization: Ability to create a performance test from YAML files stored in Git.
 - Test Execution: Ability to create a test (from a YAML file or YAML content) before running it.
 
 ### Version 1.1.1
@@ -51,41 +52,46 @@ Fixed a defect relating to a tech preview feature (REST API usage of Load Genera
 
 ### Version 1.1.2
 This version provides the following enhancements:
-- Network Virtualization Insights report is published in the Build's logs (this works with LoadRunner Enterprise but requires a hotfix in all Performance Center versions).
+- Network Virtualization Insights report is published in the Build's logs.
 - Rebranded the product name from "Performance Center" to "LoadRunner Enterprise", "PC" to "LRE", and "My PC" to "LoadRunner Enterprise Application".
 
 ### Version 1.1.3
 This version provides the following enhancements:
 - Fix for Java 11.
-- Connect to LoadRunner Enterprise 2020 SP2 and later with a tenant.
+- Connect to server with a tenant.
 
 ### Version 1.1.4
 This version provides the following enhancements:
 - Fix for pipeline build (FreeStyle project works fine): 
   - problem: While the first build passes and synchronizes everything, subsequent builds, supposed to only synchronize the changes in the Git repository, cannot calculate the difference and fail.
   - Resolution: All pipeline builds now behave as if they are the first build and will synchronize everything.
-- Added support for LoadRunner Developer scripts (DevWeb protocol): A folder containing both the "main.js" and "rts.yml" files is considered a LoadRunner Developer script.
+- Added support for new performance script type (DevWeb protocol): A folder containing both the "main.js" and "rts.yml" files is considered a LoadRunner Developer script.
 - Added support for Gatling scripts: A folder containing a file with ".scala" for extension is considered a Gatling script.
-- This plugin does not fail the build if there are failed attempts to synchronize "LoadRunner Developer" and Gatling scripts because there are many versions of Performance Center and LoadRunner Enterprise that do not support those scripts.
 - Additional rebranding (changing "Performance Center" to "LoadRunner Enterprise" in the build logs).
 
 ### Version 1.1.5
 This version provides the following enhancements:
-- Ability to use an LoadRunner Enterprise token API access key associated with a user for authentication (available in LoadRunner Enterprise 2021 R1 and later).
-- Added support for Selenium script (available from LoadRunner Enterprise 2021 R1 and later). A folder containing a file with ".java" extension and containing the expression "import org.openqa.selenium" is considered Selenium script.
+- Ability to use a token API (access key) associated with a user for authentication.
+- Added support for Selenium script. A folder containing a file with ".java" extension and containing the expression "import org.openqa.selenium" is considered Selenium script.
 - Fixed a defect caused by the plugin trying to validate a Linux OS system path according to Windows OS criteria and vice versa, when the Jenkins server and the remote agent are on a different OS type.
 
 ### Version 1.1.6
 This version provides the following enhancements:
 - Rebranding from Micro Focus to OpenText.
 - Possibility to associate a YAML defined test to a trend report.
-- Possibility to search for a timeslot defined for LRE test to execute and use it.
+- Possibility to search for a timeslot defined for performance test to execute and use it.
 - Possibility to add a wait time between generation of the trend report and the download of the trend report to the build artifact.
 - Timeslot duration can be parametrized via two parameters (Hours and Minutes).
 
 ### Version 1.1.7
 This version provides the following enhancements:
 - Removing unused dependency.
+
+### Version 1.1.7
+This version provides the following enhancements:
+- rebranding product name.
+- updating components for security compliance.
+- new requirement: java 17.
 
 ### Downloads
 You can download the plugin from this link:
@@ -99,24 +105,24 @@ You can download the plugin from this link:
 - [Version 1.1.5](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.5/micro-focus-performance-center-integration-1.1.5.hpi).
 - [Version 1.1.6](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.6/micro-focus-performance-center-integration-1.1.6.hpi).
 - [Version 1.1.7](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.7/micro-focus-performance-center-integration-1.1.7.hpi).
+- [Version 1.1.8](https://repo.jenkins-ci.org/releases/org/jenkins-ci/plugins/micro-focus-performance-center-integration/1.1.8/micro-focus-performance-center-integration-1.1.8.hpi).
 
 ## Prerequisites
-1. Java version 8 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
-2. LoadRunner Enterprise server.
+1. Java version 11 or higher. To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
+2. OpenText Enterprise Performance Engineering server.
 3. Git Repository on GitHub or GitLab server.
 4. Jenkins versions: This plugin supports only the latest five LTS versions of Jenkins (currently 2.60.3). This is a result of the Jenkins policy to no longer support older update centers. Jenkins 2.54 and higher requires you to have Java 8 installed on the machine.
 5. Content Security Policy: Starting with version 1.641 (or 1.625.3), Jenkins introduced the Content-Security-Policy header. This causes some of the integration links, such as links to reports, to become inoperable. For details, see [Configuring Content Security Policy](https://wiki.jenkins.io/display/JENKINS/Configuring+Content+Security+Policy) and [Jenkins Security Advisory](https://jenkins.io/security/advisory/2015-12-09/) . For suggested workarounds until the issue is resolved, see [Content Security Policy Header](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools#MicroFocusApplicationAutomationTools-ContentSecurityPolicyHeader).
-6. LoadRunner Enterprise projects with Version Control enabled are not supported.
 
-## Synchronize LoadRunner Enterprise With Git
-For details on how to perform this, see [Synchronize LoadRunner Enterprise with Git](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Sync_PC_with_Git.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/lre).
+## Synchronize OpenText Enterprise Performance Engineering With Git
+For details on how to perform this, see [Synchronize OpenText Enterprise Performance Engineering with Git](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Sync_PC_with_Git.htm) in the [OpenText Enterprise Performance Engineering help](https://admhelp.microfocus.com/lre).
 
-## Run Performance Test Using LoadRunner Enterprise
-Available in version 1.1.0. For details on how to perform this, see [Run a performance test using LoadRunner Enterprise](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Run_test_using_PC.htm) in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/lre).
+## Run OpenText Enterprise Performance Engineering Test
+Available in version 1.1.0. For details on how to perform this, see [Run OpenText Enterprise Performance Engineering test](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Run_test_using_PC.htm) in the [OpenText Enterprise Performance Engineering help](https://admhelp.microfocus.com/lre).
 
 ---
 **NOTE** 
 
-For details on this and other LoadRunner Enterprise integrations, see the ["LoadRunner Enterprise and Git"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Git-integration.htm) and ["Plugins"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Performance-Center-Plugins.htm) topics in the [LoadRunner Enterprise help](https://admhelp.microfocus.com/lre).
+For details on this and other OpenText Enterprise Performance Engineering integrations, see the ["OpenText Enterprise Performance Engineering and Git"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Git-integration.htm) and ["Plugins"](https://admhelp.microfocus.com/pc/en/latest/online_help/Content/PC/Performance-Center-Plugins.htm) topics in the [OpenText Enterprise Performance Engineering help](https://admhelp.microfocus.com/lre).
 
 ---

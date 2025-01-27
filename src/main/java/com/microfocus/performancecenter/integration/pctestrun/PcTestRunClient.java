@@ -28,7 +28,10 @@
 
 package com.microfocus.performancecenter.integration.pctestrun;
 
+import com.cloudbees.plugins.credentials.CredentialsProvider;
+import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
+import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.*;
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.pcsubentities.test.Test;
 import com.microfocus.adm.performancecenter.plugins.common.rest.PcRestProxy;
@@ -36,8 +39,10 @@ import com.microfocus.performancecenter.integration.common.helpers.constants.PcT
 import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 import hudson.FilePath;
 import hudson.console.HyperlinkNote;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 
 import java.beans.IntrospectionException;
@@ -67,12 +72,15 @@ public class PcTestRunClient {
     private ConfigureSystemSection configureSystemSection;
     private int testInstanceID = 0;
     private int timeslotId = -1;
+    private Run<?, ?> build;
 
-    public PcTestRunClient(PcTestRunModel pcTestRunModel, String testToCreate,
+
+    public PcTestRunClient(PcTestRunModel pcTestRunModel, Run<?, ?> build, String testToCreate,
                            String testName, String testFolderPath, String fileExtension,
                            TaskListener listener, ConfigureSystemSection configureSystemSection) {
         try {
             this.listener = listener;
+            this.build = build;
             this.model = pcTestRunModel;
             this.testToCreate = testToCreate;
             this.testName = testName;
@@ -80,7 +88,7 @@ public class PcTestRunClient {
             this.fileExtension = fileExtension;
             this.configureSystemSection = configureSystemSection;
             String credentialsProxyId = model.getCredentialsProxyId(true);
-            UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy = PcTestRunBuilder.getCredentialsId(credentialsProxyId);
+            UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy = getCredentialsId(credentialsProxyId);
             String proxyOutUser = (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getUsername();
             String proxyOutPassword = (usernamePCPasswordCredentialsForProxy == null || model.getProxyOutURL(true).isEmpty()) ? "" : usernamePCPasswordCredentialsForProxy.getPassword().getPlainText();
             if (model.getProxyOutURL(true) != null && !model.getProxyOutURL(true).isEmpty()) {
@@ -98,6 +106,30 @@ public class PcTestRunClient {
         }
     }
 
+    private UsernamePasswordCredentials getCredentialsId(String credentialsId) {
+        if (credentialsId != null && build != null)
+            return getCredentialsById(credentialsId, build);
+        return null;
+    }
+
+    private UsernamePasswordCredentials getCredentialsById(String credentialsId, Run<?, ?> build) {
+        if (StringUtils.isBlank(credentialsId))
+            return null;
+
+        UsernamePasswordCredentials usernamePCPasswordCredentials = CredentialsProvider.findCredentialById(credentialsId,
+                StandardUsernamePasswordCredentials.class,
+                build,
+                URIRequirementBuilder.create().build());
+
+        if (usernamePCPasswordCredentials == null) {
+            log(listener, String.format("%s : %s",
+                    Messages.CannotFindCredentials(),
+                    credentialsId), true);
+        }
+        return usernamePCPasswordCredentials;
+    }
+
+
     public <T extends PcRestProxy> PcTestRunClient(PcTestRunModel pcTestRunModel, /*PrintStream logger,*/ T proxy) {
         model = pcTestRunModel;
         restProxy = proxy;
@@ -107,21 +139,27 @@ public class PcTestRunClient {
         try {
             this.listener = listener;
             String credentialsId = model.getCredentialsId(true);
-            UsernamePasswordCredentials usernamePCPasswordCredentials = PcTestRunBuilder.getCredentialsId(credentialsId);
+            UsernamePasswordCredentials usernamePCPasswordCredentials = getCredentialsId(credentialsId);
             log(listener, "", true);
             if (usernamePCPasswordCredentials != null) {
                 if (model.getCredentialsId().startsWith("$"))
                     log(listener, "%s", true, Messages.UsingPCCredentialsBuildParameters());
                 else
                     log(listener, "%s", true, Messages.UsingPCCredentialsConfiguration());
-                log(listener, "%s\n[Login: Attempting to login to LoadRunner Enterprise server '%s://%s/LoadTest/%s' with credentials of %s '%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), restProxy.GetPcServer(), restProxy.GetTenant(), model.isAuthenticateWithToken() ? "ClientIdKey" : "User", usernamePCPasswordCredentials.getUsername());
+                log(listener, "%s\n[Login: Attempting to login to the server '%s://%s/LoadTest/%s' with credentials of %s '%s']", true, Messages.TryingToLogin(), model.isHTTPSProtocol(), restProxy.GetPcServer(), restProxy.GetTenant(), model.isAuthenticateWithToken() ? "ClientIdKey" : "User", usernamePCPasswordCredentials.getUsername());
                 loggedIn = restProxy.authenticate(usernamePCPasswordCredentials.getUsername(), usernamePCPasswordCredentials.getPassword().getPlainText());
             } else {
-                log(listener, "LoadRunner Enterprise credentials are missing.", true);
+                log(listener, "credentials are missing.", true);
                 loggedIn = false;
             }
-        } catch (NullPointerException | PcException | IOException e) {
-            log(listener, "%s: %s", true, Messages.Error(), e.getMessage());
+        } catch (PcException e) {
+            log(listener, "login PcException %s: %s", true, Messages.Error(), e.getMessage());
+            logStackTrace(listener, configureSystemSection, e);
+        } catch (IOException e) {
+            log(listener, "login IOException %s: %s", true, Messages.Error(), e.getMessage());
+            logStackTrace(listener, configureSystemSection, e);
+        } catch (Exception e) {
+            log(listener, "login general %s: %s", true, Messages.Error(), e.getMessage());
             logStackTrace(listener, configureSystemSection, e);
         }
         log(listener, "%s", true, loggedIn ? Messages.LoginSucceeded() : Messages.LoginFailed());
@@ -180,7 +218,7 @@ public class PcTestRunClient {
             //counter
             int retryCount = 0;
             //values
-            int retryDelay = Integer.parseInt(model.getRetryDelay());
+            long retryDelay = Integer.parseInt(model.getRetryDelay());
             int retryOccurrences = Integer.parseInt(model.getRetryOccurrences());
 
             while (retryCount <= retryOccurrences) {
@@ -332,11 +370,14 @@ public class PcTestRunClient {
                                 testInstanceID);
                     }
                 }
+            } catch (IOException e) {
+                log(listener, "getOpenedTimeslot failed due to IOException: %s", true, e.getMessage());
+                logStackTrace(listener, configureSystemSection, e);
+            } catch (PcException e) {
+                log(listener, "getOpenedTimeslot failed due to PcException: %s", true, e.getMessage());
+                logStackTrace(listener, configureSystemSection, e);
             } catch (Exception e) {
-                log(listener, "getOpenedTimeslot %s. %s: %s", true,
-                        Messages.Failure(),
-                        Messages.Error(),
-                        e.getMessage());
+                log(listener, "getOpenedTimeslot failed due to an unexpected exception: %s", true, e.getMessage());
                 logStackTrace(listener, configureSystemSection, e);
             }
         }
@@ -402,13 +443,26 @@ public class PcTestRunClient {
                         throw new PcException(msg);
                     }
                 }
-            } catch (Exception e) {
-                log(listener, "getCorrectTestInstanceID %s. %s: %s", true,
+            } catch (IOException e) {
+                log(listener, "getCorrectTestInstanceID due to IOException %s. %s: %s", true,
                         Messages.Failure(),
                         Messages.Error(),
                         e.getMessage());
                 logStackTrace(listener, configureSystemSection, e);
-                testInstanceID = Integer.parseInt(null);
+                throw e;
+            }catch (PcException e) {
+                log(listener, "getCorrectTestInstanceID due to PcException %s. %s: %s", true,
+                        Messages.Failure(),
+                        Messages.Error(),
+                        e.getMessage());
+                logStackTrace(listener, configureSystemSection, e);
+                throw e;
+            }catch (Exception e) {
+                log(listener, "getCorrectTestInstanceID general %s. %s: %s", true,
+                        Messages.Failure(),
+                        Messages.Error(),
+                        e.getMessage());
+                logStackTrace(listener, configureSystemSection, e);
                 throw e;
             }
         } else
@@ -573,7 +627,9 @@ public class PcTestRunClient {
 
     private FilePath getFilePath(int runId, String reportDirectory, PcRunResult result, boolean nvInsights) throws IOException, PcException, InterruptedException {
         File dir = new File(reportDirectory);
-        dir.mkdirs();
+        boolean created = dir.mkdirs();
+        log(listener, "getFilePath: Directory creation of %s - status: %s", true, reportDirectory, created);
+
         String reportArchiveFullPath = dir.getCanonicalPath() + IOUtils.DIR_SEPARATOR + (nvInsights ? PcTestRunBuilder.pcNVInsightsReportArchiveName : PcTestRunBuilder.pcReportArchiveName);
         try {
             restProxy.GetRunResultData(runId, result.getID(), reportArchiveFullPath);
@@ -587,7 +643,7 @@ public class PcTestRunClient {
         fp.unzip(fp.getParent());
         fp.delete();
         FilePath reportFile = fp.sibling(nvInsights ? PcTestRunBuilder.pcNVInsightsReportFileName : PcTestRunBuilder.pcReportFileName);
-        if (reportFile.exists()) {
+        if (reportFile != null && reportFile.exists()) {
             log(listener, (nvInsights ? Messages.PublishingNVInsightsReport() : Messages.PublishingAnalysisReport()), true);
             return reportFile;
         }
@@ -727,7 +783,9 @@ public class PcTestRunClient {
             InputStream in = restProxy.getTrendingPDF(trendReportId);
             File dir = new File(directory);
             if (!dir.exists()) {
-                dir.mkdirs();
+                boolean created = dir.mkdirs();
+                log(listener, "downloadTrendReportAsPdf - Directory creation of %s - status %s", true,
+                        directory, created);
             }
             String filePath = directory + IOUtils.DIR_SEPARATOR + "trendReport" + trendReportId + ".pdf";
             Path destination = Paths.get(filePath);

@@ -56,14 +56,18 @@ public class Helper {
 
     public static boolean isUsrScript(String strPath) {
         File dir = new File(strPath);
-        File[] foundFiles = {};
-        if (dir != null) {
-            foundFiles = dir.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String filename) {
-                    return (filename.toLowerCase().endsWith(PcTestRunConstants.USR_EXTENSION));
-                }
-            });
+        if (dir == null || !dir.isDirectory()) {
+            // Handle the case where the path is invalid or not a directory
+            return false;
         }
-        return foundFiles.length > 0;
+
+        File[] foundFiles = dir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String filename) {
+                return filename.toLowerCase().endsWith(PcTestRunConstants.USR_EXTENSION);
+            }
+        });
+
+        // Check if foundFiles is null before accessing length
+        return foundFiles != null && foundFiles.length > 0;
     }
 }
