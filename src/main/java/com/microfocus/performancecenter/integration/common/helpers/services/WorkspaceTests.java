@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 public class WorkspaceTests {
 
     private static boolean verifyFileIsTest(Path fileFullPath, Path workspace, boolean considerXML) {
-        if (fileFullPath == null || fileFullPath.getParent().equals(workspace)) {
+        if (fileFullPath == null || fileFullPath.getParent() == null || workspace == null || fileFullPath.getParent().equals(workspace)) {
             return false;
         }
 
@@ -76,17 +76,26 @@ public class WorkspaceTests {
     }
 
     private static boolean isParentsNotScript(Path fullPath, Path workspace, boolean isParentsNotScript) {
-        Path parentPath = fullPath.getParent();
-        File[] files = lrSupportedScriptSignatureFinder(parentPath.toString());
-        boolean parentPathContainsLrSupportedScriptSignature = files != null ? (files.length > 0) : false;
+        if (fullPath != null) {
+            Path parentPath = fullPath.getParent();
+            if(parentPath != null && workspace != null) {
+                File[] files = lrSupportedScriptSignatureFinder(parentPath.toString());
+                boolean parentPathContainsLrSupportedScriptSignature = files != null ? (files.length > 0) : false;
 
-        //directories and subdirectories are verified
-        if (!parentPath.getParent().equals(workspace) && !parentPathContainsLrSupportedScriptSignature)
-            isParentsNotScript = isParentsNotScript(parentPath, workspace);
-        else if (parentPath.getParent().equals(workspace) && !parentPathContainsLrSupportedScriptSignature)
-            isParentsNotScript = true;
+                // Directories and subdirectories are verified
+                Path parentParentPath = parentPath.getParent();
+                if (parentParentPath != null) {
+                    if (!parentParentPath.equals(workspace) && !parentPathContainsLrSupportedScriptSignature)
+                        isParentsNotScript = isParentsNotScript(parentPath, workspace);
+                    else if (parentParentPath.equals(workspace) && !parentPathContainsLrSupportedScriptSignature)
+                        isParentsNotScript = true;
+                }
+            }
+        }
         return isParentsNotScript;
     }
+
+
 
     //verify that file has xml (if considerXML is true) or yaml extension
     private static boolean isPossiblyTest(Path fullPath, boolean considerXML) {
@@ -175,7 +184,7 @@ public class WorkspaceTests {
     }
 
     private Optional<Path> getOptionalPathIfFileIsTest(Path fileFullPath, Path workspace, boolean considerXML) {
-        if (fileFullPath == null || fileFullPath.getParent().equals(workspace)) {
+        if (fileFullPath == null || fileFullPath.getParent() == null || workspace == null || fileFullPath.getParent().equals(workspace)) {
             return Optional.empty();
         }
 

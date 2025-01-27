@@ -84,10 +84,11 @@ public class WorkspaceScripts {
     }
 
     private static File[] rstFinder(String dirName) {
-        File dir = new File(dirName);
+
         File[] noFiles = {};
-        if (dir != null) {
-            return dir.listFiles(new FilenameFilter() {
+        if(dirName != null) {
+            File dir = new File(dirName);
+            noFiles = dir.listFiles(new FilenameFilter() {
                 public boolean accept(File dir, String filename) {
                     return (PcTestRunConstants.DEVWEB_RTS_FILE.equalsIgnoreCase(filename));
                 }

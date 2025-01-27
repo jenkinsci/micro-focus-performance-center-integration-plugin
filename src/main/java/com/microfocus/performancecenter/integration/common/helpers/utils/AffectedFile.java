@@ -47,12 +47,17 @@ public final class AffectedFile implements Comparable<AffectedFile> {
     private final String testName;
 
     public AffectedFile(Path fileFullPath, Path workspace) {
-        this.fullPath = Objects.requireNonNull(fileFullPath);
+        this.fullPath = Objects.requireNonNull(fileFullPath, "fileFullPath must not be null");
         PathVerifier.requireAbsolute(fileFullPath, "FullPath");
         PathVerifier.requireAbsolute(workspace, "Workspace");
 
         this.relativePath = workspace.relativize(Helper.getParent(fileFullPath));
-        this.testName = FilenameUtils.removeExtension(fileFullPath.getFileName().toString());
+
+        // Ensure testName is not null by providing a default value if fileFullPath.getFileName() is null
+        Path fileName = fileFullPath.getFileName();
+        this.testName = (fileName != null)
+                ? FilenameUtils.removeExtension(fileName.toString())
+                : "UnknownTestName"; // You can replace "defaultTestName" with an appropriate fallback value
     }
 
     private static String readFile(String path, Charset encoding)
@@ -63,7 +68,7 @@ public final class AffectedFile implements Comparable<AffectedFile> {
 
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "FB doesn't seem to understand Objects.requireNonNull")
     public String getSubjectPath() {
-        return relativePath.toString().replace(File.separatorChar, '\\').replace("/", "\\");
+        return relativePath.toString().replace('\\', File.separatorChar).replace('/', File.separatorChar);
     }
 
     @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "FB doesn't seem to understand Objects.requireNonNull")
@@ -73,8 +78,8 @@ public final class AffectedFile implements Comparable<AffectedFile> {
 
     @Override
     public int compareTo(AffectedFile o) {
-        String FullTestName = relativePath.toString().concat("\\").concat(testName);
-        String oFullTestName = o.relativePath.toString().concat("\\").concat(o.getTestName());
+        String FullTestName = relativePath.toString().concat(File.separator).concat(testName);
+        String oFullTestName = o.relativePath.toString().concat(File.separator).concat(o.getTestName());
         return FullTestName.compareTo(oFullTestName);
     }
 
@@ -82,18 +87,15 @@ public final class AffectedFile implements Comparable<AffectedFile> {
     public String toString() {
         // we override the default relative representation of the root folder itself
         // for the sake of readability:
-        return "/".concat(relativePath.toString()).concat("/").concat(testName);
-    }
-
-    public String toString(boolean backslash) {
-        if (backslash)
-            return "\\" + relativePath.toString().replace("/", "\\").concat("\\").concat(testName);
-        return "//" + relativePath.toString().replace("\\", "//").concat("/").concat(testName);
+        String normalizedRelativePath = File.separator
+                .concat(relativePath.toString().replace('/', File.separatorChar).replace('\\', File.separatorChar));
+        if (!normalizedRelativePath.endsWith(File.separator)) {
+            normalizedRelativePath = normalizedRelativePath.concat(File.separator);
+        }
+        return normalizedRelativePath.concat(testName);
     }
 
     public String getTestContent() {
-        if (fullPath == null)
-            return "";
         try {
             String content = readFile(this.fullPath.toString(), Charset.defaultCharset());
             if (content != null && !content.isEmpty())
@@ -122,28 +124,17 @@ public final class AffectedFile implements Comparable<AffectedFile> {
         if (o == this) return true;
         if (!(o instanceof AffectedFile)) return false;
         final AffectedFile other = (AffectedFile) o;
-        final Object this$fullPath = this.getFullPath();
-        final Object other$fullPath = other.getFullPath();
-        if (this$fullPath == null ? other$fullPath != null : !this$fullPath.equals(other$fullPath)) return false;
-        final Object this$relativePath = this.getRelativePath();
-        final Object other$relativePath = other.getRelativePath();
-        if (this$relativePath == null ? other$relativePath != null : !this$relativePath.equals(other$relativePath))
-            return false;
-        final Object this$testName = this.getTestName();
-        final Object other$testName = other.getTestName();
-        if (this$testName == null ? other$testName != null : !this$testName.equals(other$testName)) return false;
+        if (!this.getFullPath().equals(other.getFullPath())) return false;
+        if (!this.getRelativePath().equals(other.getRelativePath())) return false;
+        if (!this.getTestName().equals(other.getTestName())) return false;
         return true;
     }
 
     public int hashCode() {
         final int PRIME = 59;
-        int result = 1;
-        final Object $fullPath = this.getFullPath();
-        result = result * PRIME + ($fullPath == null ? 43 : $fullPath.hashCode());
-        final Object $relativePath = this.getRelativePath();
-        result = result * PRIME + ($relativePath == null ? 43 : $relativePath.hashCode());
-        final Object $testName = this.getTestName();
-        result = result * PRIME + ($testName == null ? 43 : $testName.hashCode());
+        int result = PRIME + this.getFullPath().hashCode();
+        result = result * PRIME + this.getRelativePath().hashCode();
+        result = result * PRIME + this.getTestName().hashCode();
         return result;
     }
 }

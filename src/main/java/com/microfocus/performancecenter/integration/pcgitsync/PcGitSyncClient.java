@@ -55,10 +55,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 import static com.microfocus.performancecenter.integration.common.helpers.services.ModifiedFiles.initMessage;
@@ -279,10 +276,20 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             logoutSucceeded = restProxy.logout();
             log(listener, String.format("Logout: %s", logoutSucceeded ? "succeeded" : "failed"), true);
         } catch (PcException e) {
-            log(listener, String.format("logout error PcException: %s. \n%s", e.getMessage(), Arrays.toString(e.getStackTrace())), true);
+            log(listener,
+                    String.format("logout error PcException: %s. %s%s",
+                            e.getMessage(),
+                            System.lineSeparator(),
+                            Arrays.toString(e.getStackTrace())),
+                    true);
             logStackTrace(listener, configureSystemSection, e);
         } catch (Exception e) {
-            log(listener, String.format("logout error Exception: %s. \n%s", e.getMessage(), Arrays.toString(e.getStackTrace())), true);
+            log(listener,
+                    String.format("logout error Exception: %s. %s%s",
+                            e.getMessage(),
+                            System.lineSeparator(),
+                            Arrays.toString(e.getStackTrace())),
+                    true);
             logStackTrace(listener, configureSystemSection, e);
         }
     }
@@ -302,7 +309,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             initMessage(listener, "Deleting scripts", false);
             try {
                 Objects.requireNonNull(restProxy.getScripts());
-            } catch (PcException | NullPointerException ex) {
+            } catch (PcException ex) {
                 log(
                         listener, "An error occurred while getting the list of scripts from the project. Error: %s.",
                         true,
@@ -477,11 +484,19 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             if (isXmlFile && (!testFileContent.toLowerCase().contains("<Test xmlns=\"http://www.hp.com/PC/REST/API".toLowerCase()) || !configureSystemSection.getDebug()))
                 return resultToReturn;
             try {
-                log(
-                        listener,
+                log(listener,
                         "Creating or updating test '%s' from Git to the project",
                         true,
-                        test.getRelativePath().toString().replace("/", "\\").concat("\\").concat(test.getFullPath().getFileName().toString())
+                        test.getRelativePath()
+                                .toString()
+                                .replace('/', File.separatorChar)
+                                .replace('\\', File.separatorChar)
+                                .concat(File.separator)
+                                .concat(
+                                        Optional.ofNullable(test.getFullPath().getFileName())
+                                                .map(Object::toString)
+                                                .orElse("")
+                                )
                 );
                 Test createdTest = doCreateOrUpdateTest(restProxy, test, ext, isXmlFile, targetSubject, testFileContent);
                 Thread.sleep(50);
@@ -597,7 +612,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
         }
 
         affectedFiles.forEach(affectedFile -> {
-            log(listener, affectedFile.toString(true), false);
+            log(listener, affectedFile.toString(), false);
         });
     }
 

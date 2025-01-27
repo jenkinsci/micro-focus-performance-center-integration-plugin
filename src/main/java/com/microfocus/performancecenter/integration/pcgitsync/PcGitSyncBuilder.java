@@ -33,6 +33,7 @@ import com.cloudbees.plugins.credentials.common.StandardUsernamePasswordCredenti
 import com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials;
 import com.cloudbees.plugins.credentials.domains.URIRequirementBuilder;
 import com.cloudbees.plugins.credentials.matchers.IdMatcher;
+import com.google.inject.Injector;
 import com.microfocus.performancecenter.integration.common.helpers.configuration.ConfigurationService;
 import com.microfocus.performancecenter.integration.common.helpers.services.ModifiedFiles;
 import com.microfocus.performancecenter.integration.common.helpers.utils.BuildParametersAndEnvironmentVariables;
@@ -73,10 +74,10 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
     public static final String ERROR = "Error";
 
-    private static transient UsernamePasswordCredentials usernamePCPasswordCredentials;
-    private static transient UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy;
-    private static PrintStream logger;
-    private static Run<?, ?> run;
+    private transient UsernamePasswordCredentials usernamePCPasswordCredentials;
+    private transient UsernamePasswordCredentials usernamePCPasswordCredentialsForProxy;
+    private PrintStream logger;
+    private Run<?, ?> run;
     private final String description;
     private final String pcServerName;
     private final boolean httpsProtocol;
@@ -156,17 +157,17 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                         this.buildParameters);
     }
 
-    public static UsernamePasswordCredentials getUsernamePCPasswordCredentials() {
+    public UsernamePasswordCredentials getUsernamePCPasswordCredentials() {
         return usernamePCPasswordCredentials;
     }
 
-    public static UsernamePasswordCredentials getCredentialsId(String credentialsId) {
+    public UsernamePasswordCredentials getCredentialsId(String credentialsId) {
         if (credentialsId != null && run != null)
             return getCredentialsById(credentialsId, run, logger, true);
         return null;
     }
 
-    public static UsernamePasswordCredentials getCredentialsProxyId(String credentialsProxyId) {
+    public UsernamePasswordCredentials getCredentialsProxyId(String credentialsProxyId) {
         if (credentialsProxyId != null && run != null)
             return getCredentialsById(credentialsProxyId, run, logger, false);
         return null;
@@ -192,39 +193,28 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         return usernamePCPasswordCredentials;
     }
 
-    private static UsernamePasswordCredentials getCredentialsById(String credentialsId, Run<?, ?> run, PrintStream logger) {
-        if (StringUtils.isBlank(credentialsId))
-            return null;
-
-        UsernamePasswordCredentials usernamePCPasswordCredentials = CredentialsProvider.findCredentialById(credentialsId,
-                StandardUsernamePasswordCredentials.class,
-                run,
-                URIRequirementBuilder.create().build());
-
-        if (usernamePCPasswordCredentials == null) {
-            logger.println("Cannot find credentials with the credentialsId:" + credentialsId);
-        }
-
-        return usernamePCPasswordCredentials;
-    }
-
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        if (build.getWorkspace() != null)
-            WorkspacePath = new File(build.getWorkspace().toURI());
-        else
+
+        FilePath workspace = build.getWorkspace(); // Extract workspace to a variable
+
+        if (workspace == null) {
             WorkspacePath = null;
+            return false; // Early return if the workspace is null
+        }
 
-        if ((getPcGitSyncModel() != null) && (build != null) && (build instanceof AbstractBuild))
+        WorkspacePath = new File(workspace.toURI()); // Safe to use workspace as it's already checked
+
+        PcGitSyncModel pcGitSyncModel = getPcGitSyncModel();
+        if (pcGitSyncModel != null) {
             setPcGitSyncModelBuildParameters(build, listener);
+        }
 
-        if (build.getWorkspace() != null)
-            perform(build, build.getWorkspace(), launcher, listener);
-        else
-            return false;
+        perform(build, workspace, launcher, listener); // Proceed with perform method as workspace is not null
         return true;
     }
+
 
     public File getWorkspacePath() {
         return WorkspacePath;
@@ -246,7 +236,6 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
     }
 
     public PcGitSyncModel getPcGitSyncModel() {
-
         return pcGitSyncModel;
     }
 
@@ -256,18 +245,13 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
     public void setCredentialsId(String newCredentialsId) {
         credentialsId = newCredentialsId;
-        //pcGitSyncModel = null;
-        getPcGitSyncModel();
     }
 
     private String simpleDateFormater() {
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E yyyy MMM dd 'at' HH:mm:ss.SSS a zzz");
             String simpleDate = simpleDateFormat.format(new Date());
-            if (simpleDate != null)
-                return simpleDate;
-            else
-                return "";
+            return simpleDate;
         } catch (Exception ex) {
             return "";
         }
@@ -276,7 +260,6 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
     @Override
     public void perform(@Nonnull Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
             throws InterruptedException, IOException {
-
         run = build;
         logger = listener.getLogger();
         log(listener, "", addDate);
@@ -296,7 +279,6 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         usernamePCPasswordCredentials = getCredentialsId(credentialsId);
         usernamePCPasswordCredentialsForProxy = getCredentialsProxyId(credentialsProxyId);
 
-        EnvVars env = build.getEnvironment(listener);
         ConfigureSystemSection configureSystemSection = ConfigureSystemSection.get();
 
         PcGitSyncClient pcGitSyncClient = new PcGitSyncClient(
@@ -309,7 +291,21 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         );
         Result result = Result.SUCCESS;
         try {
-            Jenkins.getInstance().getInjector().injectMembers(pcGitSyncClient);
+            Jenkins jenkinsInstance = Jenkins.getInstanceOrNull();
+            if (jenkinsInstance != null) {
+                Injector injector = jenkinsInstance.getInjector();
+                if (injector != null) {
+                    injector.injectMembers(pcGitSyncClient);
+                } else {
+                    log(listener, "Error: Jenkins injector is null. Cannot inject members.", addDate);
+                    build.setResult(Result.FAILURE);  // Optional: Set the build result to FAILURE if needed.
+                    return;
+                }
+            } else {
+                log(listener, "Error: Jenkins instance is null. Cannot inject members.", addDate);
+                build.setResult(Result.FAILURE);  // Optional: Set the build result to FAILURE if needed.
+                return;
+            }
             result = workspace.<Result>act(pcGitSyncClient);
         } catch (InterruptedException e) {
             build.setResult(Result.ABORTED);
@@ -325,10 +321,11 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
     private void provideStepResultStatus(Result resultStatus, Run<?, ?> build) {
         String runIdStr = "";
-        logger.println(String.format("%s - Result Status%s: %s\n- - -",
+        logger.println(String.format("%s - Result Status%s: %s%s- - -",
                 simpleDateFormater(),
                 runIdStr,
-                resultStatus.toString()));
+                resultStatus.toString(),
+                System.lineSeparator()));
         build.setResult(resultStatus);
 
     }
@@ -391,7 +388,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         @Override
         public String getDisplayName() {
 
-            return Messages.DisplayName();
+            return Messages.displayName();
         }
 
         public FormValidation doCheckPcServerName(@QueryParameter String value) {

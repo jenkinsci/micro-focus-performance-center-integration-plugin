@@ -36,15 +36,58 @@ public class LogHelper {
     }
 
     public static void log(TaskListener listener, String format, boolean addDate, Object... args) {
-        if (listener == null || listener.equals(TaskListener.NULL))
+        if (listener == null || listener.equals(TaskListener.NULL)) {
             return;
-        String formatted = format;
-        if (format != null && !format.isEmpty() && addDate) {
-            DateFormatter dateFormatter = new DateFormatter(DEFAULT_PATTERN);
-            formatted = String.format("%s - ", dateFormatter.getDate()) + format;
         }
-        listener.getLogger().println(String.format(formatted, args));
+
+        try {
+            String formatted = (format != null) ? format : "";
+
+            // Count placeholders and compare with the number of arguments
+            int expectedArgs = countPlaceholders(format);
+            if (args.length < expectedArgs) {
+                // Print mismatch details to the logger
+                PrintStream ps = listener.getLogger();
+                ps.println("Mismatched number of format specifiers and arguments." +
+                        System.lineSeparator() +
+                        "Format: " + formatted +
+                        System.lineSeparator() +
+                        "Expected args: " + expectedArgs +
+                        System.lineSeparator() +
+                        "Provided args length: " + args.length);
+
+                // Optionally, print the args themselves
+                ps.println("Provided arguments:");
+                for (Object arg : args) {
+                    ps.println("  - " + arg);
+                }
+
+                return; // Return early if there is a mismatch
+            }
+
+            // Add date if required
+            if (!formatted.isEmpty() && addDate) {
+                DateFormatter dateFormatter = new DateFormatter(DEFAULT_PATTERN);
+                formatted = String.format("%s - ", dateFormatter.getDate()) + formatted;
+            }
+
+            // Safely format and log the message
+            if (!formatted.isEmpty()) {
+                PrintStream ps = listener.getLogger();
+                ps.println(String.format(formatted, args));
+            } else {
+                PrintStream ps = listener.getLogger();
+                ps.println("");
+            }
+
+        } catch (Exception ex) {
+            // Catch any exception and print it
+            ex.printStackTrace();
+            PrintStream ps = listener.getLogger();
+            ps.println("Error occurred while formatting log message: " + ex.getMessage());
+        }
     }
+
 
 
     public static void logStackTrace(TaskListener listener, ConfigureSystemSection configureSystemSection, Throwable t) {
@@ -75,6 +118,15 @@ public class LogHelper {
         log(listener, "=  %s  =", addDate, description);
         log(listener, border, addDate);
         log(listener, line, addDate);
+    }
+
+    private static int countPlaceholders(String format) {
+        int count = 0;
+        if (format != null) {
+            // Regular expression to match format specifiers like %s, %d, etc.
+            count = format.split("%[a-zA-Z]").length - 1;
+        }
+        return count;
     }
 
 }

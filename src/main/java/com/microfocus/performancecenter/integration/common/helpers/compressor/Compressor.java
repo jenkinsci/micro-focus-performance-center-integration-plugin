@@ -101,11 +101,14 @@ public class Compressor implements ICompressor {
     }
 
     protected void putCompressEntriesForDirectory(ZipOutputStream target, File directory, int rootPathLength) throws IOException {
-        for (File f : directory.listFiles()) {
-            if (f.isDirectory()) {
-                putCompressEntriesForDirectory(target, f, rootPathLength);
-            } else {
-                putCompressEntriesForFile(target, f, rootPathLength);
+        File[] directoryFiles = directory.listFiles();
+        if(directoryFiles != null) {
+            for (File f : directoryFiles) {
+                if (f.isDirectory()) {
+                    putCompressEntriesForDirectory(target, f, rootPathLength);
+                } else {
+                    putCompressEntriesForFile(target, f, rootPathLength);
+                }
             }
         }
     }
