@@ -1,5 +1,5 @@
 ![OpenText Logo](https://upload.wikimedia.org/wikipedia/commons/1/1b/OpenText_logo.svg)
-# OpenText OpenText Enterprise Performance Engineering Integration with Git
+# OpenText Enterprise Performance Engineering Integration with Git
 This plugin integrates OpenText Enterprise Performance Engineering with Git via Jenkins.
 
 ---
@@ -15,7 +15,7 @@ This plugin integrates OpenText Enterprise Performance Engineering with Git via 
     + [Version 1.1.5](#version-115)
     + [Version 1.1.6](#version-116)
     + [Version 1.1.7](#version-117)
-    + [Version 1.1.8](#version-117)
+    + [Version 1.1.8](#version-118)
     + [Downloads](#downloads)
   * [Prerequisites](#prerequisites)
   * [Synchronize OpenText Enterprise Performance Engineering With Git](#synchronize-openText-enterprise-performance-engineering-with-git)
@@ -24,11 +24,11 @@ This plugin integrates OpenText Enterprise Performance Engineering with Git via 
 ---
   
 Using this plugin, you can:
-- Upload performance scripts from a GitHub repository or a GitLab project to a project on an OpenText Enterprise Performance Engineering server.
+- Upload performance scripts from a GitHub repository or a GitLab project to a project.
 - Create performance tests from a YAML file.
-- Run a test from its ID, or create it from a YAML file or YAML syntax and then run it.
+- Run a performance test from its ID, or create it from a YAML file or YAML syntax and then run it.
 
-There is a separate plugin for running OpenText Enterprise Performance Engineering tests. For details, see [OpenText Application Automation Tools](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools) - [OpenText Enterprise Performance Engineering Integration](https://wiki.jenkins.io/display/JENKINS/Performance+Center+Integration).
+There is a separate plugin for running performance tests using OpenText Enterprise Performance Engineering. For details, see [OpenText Application Automation Tools](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools) - [OpenText Enterprise Performance Engineering Integration](https://wiki.jenkins.io/display/JENKINS/Performance+Center+Integration).
 
 **Submit issues and feedback through [JIRA](https://issues.jenkins-ci.org/browse/JENKINS-36795?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20micro-focus-performance-center-integration)**
 
@@ -40,7 +40,7 @@ This version provides the following enhancements:
 
 **Git synchronization**
 
-- Ability to synchronize OpenText Enterprise Performance Engineering with Git by uploading performance scripts stored in a Git repository to a LoadRunner Enterprise project.
+- Ability to synchronize OpenText Enterprise Performance Engineering with Git by uploading performance scripts stored in a Git repository to a project.
 
 ### Version 1.1.0
 This version provides the following enhancements:
@@ -58,21 +58,21 @@ This version provides the following enhancements:
 ### Version 1.1.3
 This version provides the following enhancements:
 - Fix for Java 11.
-- Connect to server with a tenant.
+- Connect to the server with a tenant.
 
 ### Version 1.1.4
 This version provides the following enhancements:
 - Fix for pipeline build (FreeStyle project works fine): 
   - problem: While the first build passes and synchronizes everything, subsequent builds, supposed to only synchronize the changes in the Git repository, cannot calculate the difference and fail.
   - Resolution: All pipeline builds now behave as if they are the first build and will synchronize everything.
-- Added support for new performance script type (DevWeb protocol): A folder containing both the "main.js" and "rts.yml" files is considered a LoadRunner Developer script.
-- Added support for Gatling scripts: A folder containing a file with ".scala" for extension is considered a Gatling script.
+- Added support for DevWeb protocol: A folder containing both the "main.js" and "rts.yml" files is considered a performance script.
+- Added support for Gatling scripts: A folder containing a file with ".scala" for extension is considered a performance script.
 - Additional rebranding (changing "Performance Center" to "LoadRunner Enterprise" in the build logs).
 
 ### Version 1.1.5
 This version provides the following enhancements:
 - Ability to use a token API (access key) associated with a user for authentication.
-- Added support for Selenium script. A folder containing a file with ".java" extension and containing the expression "import org.openqa.selenium" is considered Selenium script.
+- Added support for Selenium script. A folder containing a file with ".java" extension in which the expression "import org.openqa.selenium" is detected will be considered performance script.
 - Fixed a defect caused by the plugin trying to validate a Linux OS system path according to Windows OS criteria and vice versa, when the Jenkins server and the remote agent are on a different OS type.
 
 ### Version 1.1.6
@@ -112,7 +112,7 @@ You can download the plugin from this link:
 1. Jenkins 2.462.3 and above (and consequently Java version 17 or 21). To verify your Java version, go to http://www.java.com/en/download/installed.jsp.
 2. OpenText Enterprise Performance Engineering server.
 3. Git Repository on GitHub or GitLab server.
-4. Jenkins versions: This plugin supports only the latest five LTS versions of Jenkins (currently, the latest is 2.479.3). This is a result of the Jenkins policy to no longer support older update centers. From Jenkins 2.462.3, Java 17 (or 21) is required.
+4. Jenkins versions: This plugin supports only the latest five LTS versions of Jenkins (currently, the latest is 2.479.3). This is a result of the Jenkins policy to no longer support older update centers. From Jenkins 2.462.3, Java 17 or 21 is required.
 5. Content Security Policy: Starting with version 1.641 (or 1.625.3), Jenkins introduced the Content-Security-Policy header. This causes some of the integration links, such as links to reports, to become inoperable. For details, see [Configuring Content Security Policy](https://wiki.jenkins.io/display/JENKINS/Configuring+Content+Security+Policy) and [Jenkins Security Advisory](https://jenkins.io/security/advisory/2015-12-09/) . For suggested workarounds until the issue is resolved, see [Content Security Policy Header](https://wiki.jenkins.io/display/JENKINS/Micro+Focus+Application+Automation+Tools#MicroFocusApplicationAutomationTools-ContentSecurityPolicyHeader).
 
 ## Synchronize OpenText Enterprise Performance Engineering With Git
