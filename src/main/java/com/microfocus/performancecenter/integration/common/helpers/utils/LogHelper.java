@@ -74,10 +74,10 @@ public class LogHelper {
             // Safely format and log the message
             if (!formatted.isEmpty()) {
                 PrintStream ps = listener.getLogger();
-                ps.println(String.format(formatted, args));
+                ps.printf((formatted) + "%n", args);
             } else {
                 PrintStream ps = listener.getLogger();
-                ps.println("");
+                ps.println();
             }
 
         } catch (Exception ex) {

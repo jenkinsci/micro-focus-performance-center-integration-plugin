@@ -42,6 +42,7 @@ import com.microfocus.performancecenter.integration.configuresystem.ConfigureSys
 import com.microfocus.performancecenter.integration.pcgitsync.helper.ScriptUploader;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.YesOrNo;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.TaskListener;
@@ -50,7 +51,6 @@ import jenkins.security.Roles;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.remoting.RoleChecker;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -583,9 +583,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     private void logSetOfChangedFiles(Set<ModifiedFile> modifiedFiles) {
         log(listener, "", true);
         log(listener, "List of files modified in GIT repository since last successful build:", true);
-        modifiedFiles.forEach(changedFile -> {
-            log(listener, changedFile.toString(true), false);
-        });
+        modifiedFiles.forEach(changedFile -> log(listener, changedFile.toString(true), false));
         log(listener, "", true);
     }
 
@@ -597,9 +595,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             return;
         }
 
-        affectedFiles.forEach(affectedFile -> {
-            log(listener, affectedFile.toString(true), false);
-        });
+        affectedFiles.forEach(affectedFile -> log(listener, affectedFile.toString(true), false));
         log(listener, "", true);
     }
 
@@ -611,9 +607,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             return;
         }
 
-        affectedFiles.forEach(affectedFile -> {
-            log(listener, affectedFile.toString(), false);
-        });
+        affectedFiles.forEach(affectedFile -> log(listener, affectedFile.toString(), false));
     }
 
     private boolean validateParameters(TaskListener listener) {

@@ -26,6 +26,7 @@ package com.microfocus.performancecenter.integration.common.helpers.services;
 import com.cloudbees.jenkins.plugins.changelog.Changes;
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedFile;
 import com.microfocus.performancecenter.integration.common.helpers.utils.ModifiedType;
+import edu.umd.cs.findbugs.annotations.CheckForNull;
 import hudson.Extension;
 import hudson.model.AbstractBuild;
 import hudson.model.Run;
@@ -33,7 +34,6 @@ import hudson.model.TaskListener;
 import hudson.scm.ChangeLogSet;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 
-import javax.annotation.CheckForNull;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -92,18 +92,16 @@ public class ModifiedFiles {
             for (Object item : change.getItems()) {
                 ChangeLogSet.Entry e = (ChangeLogSet.Entry) item;
                 e.getAffectedFiles()
-                        .forEach((file) -> {
-                            result.add(
-                                    new ModifiedFile(
-                                            ModifiedType.from(file.getEditType()),
-                                            // we hardcoded '/' here because it is used regardless
-                                            // of target platform, by contract.
-                                            // see hudson.​scm.​ChangeLogSet.​AffectedFile#getPath()
-                                            Paths.get(file.getPath().replace('/', File.separatorChar)),
-                                            workspace
-                                    )
-                            );
-                        });
+                        .forEach((file) -> result.add(
+                                new ModifiedFile(
+                                        ModifiedType.from(file.getEditType()),
+                                        // we hardcoded '/' here because it is used regardless
+                                        // of target platform, by contract.
+                                        // see hudson.​scm.​ChangeLogSet.​AffectedFile#getPath()
+                                        Paths.get(file.getPath().replace('/', File.separatorChar)),
+                                        workspace
+                                )
+                        ));
             }
         });
 

@@ -23,21 +23,19 @@
 
 package com.microfocus.performancecenter.integration.common.helpers.utils;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import edu.umd.cs.findbugs.annotations.NonNull;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-//@SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "lombok generated sources")
 public final class AffectedFolder implements Comparable<AffectedFolder> {
 
-    @Nonnull
+    @NonNull
     private final Path fullPath;
 
-    @Nonnull
+    @NonNull
     private final Path relativePath;
 
     public AffectedFolder(Path folderFullPath, Path workspace) {
@@ -48,7 +46,6 @@ public final class AffectedFolder implements Comparable<AffectedFolder> {
         this.relativePath = workspace.relativize(folderFullPath);
     }
 
-    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "FB doesn't seem to understand Objects.requireNonNull")
     public String getSubjectPath() {
         String subjectRoot = "Subject";
         String scriptPath = subjectRoot + "\\" + relativePath.toString().replace(File.separatorChar, '\\');
@@ -60,7 +57,7 @@ public final class AffectedFolder implements Comparable<AffectedFolder> {
     }
 
     @Override
-    public int compareTo(AffectedFolder o) {
+    public int compareTo(@NonNull AffectedFolder o) {
         return relativePath.compareTo(o.getRelativePath());
     }
 
@@ -68,7 +65,7 @@ public final class AffectedFolder implements Comparable<AffectedFolder> {
     public String toString() {
         // we override the default relative representation of the root folder itself
         // for the sake of readability:
-        return "/" + relativePath.toString();
+        return "/" + relativePath;
     }
 
     public String toString(boolean backslash) {
@@ -77,20 +74,19 @@ public final class AffectedFolder implements Comparable<AffectedFolder> {
         return "//" + relativePath.toString().replace("\\", "//");
     }
 
-    @Nonnull
+    @NonNull
     public Path getFullPath() {
         return this.fullPath;
     }
 
-    @Nonnull
+    @NonNull
     public Path getRelativePath() {
         return this.relativePath;
     }
 
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof AffectedFolder)) return false;
-        final AffectedFolder other = (AffectedFolder) o;
+        if (!(o instanceof AffectedFolder other)) return false;
         return this.getRelativePath().equals(other.getRelativePath());
     }
 

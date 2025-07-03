@@ -28,9 +28,9 @@ public enum RemoveScriptFromPC {
     YES("Yes"),
     NO("No");
 
-    private String value;
+    private final String value;
 
-    private RemoveScriptFromPC(String value) {
+    RemoveScriptFromPC(String value) {
         this.value = value;
     }
 

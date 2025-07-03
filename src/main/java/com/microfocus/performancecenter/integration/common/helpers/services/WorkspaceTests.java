@@ -31,7 +31,6 @@ import com.microfocus.performancecenter.integration.common.helpers.utils.Modifie
 import hudson.Extension;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -80,7 +79,7 @@ public class WorkspaceTests {
             Path parentPath = fullPath.getParent();
             if(parentPath != null && workspace != null) {
                 File[] files = lrSupportedScriptSignatureFinder(parentPath.toString());
-                boolean parentPathContainsLrSupportedScriptSignature = files != null ? (files.length > 0) : false;
+                boolean parentPathContainsLrSupportedScriptSignature = files != null && (files.length > 0);
 
                 // Directories and subdirectories are verified
                 Path parentParentPath = parentPath.getParent();
@@ -120,25 +119,17 @@ public class WorkspaceTests {
     private static File[] lrSupportedScriptSignatureFinder(String dirName) {
         File dir = new File(dirName);
 
-        return dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                return (filename.toLowerCase().endsWith(PcTestRunConstants.USR_EXTENSION)
-                        || filename.toLowerCase().endsWith(PcTestRunConstants.JMX_EXTENSION)
-                        || filename.toLowerCase().endsWith(PcTestRunConstants.GATLING_EXTENSION)
-                        || ((PcTestRunConstants.DEVWEB_MAIN_FILE.equalsIgnoreCase(filename)) && rstFinder(dir.toString()).length > 0)
-                        || (filename.toLowerCase().endsWith(PcTestRunConstants.SELENIUM_EXTENSION))
-                );
-            }
-        });
+        return dir.listFiles((dir1, filename) -> (filename.toLowerCase().endsWith(PcTestRunConstants.USR_EXTENSION)
+                || filename.toLowerCase().endsWith(PcTestRunConstants.JMX_EXTENSION)
+                || filename.toLowerCase().endsWith(PcTestRunConstants.GATLING_EXTENSION)
+                || ((PcTestRunConstants.DEVWEB_MAIN_FILE.equalsIgnoreCase(filename)) && rstFinder(dir1.toString()).length > 0)
+                || (filename.toLowerCase().endsWith(PcTestRunConstants.SELENIUM_EXTENSION))
+        ));
     }
 
     private static File[] rstFinder(String dirName) {
         File dir = new File(dirName);
-        return dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                return (PcTestRunConstants.DEVWEB_RTS_FILE.equalsIgnoreCase(filename));
-            }
-        });
+        return dir.listFiles((dir1, filename) -> (PcTestRunConstants.DEVWEB_RTS_FILE.equalsIgnoreCase(filename)));
     }
 
     //verify child path is subdirectory of parent
@@ -150,7 +141,7 @@ public class WorkspaceTests {
         SortedSet<AffectedFile> result = new TreeSet<>();
 
         allModifiedFiles.stream()
-                .map(file -> file.getFullPath())
+                .map(ModifiedFile::getFullPath)
                 .filter(file -> WorkspaceTests.isNotDirectlyUnderRootWorkspace(file, workspace))
                 .map(file -> new AffectedFile(file, workspace))
                 .forEachOrdered(result::add);

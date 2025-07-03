@@ -28,9 +28,9 @@ public enum YesOrNo {
     YES("Yes"),
     NO("No");
 
-    private String value;
+    private final String value;
 
-    private YesOrNo(String value) {
+    YesOrNo(String value) {
         this.value = value;
     }
 

@@ -43,6 +43,8 @@ import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcG
 import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcGitBuildStepDescriptor;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.YesOrNo;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.model.*;
 import hudson.model.queue.Tasks;
@@ -57,7 +59,6 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -247,6 +248,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         credentialsId = newCredentialsId;
     }
 
+    @SuppressFBWarnings("FS_BAD_DATE_FORMAT_FLAG_COMBO")
     private String simpleDateFormater() {
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E yyyy MMM dd 'at' HH:mm:ss.SSS a zzz");
@@ -258,7 +260,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
+    public void perform(@NonNull Run<?, ?> build, @NonNull FilePath workspace, @NonNull Launcher launcher, @NonNull TaskListener listener)
             throws InterruptedException, IOException {
         run = build;
         logger = listener.getLogger();
@@ -289,7 +291,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                 usernamePCPasswordCredentials,
                 usernamePCPasswordCredentialsForProxy
         );
-        Result result = Result.SUCCESS;
+        Result result;
         try {
             Jenkins jenkinsInstance = Jenkins.getInstanceOrNull();
             if (jenkinsInstance != null) {
@@ -306,7 +308,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                 build.setResult(Result.FAILURE);  // Optional: Set the build result to FAILURE if needed.
                 return;
             }
-            result = workspace.<Result>act(pcGitSyncClient);
+            result = workspace.act(pcGitSyncClient);
         } catch (InterruptedException e) {
             build.setResult(Result.ABORTED);
             throw e;
@@ -321,11 +323,11 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
     private void provideStepResultStatus(Result resultStatus, Run<?, ?> build) {
         String runIdStr = "";
-        logger.println(String.format("%s - Result Status%s: %s%s- - -",
+        logger.printf("%s - Result Status%s: %s%s- - -%n",
                 simpleDateFormater(),
                 runIdStr,
                 resultStatus.toString(),
-                System.lineSeparator()));
+                System.lineSeparator());
         build.setResult(resultStatus);
 
     }
@@ -385,6 +387,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
 
         private transient ModifiedFiles modifiedFiles;
 
+        @NonNull
         @Override
         public String getDisplayName() {
 
@@ -453,10 +456,10 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
                 return FormValidation.ok();
             }
 
-            for (ListBoxModel.Option o : CredentialsProvider.listCredentials(
+            for (ListBoxModel.Option o : CredentialsProvider.listCredentialsInItem(
                     StandardUsernamePasswordCredentials.class,
                     project,
-                    project instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) project) : ACL.SYSTEM,
+                    project instanceof Queue.Task ? Tasks.getAuthenticationOf2((Queue.Task) project) : ACL.SYSTEM2,
                     URIRequirementBuilder.create().build(),
                     new IdMatcher(urlValueFixed))) {
 
@@ -526,7 +529,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
             return new StandardUsernameListBoxModel()
                     .includeEmptyValue()
                     .includeAs(
-                            project instanceof Queue.Task ? Tasks.getAuthenticationOf((Queue.Task) project) : ACL.SYSTEM,
+                            project instanceof Queue.Task ? Tasks.getAuthenticationOf2((Queue.Task) project) : ACL.SYSTEM2,
                             project,
                             StandardUsernamePasswordCredentials.class,
                             URIRequirementBuilder.create().build())

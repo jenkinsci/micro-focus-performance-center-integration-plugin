@@ -24,7 +24,7 @@
 package com.microfocus.performancecenter.integration.common.helpers.compressor;
 
 import java.io.*;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -90,7 +90,7 @@ public class Compressor implements ICompressor {
     protected void compress(OutputStream target, String directoryPath, String compressComment) throws IOException {
         File directoryFile = requireToBeDirectory(new File(directoryPath));
         try (BufferedOutputStream bos = new BufferedOutputStream(target);
-             ZipOutputStream zos = new ZipOutputStream(bos, Charset.forName("UTF-8"))) {
+             ZipOutputStream zos = new ZipOutputStream(bos, StandardCharsets.UTF_8)) {
 
             putCompressEntriesForDirectory(zos, directoryFile, directoryFile.getAbsolutePath().length() + 1);
             zos.closeEntry();

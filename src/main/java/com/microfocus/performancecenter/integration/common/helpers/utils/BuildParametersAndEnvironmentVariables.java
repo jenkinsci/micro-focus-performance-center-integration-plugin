@@ -47,9 +47,8 @@ public class BuildParametersAndEnvironmentVariables {
     }
 
     public BuildParametersAndEnvironmentVariables invoke() throws IOException, InterruptedException {
-        Map<String, String> mapParamsAndEnvars = new HashMap<String, String>();
         Map<String, String> buildParameters = build.getBuildVariables();
-        mapParamsAndEnvars.putAll(buildParameters);
+        Map<String, String> mapParamsAndEnvars = new HashMap<>(buildParameters);
         if (listener != null) {
             Map<String, String> buildEnvars = build.getEnvironment(listener);
             mapParamsAndEnvars.putAll(buildEnvars);

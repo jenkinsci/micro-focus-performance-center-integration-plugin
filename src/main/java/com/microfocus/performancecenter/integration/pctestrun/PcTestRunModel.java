@@ -27,7 +27,6 @@
 package com.microfocus.performancecenter.integration.pctestrun;
 
 import com.microfocus.adm.performancecenter.plugins.common.pcentities.PostRunAction;
-import com.microfocus.adm.performancecenter.plugins.common.pcentities.TimeslotDuration;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.Arrays;

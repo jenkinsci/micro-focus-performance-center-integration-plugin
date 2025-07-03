@@ -23,6 +23,9 @@
 
 package com.microfocus.performancecenter.integration.common.helpers.utils;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.net.URI;
 import java.nio.file.Path;
@@ -31,6 +34,7 @@ import java.util.Objects;
 
 public final class ModifiedFile implements Comparable<ModifiedFile>, Serializable {
 
+    @Serial
     private static final long serialVersionUID = 1L;
     private final ModifiedType modifiedType;
     private final URI fullPathAsUri;
@@ -56,7 +60,7 @@ public final class ModifiedFile implements Comparable<ModifiedFile>, Serializabl
     }
 
     @Override
-    public int compareTo(ModifiedFile o) {
+    public int compareTo(@NonNull ModifiedFile o) {
         int compareByRelativePath = fullPathAsUri.compareTo(o.getFullPathAsUri());
 
         if (compareByRelativePath == 0) {
@@ -83,17 +87,14 @@ public final class ModifiedFile implements Comparable<ModifiedFile>, Serializabl
 
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof ModifiedFile)) return false;
-        final ModifiedFile other = (ModifiedFile) o;
+        if (!(o instanceof ModifiedFile other)) return false;
         final Object this$modifiedType = this.getModifiedType();
         final Object other$modifiedType = other.getModifiedType();
-        if (this$modifiedType == null ? other$modifiedType != null : !this$modifiedType.equals(other$modifiedType))
+        if (!Objects.equals(this$modifiedType, other$modifiedType))
             return false;
         final Object this$fullPathAsUri = this.getFullPathAsUri();
         final Object other$fullPathAsUri = other.getFullPathAsUri();
-        if (this$fullPathAsUri == null ? other$fullPathAsUri != null : !this$fullPathAsUri.equals(other$fullPathAsUri))
-            return false;
-        return true;
+        return Objects.equals(this$fullPathAsUri, other$fullPathAsUri);
     }
 
     public int hashCode() {

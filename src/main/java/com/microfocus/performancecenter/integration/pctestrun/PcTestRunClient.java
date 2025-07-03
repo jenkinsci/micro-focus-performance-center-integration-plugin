@@ -205,10 +205,7 @@ public class PcTestRunClient {
             log(listener, "%s (TestID: %s, RunID: %s, TimeslotID: %s)", true, Messages.RunStarted(), response.getTestID(), response.getID(), response.getTimeslotID());
 
             return response.getID();
-        } catch (NumberFormatException | ClientProtocolException | PcException ex) {
-            log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
-            logStackTrace(listener, configureSystemSection, ex);
-        } catch (IOException ex) {
+        } catch (NumberFormatException | PcException | IOException ex) {
             log(listener, "%s. %s: %s", true, Messages.StartRunFailed(), Messages.Error(), ex.getMessage());
             logStackTrace(listener, configureSystemSection, ex);
         }
@@ -263,13 +260,7 @@ public class PcTestRunClient {
                     model.getPostRunAction().getValue(),
                     model.isVudsMode(),
                     -1);
-        } catch (NumberFormatException | ClientProtocolException | PcException ex) {
-            log(listener, "%s. %s: %s", true,
-                    Messages.StartRunRetryFailed(),
-                    Messages.Error(),
-                    ex.getMessage());
-            logStackTrace(listener, configureSystemSection, ex);
-        } catch (IOException ex) {
+        } catch (NumberFormatException | PcException | IOException ex) {
             log(listener, "%s. %s: %s", true,
                     Messages.StartRunRetryFailed(),
                     Messages.Error(),
@@ -280,17 +271,20 @@ public class PcTestRunClient {
     }
 
     private void printInitMessage() {
-        log(listener, "\n%s \n" +
-                        "====================\n" +
-                        "%s: %s \n" +
-                        "%s: %s \n" +
-                        "%s: %s \n" +
-                        "%s: %s \n" +
-                        "%s: %s \n" +
-                        "%s: %s \n" +
-                        "%s: %s \n" +
-                        "%s: %s \n" +
-                        "====================\n",
+        log(listener, """
+                        
+                        %s\s
+                        ====================
+                        %s: %s\s
+                        %s: %s\s
+                        %s: %s\s
+                        %s: %s\s
+                        %s: %s\s
+                        %s: %s\s
+                        %s: %s\s
+                        %s: %s\s
+                        ====================
+                        """,
                 false,
                 Messages.ExecutingLoadTest(),
                 Messages.Domain(), model.getAlmDomain(true),
@@ -340,7 +334,7 @@ public class PcTestRunClient {
                 Timeslots openedTimeslots = restProxy.GetOpenTimeslotsByTestId(testID);
                 List<Timeslot> timeslots = openedTimeslots.getTimeslotsList();
                 String timeslotIds = timeslots.stream().map(i -> Integer.toString(i.getID())).collect(Collectors.joining(", "));
-                String timeslotNames = timeslots.stream().map(i -> i.getName()).collect(Collectors.joining(", "));
+                String timeslotNames = timeslots.stream().map(Timeslot::getName).collect(Collectors.joining(", "));
                 String timeslotTestInstanceIDs = timeslots.stream().map(i -> Integer.toString(i.getLoadTestInstanceID())).collect(Collectors.joining(", "));
                 log(listener,
                         "Timeslots related to test ID %s are: timeslot Ids '%s', timeslot names '%s', timeslot TestInstance IDs '%s'.",
@@ -351,7 +345,7 @@ public class PcTestRunClient {
                         timeslotTestInstanceIDs);
                 Stream<Timeslot> timeslotsStream = openedTimeslots.getTimeslotsList().stream().filter((p) -> IsTimeslotPostRunActionValidComparedToRequestedPostRunAction(p.getPostRunAction()));
                 ArrayList<Timeslot> timeslotsList = timeslotsStream.collect(Collectors.toCollection(ArrayList::new));
-                long timeslotsListCount = timeslotsList.stream().count();
+                long timeslotsListCount = timeslotsList.size();
                 log(listener,
                         "%s matching timeslot(s) found.",
                         true,
@@ -388,12 +382,10 @@ public class PcTestRunClient {
             TimeslotPostRunAction timeslotPostRUnAction = TimeslotPostRunAction.valueOf(postRunAction);
             PostRunAction requestedPostRunAction = model.getPostRunAction();
 
-            if (requestedPostRunAction == PostRunAction.DO_NOTHING
+            return requestedPostRunAction == PostRunAction.DO_NOTHING
                     || (requestedPostRunAction == PostRunAction.COLLATE && timeslotPostRUnAction == TimeslotPostRunAction.CollateOnly)
                     || (requestedPostRunAction == PostRunAction.COLLATE && timeslotPostRUnAction == TimeslotPostRunAction.CollateAnalyze)
-                    || (requestedPostRunAction == PostRunAction.COLLATE_AND_ANALYZE && timeslotPostRUnAction == TimeslotPostRunAction.CollateAnalyze))
-                return true;
-            return false;
+                    || (requestedPostRunAction == PostRunAction.COLLATE_AND_ANALYZE && timeslotPostRUnAction == TimeslotPostRunAction.CollateAnalyze);
         } catch (Exception ex) {
             return false;
         }
@@ -492,7 +484,7 @@ public class PcTestRunClient {
                     }
                 } catch (Exception ex) {
                     logStackTrace(listener, configureSystemSection, ex);
-                    throw new PcException(msg + System.getProperty("line.separator") + ex);
+                    throw new PcException(msg + System.lineSeparator() + ex);
                 }
             }
         }
@@ -516,21 +508,11 @@ public class PcTestRunClient {
     }
 
     public PcRunResponse waitForRunCompletion(int runId, int interval) throws InterruptedException, ClientProtocolException, PcException, IOException {
-        RunState state;
-        switch (model.getPostRunAction()) {
-            case DO_NOTHING:
-                state = RunState.BEFORE_COLLATING_RESULTS;
-                break;
-            case COLLATE:
-                state = RunState.BEFORE_CREATING_ANALYSIS_DATA;
-                break;
-            case COLLATE_AND_ANALYZE:
-                state = RunState.FINISHED;
-                break;
-            default:
-                state = RunState.UNDEFINED;
-                break;
-        }
+        RunState state = switch (model.getPostRunAction()) {
+            case DO_NOTHING -> RunState.BEFORE_COLLATING_RESULTS;
+            case COLLATE -> RunState.BEFORE_CREATING_ANALYSIS_DATA;
+            case COLLATE_AND_ANALYZE -> RunState.FINISHED;
+        };
         return waitForRunState(runId, state, interval);
     }
 
@@ -823,19 +805,19 @@ public class PcTestRunClient {
     // <Virtual transaction 2:0.51>
     // This function uses reflection since we know only at runtime which transactions data will be reposed from the rest request.
     public Map<String, String> getTrendReportByXML(String trendReportId, int runId, TrendReportTypes.DataType dataType, TrendReportTypes.PctType pctType, TrendReportTypes.Measurement measurement) throws IOException, PcException, IntrospectionException, NoSuchMethodException {
-        Map<String, String> measurmentsMap = new LinkedHashMap<String, String>();
+        Map<String, String> measurmentsMap = new LinkedHashMap<>();
         measurmentsMap.put("RunId", "_" + runId + "_");
         measurmentsMap.put("Trend Measurement Type", measurement.toString() + "_" + pctType.toString());
         TrendReportTransactionDataRoot res = restProxy.getTrendReportByXML(trendReportId, runId);
         List<Object> RowsListObj = res.getTrendReportRoot();
         if (RowsListObj != null) {
-            for (int i = 0; i < RowsListObj.size(); i++) {
+            for (Object o : RowsListObj) {
                 try {
-                    java.lang.reflect.Method rowListMethod = RowsListObj.get(i).getClass().getMethod("getTrendReport" + dataType.toString() + "DataRowList");
-                    for (Object DataRowObj : (ArrayList<Object>) rowListMethod.invoke(RowsListObj.get(i))) {
+                    java.lang.reflect.Method rowListMethod = o.getClass().getMethod("getTrendReport" + dataType.toString() + "DataRowList");
+                    for (Object DataRowObj : (ArrayList<Object>) rowListMethod.invoke(o)) {
                         if (DataRowObj.getClass().getMethod("getPCT_TYPE").invoke(DataRowObj).equals(pctType.toString())) {
                             java.lang.reflect.Method method;
-                            method = DataRowObj.getClass().getMethod("get" + measurement.toString());
+                            method = DataRowObj.getClass().getMethod("get" + measurement);
                             measurmentsMap.put(DataRowObj.getClass().getMethod("getPCT_NAME").invoke(DataRowObj).toString(), method.invoke(DataRowObj) == null ? "" : method.invoke(DataRowObj).toString());
                         }
                     }
