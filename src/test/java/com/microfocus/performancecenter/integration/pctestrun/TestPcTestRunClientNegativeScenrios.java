@@ -89,7 +89,7 @@ public class TestPcTestRunClientNegativeScenrios {
                     reportHtml);
         } catch (Exception e) {
             Assert.fail("pcTestRunClient.publishRunReport threw an exception (should have returned null due to empty run results): "
-                    + e.toString());
+                    + e);
         }
     }
 
@@ -105,7 +105,7 @@ public class TestPcTestRunClientNegativeScenrios {
                     reportHtml);
         } catch (Exception e) {
             Assert.fail("pcTestRunClient.publishRunReport threw an exception (should have returned null due to empty run results): "
-                    + e.toString());
+                    + e);
         }
     }
 

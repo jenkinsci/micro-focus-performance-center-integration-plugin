@@ -75,7 +75,7 @@ public final class AffectedFile implements Comparable<AffectedFile> {
     }
 
     @Override
-    public int compareTo(AffectedFile o) {
+    public int compareTo(@NonNull AffectedFile o) {
         String FullTestName = relativePath.toString().concat(File.separator).concat(testName);
         String oFullTestName = o.relativePath.toString().concat(File.separator).concat(o.getTestName());
         return FullTestName.compareTo(oFullTestName);
@@ -120,12 +120,10 @@ public final class AffectedFile implements Comparable<AffectedFile> {
 
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof AffectedFile)) return false;
-        final AffectedFile other = (AffectedFile) o;
+        if (!(o instanceof AffectedFile other)) return false;
         if (!this.getFullPath().equals(other.getFullPath())) return false;
         if (!this.getRelativePath().equals(other.getRelativePath())) return false;
-        if (!this.getTestName().equals(other.getTestName())) return false;
-        return true;
+        return this.getTestName().equals(other.getTestName());
     }
 
     public int hashCode() {

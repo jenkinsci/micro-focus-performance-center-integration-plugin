@@ -23,6 +23,7 @@
 
 package com.microfocus.performancecenter.integration.pctestrun.helper;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.*;
@@ -64,7 +65,7 @@ public class AdditionalParametersAction extends ParametersAction {
     @Extension
     public static final class AdditionalParametersActionEnvironmentContributor extends EnvironmentContributor {
         @Override
-        public void buildEnvironmentFor(Run r, EnvVars envs, TaskListener listener)
+        public void buildEnvironmentFor(@NonNull Run r, @NonNull EnvVars envs, @NonNull TaskListener listener)
                 throws IOException, InterruptedException {
             AdditionalParametersAction action = r.getAction(AdditionalParametersAction.class);
             if (action != null) {

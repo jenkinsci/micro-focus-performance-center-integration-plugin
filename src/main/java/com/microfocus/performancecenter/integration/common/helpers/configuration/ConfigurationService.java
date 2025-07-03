@@ -53,7 +53,7 @@ public class ConfigurationService {
 
 
     private static Jenkins getJenkinsInstance() {
-        Jenkins result = Jenkins.getInstance();
+        Jenkins result = Jenkins.getInstanceOrNull();
         if (result == null) {
             throw new IllegalStateException("failed to obtain Jenkins instance");
         }

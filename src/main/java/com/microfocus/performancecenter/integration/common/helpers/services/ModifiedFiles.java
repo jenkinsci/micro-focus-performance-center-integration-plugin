@@ -92,18 +92,16 @@ public class ModifiedFiles {
             for (Object item : change.getItems()) {
                 ChangeLogSet.Entry e = (ChangeLogSet.Entry) item;
                 e.getAffectedFiles()
-                        .forEach((file) -> {
-                            result.add(
-                                    new ModifiedFile(
-                                            ModifiedType.from(file.getEditType()),
-                                            // we hardcoded '/' here because it is used regardless
-                                            // of target platform, by contract.
-                                            // see hudson.​scm.​ChangeLogSet.​AffectedFile#getPath()
-                                            Paths.get(file.getPath().replace('/', File.separatorChar)),
-                                            workspace
-                                    )
-                            );
-                        });
+                        .forEach((file) -> result.add(
+                                new ModifiedFile(
+                                        ModifiedType.from(file.getEditType()),
+                                        // we hardcoded '/' here because it is used regardless
+                                        // of target platform, by contract.
+                                        // see hudson.​scm.​ChangeLogSet.​AffectedFile#getPath()
+                                        Paths.get(file.getPath().replace('/', File.separatorChar)),
+                                        workspace
+                                )
+                        ));
             }
         });
 

@@ -36,7 +36,6 @@ import hudson.tasks.Builder;
 
 import java.io.IOException;
 
-@SuppressWarnings("deprecation")
 public abstract class AbstractPcGitBuildStep<T extends AbstractPcGitBuildStepDescriptor> extends Builder {
 
     @Override

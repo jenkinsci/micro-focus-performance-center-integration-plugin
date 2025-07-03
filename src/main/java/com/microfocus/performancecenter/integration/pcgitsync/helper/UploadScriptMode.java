@@ -28,9 +28,9 @@ public enum UploadScriptMode {
     RUNTIME_FILES("Runtime Files"),
     ALL_FILES("All Files");
 
-    private String value;
+    private final String value;
 
-    private UploadScriptMode(String value) {
+    UploadScriptMode(String value) {
         this.value = value;
     }
 

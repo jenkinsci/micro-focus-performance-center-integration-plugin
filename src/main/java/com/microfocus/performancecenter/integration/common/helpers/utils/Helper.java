@@ -26,7 +26,6 @@ package com.microfocus.performancecenter.integration.common.helpers.utils;
 import com.microfocus.performancecenter.integration.common.helpers.constants.PcTestRunConstants;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -61,11 +60,7 @@ public class Helper {
             return false;
         }
 
-        File[] foundFiles = dir.listFiles(new FilenameFilter() {
-            public boolean accept(File dir, String filename) {
-                return filename.toLowerCase().endsWith(PcTestRunConstants.USR_EXTENSION);
-            }
-        });
+        File[] foundFiles = dir.listFiles((dir1, filename) -> filename.toLowerCase().endsWith(PcTestRunConstants.USR_EXTENSION));
 
         // Check if foundFiles is null before accessing length
         return foundFiles != null && foundFiles.length > 0;

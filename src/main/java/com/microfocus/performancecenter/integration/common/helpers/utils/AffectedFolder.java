@@ -57,7 +57,7 @@ public final class AffectedFolder implements Comparable<AffectedFolder> {
     }
 
     @Override
-    public int compareTo(AffectedFolder o) {
+    public int compareTo(@NonNull AffectedFolder o) {
         return relativePath.compareTo(o.getRelativePath());
     }
 
@@ -65,7 +65,7 @@ public final class AffectedFolder implements Comparable<AffectedFolder> {
     public String toString() {
         // we override the default relative representation of the root folder itself
         // for the sake of readability:
-        return "/" + relativePath.toString();
+        return "/" + relativePath;
     }
 
     public String toString(boolean backslash) {
@@ -86,8 +86,7 @@ public final class AffectedFolder implements Comparable<AffectedFolder> {
 
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof AffectedFolder)) return false;
-        final AffectedFolder other = (AffectedFolder) o;
+        if (!(o instanceof AffectedFolder other)) return false;
         return this.getRelativePath().equals(other.getRelativePath());
     }
 

@@ -71,7 +71,7 @@ public class PcGitSyncModel implements Serializable {
         this.proxyOutURL = proxyOutURL;
         this.credentialsProxyId = credentialsProxyId;
         if (subjectTestPlan != null
-                && subjectTestPlan.length() > 0) {
+                && !subjectTestPlan.isEmpty()) {
             this.subjectTestPlan = subjectTestPlan.replace("/", "\\").replaceFirst("\\\\$", "").replaceAll("\\$", "");
         } else {
             this.subjectTestPlan = subjectTestPlan;
@@ -150,7 +150,7 @@ public class PcGitSyncModel implements Serializable {
     }
 
     public String getSubjectTestPlan() {
-        if (this.subjectTestPlan != null && this.subjectTestPlan.length() > 0)
+        if (this.subjectTestPlan != null && !this.subjectTestPlan.isEmpty())
             return this.subjectTestPlan.substring(0, 1).toUpperCase() + this.subjectTestPlan.substring(1);
         else
             return this.subjectTestPlan;

@@ -29,11 +29,13 @@ import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
 import org.kohsuke.stapler.StaplerRequest2;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 @Extension
 public class ConfigureSystemSection extends GlobalConfiguration implements Serializable {
 
+    @Serial
     private final static long serialVersionUID = 1L;
     private boolean debug;
 

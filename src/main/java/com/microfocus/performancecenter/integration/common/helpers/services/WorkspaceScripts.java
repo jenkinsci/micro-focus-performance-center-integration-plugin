@@ -31,7 +31,6 @@ import com.microfocus.performancecenter.integration.common.helpers.utils.Modifie
 import hudson.Extension;
 
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -66,8 +65,7 @@ public class WorkspaceScripts {
     private static boolean isFileContainSeleniumPackageReference(Path fullPath) {
         if (fullPath != null) {
             String javaFileContent = readLineByLineJava8(fullPath);
-            if (javaFileContent != null && javaFileContent.toLowerCase().contains(PcTestRunConstants.SELENIUM_JAVA_CONTENT))
-                return true;
+            return javaFileContent != null && javaFileContent.toLowerCase().contains(PcTestRunConstants.SELENIUM_JAVA_CONTENT);
         }
         return false;
     }
@@ -88,11 +86,7 @@ public class WorkspaceScripts {
         File[] noFiles = {};
         if(dirName != null) {
             File dir = new File(dirName);
-            noFiles = dir.listFiles(new FilenameFilter() {
-                public boolean accept(File dir, String filename) {
-                    return (PcTestRunConstants.DEVWEB_RTS_FILE.equalsIgnoreCase(filename));
-                }
-            });
+            noFiles = dir.listFiles((dir1, filename) -> (PcTestRunConstants.DEVWEB_RTS_FILE.equalsIgnoreCase(filename)));
         }
         return noFiles;
     }

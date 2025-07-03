@@ -29,44 +29,44 @@ import java.io.PrintStream;
 
 public interface PcTestBase {
 
-    public static final String SERVER_AND_PORT = "jenkins.server:8082";
-    public static final String PC_SERVER_NAME = "pcServer.hp.com";
-    public static final String CREDENTIALSID = "123456789";
-    public static final String ALM_DOMAIN = "ALMDOM";
-    public static final String ALM_PROJECT = "ALMPROJ";
-    public static final String TEST_TO_RUN = "EXISTING_TEST";
-    public static final String TEST_ID = "1";
-    public static final String TEST_CONTENT_TO_CREATE = "";
-    public static final String TEST_INSTANCE_ID = "2";
-    public static final String TIMESLOT_DURATION_HOURS = "0";
-    public static final String TIMESLOT_DURATION_MINUTES = "34";
-    public static final String TIMESLOT_ID = "56";
-    public static final PostRunAction POST_RUN_ACTION = PostRunAction.COLLATE_AND_ANALYZE;
-    public static final boolean VUDS_MODE = false;
-    public static final String DESCRIPTION = "Testing HPE Performance Center Jenkins plugin";
-    public static final String RUN_ID = "7";
-    public static final String RUN_ID_WAIT = "8";
-    public static final String REPORT_ID = "9";
-    public static final String NV_INSIGHTS_REPORT_ID = "10";
-    public static final String STOP_MODE = "stop";
-    public static final String WEB_PROTOCOL = "http";
-    public static final Boolean IS_HTTPS = false;
-    public static final String TESTINSTANCEID = "MANUAL";
-    public static final PrintStream LOGGER = null;
-    public static final String RETRY = "NO_RETRY";
-    public static final String RETRYDELAY = "5";
-    public static final String RETRYOCCURRENCES = "3";
-    public static final String TRENDREPORTWAITTIME = "0";
-    public static final boolean AUTHENTICATE_WITH_TOKEN = false;
-    public static final boolean SEARCH_TIMESLOT = false;
+    String SERVER_AND_PORT = "jenkins.server:8082";
+    String PC_SERVER_NAME = "pcServer.hp.com";
+    String CREDENTIALSID = "123456789";
+    String ALM_DOMAIN = "ALMDOM";
+    String ALM_PROJECT = "ALMPROJ";
+    String TEST_TO_RUN = "EXISTING_TEST";
+    String TEST_ID = "1";
+    String TEST_CONTENT_TO_CREATE = "";
+    String TEST_INSTANCE_ID = "2";
+    String TIMESLOT_DURATION_HOURS = "0";
+    String TIMESLOT_DURATION_MINUTES = "34";
+    String TIMESLOT_ID = "56";
+    PostRunAction POST_RUN_ACTION = PostRunAction.COLLATE_AND_ANALYZE;
+    boolean VUDS_MODE = false;
+    String DESCRIPTION = "Testing HPE Performance Center Jenkins plugin";
+    String RUN_ID = "7";
+    String RUN_ID_WAIT = "8";
+    String REPORT_ID = "9";
+    String NV_INSIGHTS_REPORT_ID = "10";
+    String STOP_MODE = "stop";
+    String WEB_PROTOCOL = "http";
+    Boolean IS_HTTPS = false;
+    String TESTINSTANCEID = "MANUAL";
+    PrintStream LOGGER = null;
+    String RETRY = "NO_RETRY";
+    String RETRYDELAY = "5";
+    String RETRYOCCURRENCES = "3";
+    String TRENDREPORTWAITTIME = "0";
+    boolean AUTHENTICATE_WITH_TOKEN = false;
+    boolean SEARCH_TIMESLOT = false;
 
-    public static final MockPcTestRunModel pcModel = new MockPcTestRunModel(SERVER_AND_PORT, PC_SERVER_NAME, CREDENTIALSID, ALM_DOMAIN, ALM_PROJECT,
+    MockPcTestRunModel pcModel = new MockPcTestRunModel(SERVER_AND_PORT, PC_SERVER_NAME, CREDENTIALSID, ALM_DOMAIN, ALM_PROJECT,
             TEST_TO_RUN, TEST_ID, TEST_CONTENT_TO_CREATE, TESTINSTANCEID, TEST_INSTANCE_ID,
             TIMESLOT_DURATION_HOURS,
             TIMESLOT_DURATION_MINUTES, POST_RUN_ACTION,
             VUDS_MODE, DESCRIPTION, IS_HTTPS, RETRY, RETRYDELAY, RETRYOCCURRENCES, TRENDREPORTWAITTIME, AUTHENTICATE_WITH_TOKEN, SEARCH_TIMESLOT);
 
-    public static final String runResponseEntity = "<Run xmlns=\"http://www.hp.com/PC/REST/API\">" +
+    String runResponseEntity = "<Run xmlns=\"http://www.hp.com/PC/REST/API\">" +
             "<TestID>" + TEST_ID + "</TestID>" +
             "<TestInstanceID>" + TEST_INSTANCE_ID + "</TestInstanceID>" +
             "<PostRunAction>" + POST_RUN_ACTION.getValue() + "</PostRunAction>" +
@@ -78,9 +78,9 @@ public interface PcTestBase {
             "<RunSLAStatus />" +
             "</Run>";
 
-    public static final String emptyResultsEntity = "<RunResults xmlns=\"http://www.hp.com/PC/REST/API\" />";
+    String emptyResultsEntity = "<RunResults xmlns=\"http://www.hp.com/PC/REST/API\" />";
 
-    public static final String runResultsEntity = "<RunResults xmlns=\"http://www.hp.com/PC/REST/API\">" +
+    String runResultsEntity = "<RunResults xmlns=\"http://www.hp.com/PC/REST/API\">" +
             "<RunResult>" +
             "<ID>1302</ID>" +
             "<Name>output.mdb.zip</Name>" +
@@ -119,13 +119,13 @@ public interface PcTestBase {
             "</RunResult>" +
             "</RunResults>";
 
-    public static final String pcAuthenticationFailureMessage = "Exception of type 'HPE.PC.API.Model.Exceptions.InvalidAuthenticationDataException' was thrown. Error code: 1100";
+    String pcAuthenticationFailureMessage = "Exception of type 'HPE.PC.API.Model.Exceptions.InvalidAuthenticationDataException' was thrown. Error code: 1100";
 
-    public static final String pcNoTimeslotExceptionMessage = "Failed to retrieve reservation information for reservation " + TIMESLOT_ID + ". Error code: 1202";
+    String pcNoTimeslotExceptionMessage = "Failed to retrieve reservation information for reservation " + TIMESLOT_ID + ". Error code: 1202";
 
-    public static final String pcStopNonExistRunFailureMessage = "Failed to retrieve run " + RUN_ID + " information from domain " + ALM_DOMAIN + ", project " + ALM_PROJECT + ". Error code: 1300";
+    String pcStopNonExistRunFailureMessage = "Failed to retrieve run " + RUN_ID + " information from domain " + ALM_DOMAIN + ", project " + ALM_PROJECT + ". Error code: 1300";
 
-    public static final String testResponseEntity = "<Test>" +
+    String testResponseEntity = "<Test>" +
             "<ID>2</ID>" +
             "<Name>test1</Name>" +
             "</Test>";

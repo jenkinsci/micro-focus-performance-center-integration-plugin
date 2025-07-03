@@ -583,9 +583,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
     private void logSetOfChangedFiles(Set<ModifiedFile> modifiedFiles) {
         log(listener, "", true);
         log(listener, "List of files modified in GIT repository since last successful build:", true);
-        modifiedFiles.forEach(changedFile -> {
-            log(listener, changedFile.toString(true), false);
-        });
+        modifiedFiles.forEach(changedFile -> log(listener, changedFile.toString(true), false));
         log(listener, "", true);
     }
 
@@ -597,9 +595,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             return;
         }
 
-        affectedFiles.forEach(affectedFile -> {
-            log(listener, affectedFile.toString(true), false);
-        });
+        affectedFiles.forEach(affectedFile -> log(listener, affectedFile.toString(true), false));
         log(listener, "", true);
     }
 
@@ -611,9 +607,7 @@ public class PcGitSyncClient implements FilePath.FileCallable<Result>, Serializa
             return;
         }
 
-        affectedFiles.forEach(affectedFile -> {
-            log(listener, affectedFile.toString(), false);
-        });
+        affectedFiles.forEach(affectedFile -> log(listener, affectedFile.toString(), false));
     }
 
     private boolean validateParameters(TaskListener listener) {
