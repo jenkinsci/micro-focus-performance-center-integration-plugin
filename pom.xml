@@ -29,7 +29,7 @@
         <version>4.83</version>
     </parent>
     <artifactId>micro-focus-performance-center-integration</artifactId>
-    <version>1.1.9-SNAPSHOT</version>
+    <version>1.1.9</version>
     <packaging>hpi</packaging>
     <name>OpenText Enterprise Performance Engineering integration With Git</name>
     <!--<description>The plugin integrates OpenText Enterprise Performance Engineering with Git.</description>-->
@@ -60,7 +60,7 @@
         <connection>scm:git:ssh://github.com/jenkinsci/micro-focus-performance-center-integration-plugin.git</connection>
         <developerConnection>scm:git:git@github.com:jenkinsci/${project.artifactId}-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/micro-focus-performance-center-integration-plugin</url>
-        <tag>HEAD</tag>
+        <tag>micro-focus-performance-center-integration-1.1.9</tag>
     </scm>
     <issueManagement>
         <system>JIRA</system>
