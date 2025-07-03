@@ -24,6 +24,7 @@
 
 package com.microfocus.performancecenter.integration.pcgitsync.helper;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -33,7 +34,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.tasks.Builder;
 
-import javax.annotation.Nonnull;
 import java.io.IOException;
 
 @SuppressWarnings("deprecation")
@@ -55,6 +55,6 @@ public abstract class AbstractPcGitBuildStep<T extends AbstractPcGitBuildStepDes
         return (T) super.getDescriptor();
     }
 
-    public abstract void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace, @Nonnull Launcher launcher, @Nonnull TaskListener listener) throws InterruptedException, IOException;
+    public abstract void perform(@NonNull Run<?, ?> build, @NonNull FilePath workspace, @NonNull Launcher launcher, @NonNull TaskListener listener) throws InterruptedException, IOException;
 
 }

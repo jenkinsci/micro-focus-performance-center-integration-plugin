@@ -41,6 +41,7 @@ import com.microfocus.performancecenter.integration.common.helpers.utils.BuildPa
 import com.microfocus.performancecenter.integration.configuresystem.ConfigureSystemSection;
 import com.microfocus.performancecenter.integration.pctestrun.helper.AdditionalParametersAction;
 import com.thoughtworks.xstream.XStream;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.*;
 import hudson.console.HyperlinkNote;
 import hudson.model.*;
@@ -60,7 +61,6 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import java.beans.IntrospectionException;
@@ -980,8 +980,8 @@ public class PcTestRunBuilder extends Builder implements SimpleBuildStep {
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> build, @Nonnull FilePath workspace, @Nonnull Launcher launcher,
-                        @Nonnull TaskListener listener) throws InterruptedException, IOException {
+    public void perform(@NonNull Run<?, ?> build, @NonNull FilePath workspace, @NonNull Launcher launcher,
+                        @NonNull TaskListener listener) throws InterruptedException, IOException {
         this.listener = listener;
         _run = build;
         Workspace = workspace;

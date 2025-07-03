@@ -23,10 +23,10 @@
 
 package com.microfocus.performancecenter.integration.common.helpers.utils;
 
+import edu.umd.cs.findbugs.annotations.NonNull;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.apache.commons.io.FilenameUtils;
 
-import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -35,15 +35,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-//@SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_OF_NONNULL_VALUE", justification = "lombok generated sources")
 public final class AffectedFile implements Comparable<AffectedFile> {
-    @Nonnull
+    @NonNull
     private final Path fullPath;
 
-    @Nonnull
+    @NonNull
     private final Path relativePath;
 
-    @Nonnull
+    @NonNull
     private final String testName;
 
     public AffectedFile(Path fileFullPath, Path workspace) {
@@ -66,7 +65,6 @@ public final class AffectedFile implements Comparable<AffectedFile> {
         return new String(encoded, encoding);
     }
 
-    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE", justification = "FB doesn't seem to understand Objects.requireNonNull")
     public String getSubjectPath() {
         return relativePath.toString().replace('\\', File.separatorChar).replace('/', File.separatorChar);
     }
@@ -105,17 +103,17 @@ public final class AffectedFile implements Comparable<AffectedFile> {
         return "";
     }
 
-    @Nonnull
+    @NonNull
     public Path getFullPath() {
         return this.fullPath;
     }
 
-    @Nonnull
+    @NonNull
     public Path getRelativePath() {
         return this.relativePath;
     }
 
-    @Nonnull
+    @NonNull
     public String getTestName() {
         return this.testName;
     }

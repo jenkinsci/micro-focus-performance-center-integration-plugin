@@ -42,6 +42,7 @@ import com.microfocus.performancecenter.integration.configuresystem.ConfigureSys
 import com.microfocus.performancecenter.integration.pcgitsync.helper.ScriptUploader;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.YesOrNo;
+import edu.umd.cs.findbugs.annotations.Nullable;
 import hudson.FilePath;
 import hudson.model.Result;
 import hudson.model.TaskListener;
@@ -50,7 +51,6 @@ import jenkins.security.Roles;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.remoting.RoleChecker;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;

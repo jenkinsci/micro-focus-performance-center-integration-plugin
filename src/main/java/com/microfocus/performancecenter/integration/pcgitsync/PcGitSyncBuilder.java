@@ -43,6 +43,8 @@ import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcG
 import com.microfocus.performancecenter.integration.pcgitsync.helper.AbstractPcGitBuildStepDescriptor;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.UploadScriptMode;
 import com.microfocus.performancecenter.integration.pcgitsync.helper.YesOrNo;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.model.*;
 import hudson.model.queue.Tasks;
@@ -57,7 +59,6 @@ import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
@@ -247,6 +248,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
         credentialsId = newCredentialsId;
     }
 
+    @SuppressFBWarnings("FS_BAD_DATE_FORMAT_FLAG_COMBO")
     private String simpleDateFormater() {
         try {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("E yyyy MMM dd 'at' HH:mm:ss.SSS a zzz");
@@ -258,7 +260,7 @@ public class PcGitSyncBuilder extends AbstractPcGitBuildStep<PcGitSyncBuilder.De
     }
 
     @Override
-    public void perform(@Nonnull Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
+    public void perform(@NonNull Run<?, ?> build, FilePath workspace, Launcher launcher, TaskListener listener)
             throws InterruptedException, IOException {
         run = build;
         logger = listener.getLogger();

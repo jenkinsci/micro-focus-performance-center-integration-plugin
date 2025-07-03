@@ -27,7 +27,7 @@ import hudson.Extension;
 import hudson.model.Descriptor;
 import jenkins.model.GlobalConfiguration;
 import net.sf.json.JSONObject;
-import org.kohsuke.stapler.StaplerRequest;
+import org.kohsuke.stapler.StaplerRequest2;
 
 import java.io.Serializable;
 
@@ -54,7 +54,7 @@ public class ConfigureSystemSection extends GlobalConfiguration implements Seria
     }
 
     @Override
-    public boolean configure(StaplerRequest req, JSONObject json) throws Descriptor.FormException {
+    public boolean configure(StaplerRequest2 req, JSONObject json) throws Descriptor.FormException {
         req.bindJSON(this, json);
         save();
         return super.configure(req, json);
